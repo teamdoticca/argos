@@ -61,10 +61,6 @@ dotnet nuget add source https://nuget.pkg.github.com/teamdoticca/index.json `
 
 3. Run / publish your host as **win-x64** so `runtimes/win-x64/native/argos_ffi.dll` is available (`DllImport("argos_ffi")`).
 
----
-
-## How to use it
-
 ```csharp
 using System.Text.Json;
 using Argos;
@@ -72,31 +68,51 @@ using Argos;
 var root = @"Z:\path\to\your\repo";
 await using var ws = await ArgosWorkspace.OpenAsync(root);
 
-// Immutable snapshot JSON — identity, model, filesystem, planning
-using var snap = JsonDocument.Parse(ws.CurrentSnapshot);
+var snap = JsonDocument.Parse(ws.CurrentSnapshot);
 // expected: identity.state == "ready"
-// expected: model.nodes is non-empty on a real multi-package repo
-
-// Packages / projects Argos discovered
-var nodesJson = ws.ListNodes();
-
-// Watch plan (relative roots under each package — not “watch everything”)
 var scopesJson = ws.ListScopes();
-// expected: length > 0 when nodes exist
+// expected: length > 0 on a real multi-package repo
 
-var file = Path.Combine(root, "packages", "app", "src", "index.ts");
-var owner = ws.FindOwner(file);     // deepest owning node
-var explain = ws.ExplainPath(file); // exists? ignored? watched? which scope?
-
-// Optional: keep the tool in sync. Events only fire under planned scopes.
 await foreach (var changeJson in ws.WatchAsync())
 {
     var affected = ws.GetAffectedScopes(changeJson);
-    // refresh from ws.CurrentSnapshot when you need latest truth
+    // refresh from ws.CurrentSnapshot when needed
 }
 ```
 
-### Snapshot contract (what “truth” looks like)
+---
+
+## Add Argos to your Node / TypeScript project
+
+Package: **`@doticca/argos`** (napi-rs). Supported natives: **win32-x64**, **linux-x64-gnu**, **darwin-arm64**.
+
+```bash
+# GitHub Packages (npm)
+npm login --scope=@doticca --registry=https://npm.pkg.github.com
+# use a PAT with read:packages as password
+
+npm install @doticca/argos --registry=https://npm.pkg.github.com
+```
+
+```ts
+import { Workspace, watch } from '@doticca/argos'
+
+const ws = Workspace.open('/path/to/repo')
+const snap = ws.currentSnapshot
+// expected: snap.identity.state === 'ready'
+const scopes = ws.listScopes()
+// expected: scopes.length > 0 on a real multi-package repo
+
+for await (const change of watch(ws, AbortSignal.timeout(30_000))) {
+  const affected = ws.getAffectedScopes(change)
+  // refresh from ws.currentSnapshot when needed
+}
+ws.close()
+```
+
+---
+
+## Snapshot contract (what “truth” looks like)
 
 ```json
 {

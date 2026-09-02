@@ -1,0 +1,58 @@
+{
+  "name": "@doticca/argos",
+  "version": "0.1.2",
+  "description": "Argos workspace intelligence for Node.js / TypeScript",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/teamdoticca/argos.git",
+    "directory": "bindings/npm"
+  },
+  "license": "MIT",
+  "keywords": [
+    "argos",
+    "workspace",
+    "monorepo",
+    "napi",
+    "snapshot"
+  ],
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "binding.js",
+    "binding.d.ts",
+    "*.node"
+  ],
+  "napi": {
+    "name": "argos",
+    "triples": {
+      "defaults": false,
+      "additional": [
+        "x86_64-pc-windows-msvc",
+        "x86_64-unknown-linux-gnu",
+        "aarch64-apple-darwin"
+      ]
+    }
+  },
+  "engines": {
+    "node": ">= 18"
+  },
+  "scripts": {
+    "artifacts": "napi artifacts",
+    "build": "napi build --platform --release --cargo-cwd ../../crates/argos-napi --js binding.js --dts binding.d.ts",
+    "build:debug": "napi build --platform --cargo-cwd ../../crates/argos-napi --js binding.js --dts binding.d.ts",
+    "prepublishOnly": "napi prepublish -t npm",
+    "smoke": "node smoke.mjs",
+    "smoke:watch": "node smoke-watch.mjs",
+    "universal": "napi universal"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^2.18.4"
+  },
+  "optionalDependencies": {}
+}

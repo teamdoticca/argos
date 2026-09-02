@@ -4,9 +4,9 @@ Live status. Update on every meaningful progress.
 
 ## Current
 
-- **Active epic:** none
-- **Status:** m16 complete; NuGet CI publishes on main
-- **Last update:** 2026-09-02 — Root README is consumer-only (problems / install / use / expected layouts); CI publish policy stays in m15 docs
+- **Active epic:** [m17-typescript-napi](epics/m17-typescript-napi/)
+- **Status:** in_progress
+- **Last update:** 2026-09-02 — m17: `argos-napi` + `@doticca/argos`; win smoke/watch green; `pack-npm.yml` matrix win/linux/darwin-arm64
 
 ## Completed
 
@@ -36,19 +36,14 @@ Path: [docs/done/m15-nuget-pack-ci](done/m15-nuget-pack-ci/)
 
 Path: [docs/done/m16-monorepo-discovery-parity](done/m16-monorepo-discovery-parity/)
 
-- [x] Root cause: root-only manifests missed Mnemon nested npm + .NET
-- [x] Providers: `npm-nested`, `dotnet-sln`, `dotnet-csproj`; `fallback-root` when still empty
-- [x] Planner: package-root `.` when no conventional watch dirs; backends treat `.`
-- [x] Fixtures: `nested-npm`, `dotnet-sln`; `small-pnpm` regression
-- [x] Mnemon smoke: scopes > 0; watch on `mnemon-web` file edit
-- [x] NuGet `Argos` **0.1.2** at `artifacts/nuget/Argos.0.1.2.nupkg`
+- Nested npm + .NET discovery; Mnemon scopes; NuGet `0.1.2`
 
 ## Next
 
-1. Push m16 + CI publish change to `main` → Packages gets `0.1.2.<run>` automatically
-2. Mnemon PackageReference that published 4-part version (win-x64)
-3. linux-x64 / osx-arm64 pack matrix
-4. Optional NuGet.org listing after dogfood
+1. Finish m17: `argos-napi`, npm package, multi-OS CI, smoke, README Node section
+2. Mnemon PackageReference dogfood (NuGet)
+3. linux-x64 / osx-arm64 NuGet RID matrix
+4. Optional npmjs / NuGet.org listing after dogfood
 
 ## Blockers
 

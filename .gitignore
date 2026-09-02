@@ -18,6 +18,12 @@ bindings/nuget/**/runtimes/**/native/*.dylib
 # Pack outputs (never commit nupkgs)
 /artifacts/
 
+# Node / napi
+**/node_modules/
+bindings/npm/*.node
+bindings/npm/*.tgz
+bindings/npm/npm-packages/
+
 # OS / IDE
 .DS_Store
 Thumbs.db

@@ -1,0 +1,5 @@
+# npm / napi artifacts
+node_modules/
+*.node
+npm-packages/
+*.tgz

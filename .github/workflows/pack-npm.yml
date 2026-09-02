@@ -1,0 +1,155 @@
+name: pack-npm
+
+# Pack/publish @doticca/argos when package-relevant paths change.
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - "crates/**"
+      - "bindings/npm/**"
+      - ".github/workflows/pack-npm.yml"
+      - "Cargo.toml"
+      - "fixtures/**"
+  pull_request:
+    paths:
+      - "crates/**"
+      - "bindings/npm/**"
+      - ".github/workflows/pack-npm.yml"
+      - "Cargo.toml"
+      - "fixtures/**"
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish to GitHub Packages npm after build + smoke"
+        type: boolean
+        default: true
+
+concurrency:
+  group: pack-npm-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            node_file: argos.win32-x64-msvc.node
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            node_file: argos.linux-x64-gnu.node
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            node_file: argos.darwin-arm64.node
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: https://npm.pkg.github.com
+          scope: "@doticca"
+
+      - name: Install npm deps
+        working-directory: bindings/npm
+        run: npm ci
+
+      - name: Build native addon
+        working-directory: bindings/npm
+        run: npm run build -- --target ${{ matrix.target }}
+
+      - name: Smoke Open scopes
+        working-directory: bindings/npm
+        run: npm run smoke
+
+      - name: Watch smoke (Windows)
+        if: runner.os == 'Windows'
+        working-directory: bindings/npm
+        shell: pwsh
+        run: node smoke-watch.mjs
+
+      - name: Watch smoke (Unix)
+        if: runner.os != 'Windows'
+        working-directory: bindings/npm
+        run: node smoke-watch.mjs
+
+      - name: Upload native artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: argos-node-${{ matrix.target }}
+          path: |
+            bindings/npm/${{ matrix.node_file }}
+            bindings/npm/binding.js
+            bindings/npm/binding.d.ts
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    name: Publish GitHub Packages npm
+    needs: build
+    if: >
+      (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'))
+      || (github.event_name == 'workflow_dispatch' && (inputs.publish == true || inputs.publish == 'true'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: https://npm.pkg.github.com
+          scope: "@doticca"
+
+      - name: Download natives
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/npm
+          pattern: argos-node-*
+          merge-multiple: true
+
+      - name: Stage natives into package
+        working-directory: bindings/npm
+        run: |
+          cp -f ../../artifacts/npm/*.node . || true
+          ls -la *.node binding.js || true
+          # Prefer downloaded binding.js if present
+          if [ -f ../../artifacts/npm/binding.js ]; then cp -f ../../artifacts/npm/binding.js .; fi
+          if [ -f ../../artifacts/npm/binding.d.ts ]; then cp -f ../../artifacts/npm/binding.d.ts .; fi
+
+      - name: Install npm deps
+        working-directory: bindings/npm
+        run: npm ci
+
+      - name: Bump unique version for publish
+        working-directory: bindings/npm
+        run: |
+          BASE=$(node -p "require('./package.json').version.split('-')[0]")
+          VER="${BASE}-ci.${GITHUB_RUN_NUMBER}"
+          npm version "$VER" --no-git-tag-version
+          echo "NPM_VERSION=$VER" >> "$GITHUB_ENV"
+
+      - name: Publish
+        working-directory: bindings/npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm publish --access restricted
+
+      - name: Summary
+        run: |
+          echo "## @doticca/argos published" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Version: \`${NPM_VERSION:-see package.json}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Registry: https://npm.pkg.github.com" >> "$GITHUB_STEP_SUMMARY"
