@@ -1,0 +1,19 @@
+---
+description: Argos docs lifecycle — read roadmap/execution-plan; sync on every progress
+alwaysApply: true
+---
+
+# Argos documentation lifecycle
+
+Before substantive work, read:
+
+1. `docs/roadmap.md`
+2. `docs/execution-plan.md`
+3. `status.md` of the active epic under `docs/epics/`
+
+Rules:
+
+- Do not write product code without an epic marked `in_progress`
+- After every meaningful progress, update **both** `docs/roadmap.md` and `docs/execution-plan.md`
+- Completed epics must move from `docs/epics/<name>/` to `docs/done/<name>/`
+- Prefer English-only docs (see `argos-english-only.mdc`)

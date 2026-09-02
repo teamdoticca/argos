@@ -1,0 +1,13 @@
+---
+description: Forbid V1/v1/Version 1 branding in Argos repository files
+alwaysApply: true
+---
+
+# No version branding labels
+
+Do not use `V1`, `v1`, or `Version 1` as branding or scope labels in repository files.
+
+Use:
+
+- **current scope** / **now** for active work
+- **deferred** / **later** for future work

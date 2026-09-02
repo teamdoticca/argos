@@ -1,0 +1,14 @@
+---
+description: All Argos repository files must be English only
+alwaysApply: true
+---
+
+# English only
+
+Every file written in this repository must be English only:
+
+- README, docs, epics, AGENTS, rules, skills
+- Code comments and user-facing strings in docs
+- Package metadata descriptions
+
+Do not write Greek or any other language into repository files. Chat with humans may use other languages; on-disk Argos files may not.

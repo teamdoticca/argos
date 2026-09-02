@@ -1,0 +1,13 @@
+---
+description: WorkspaceSnapshot is the sole business truth; reject second state models
+alwaysApply: true
+---
+
+# Snapshot is truth
+
+`WorkspaceSnapshot` is the system contract and sole source of business truth.
+
+- `WorkspaceSnapshot` is immutable; never mutate in place
+- `CurrentSnapshot` is only a pointer to the latest immutable instance
+- Do not introduce public APIs or docs for `WorkspaceRuntimeState`, `WatchState`, `PlannerCache`, or similar models that carry business truth
+- Runtime caches may exist only as private implementation details
