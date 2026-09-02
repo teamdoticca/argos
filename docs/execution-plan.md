@@ -6,7 +6,7 @@ Live status. Update on every meaningful progress.
 
 - **Active epic:** none
 - **Status:** m16 complete; NuGet CI publishes on main
-- **Last update:** 2026-09-02 — `pack-nuget` path-filtered: docs/README-only pushes skip pack/publish; package paths still auto-publish `{csproj}.{run}` on main
+- **Last update:** 2026-09-02 — Root README is consumer-only (problems / install / use / expected layouts); CI publish policy stays in m15 docs
 
 ## Completed
 
