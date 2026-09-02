@@ -1,0 +1,11 @@
+[package]
+name = "argos-backend-macos"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Argos macOS watch backend (FSEvents via notify)"
+
+[dependencies]
+argos-core = { workspace = true }
+argos-backend = { workspace = true }
+notify = { workspace = true }

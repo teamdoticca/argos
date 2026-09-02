@@ -32,7 +32,17 @@ Workspace → Snapshot → Explain → Scope → Change Stream
 
 Not: `Folder → Watch → Events`.
 
-## Quick start (planned NuGet surface)
+## Quick start
+
+### Rust
+
+```text
+cargo build
+cargo test -p argos-core
+cargo run -p argos-benches -- fixtures/small-pnpm
+```
+
+### .NET (NuGet wrapper)
 
 ```csharp
 var workspace = await ArgosWorkspace.OpenAsync(root);
@@ -44,9 +54,11 @@ var explanation = workspace.ExplainPath(path);
 
 await foreach (var change in workspace.WatchAsync())
 {
-    var affected = snapshot.GetAffectedScopes(change);
+    var affected = workspace.GetAffectedScopes(change);
 }
 ```
+
+Native library: build `argos-ffi` and place under `bindings/nuget/Argos/runtimes/<rid>/native/`.
 
 ## Documentation
 

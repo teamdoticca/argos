@@ -1,0 +1,4 @@
+# Fixture: small pnpm monorepo
+
+packages:
+  - 'packages/*'

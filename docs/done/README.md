@@ -1,4 +1,21 @@
 # Done epics
 
-Completed epic folders are moved here from `docs/epics/`.
+Completed Argos epics. Each folder retains README / design / status for historical reference.
 
+| Epic | Notes |
+|------|-------|
+| m00-foundation | Repo, docs, agents |
+| m01-topology-discovery | Topology + DiscoverySource + confidence |
+| m02-filesystem-semantics | PathIdentity / casing / junctions |
+| m03-workspace-model | Snapshot sections + versions + state |
+| m04-ignore-engine | Hard defaults + nested ignores |
+| m05-scope-planner | Scope planning IP |
+| m06-diagnostics-api | Explain / list / health / rebuild |
+| m07-backend-abstraction | WatchBackend + PlatformCapabilities |
+| m08-windows-backend | RDCW via notify |
+| m09-linux-backend | inotify via notify |
+| m10-macos-backend | FSEvents via notify |
+| m11-file-and-workspace-events | Dual streams + compute_delta |
+| m12-platform-recovery | Overflow → scoped rescan |
+| m13-nuget-wrapper | .NET Argos package |
+| m14-benchmark-suite | fixtures + argos-bench |

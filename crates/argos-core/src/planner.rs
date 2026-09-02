@@ -1,0 +1,122 @@
+use crate::ignore_engine::IgnoreEngine;
+use crate::model::{NodeKind, WorkspaceNode};
+use crate::snapshot::WorkspaceSnapshot;
+use serde::{Deserialize, Serialize};
+use std::path::{Path, PathBuf};
+
+const KNOWN_DIRS: &[&str] = &[
+    "src", "lib", "app", "public", "server", "client", "features", "modules", "packages",
+];
+
+const CONFIG_FILES: &[&str] = &[
+    "package.json",
+    "Cargo.toml",
+    "tsconfig.json",
+    "pyproject.toml",
+    ".workspace",
+];
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WatchScope {
+    pub package: String,
+    pub root: String,
+    pub watch: Vec<String>,
+}
+
+pub fn plan_scopes(nodes: &[WorkspaceNode], ignore: &IgnoreEngine) -> Vec<WatchScope> {
+    let mut scopes = Vec::new();
+    for node in nodes {
+        if matches!(node.kind, NodeKind::OsArtifact) {
+            continue;
+        }
+        if matches!(
+            node.kind,
+            NodeKind::GitSubmodule | NodeKind::ImportedFolder | NodeKind::Package
+        ) {
+            let watch = discover_watch_roots(&node.root, ignore);
+            if watch.is_empty() {
+                continue;
+            }
+            scopes.push(WatchScope {
+                package: node.id.clone(),
+                root: node.root.to_string_lossy().replace('\\', "/"),
+                watch,
+            });
+        }
+    }
+    scopes
+}
+
+fn discover_watch_roots(node_root: &Path, ignore: &IgnoreEngine) -> Vec<String> {
+    let mut watch = Vec::new();
+    for name in KNOWN_DIRS {
+        let p = node_root.join(name);
+        if p.is_dir() && !ignore.is_ignored(&p) {
+            watch.push((*name).to_string());
+        }
+    }
+    for name in CONFIG_FILES {
+        let p = node_root.join(name);
+        if p.is_file() {
+            watch.push((*name).to_string());
+        }
+    }
+    if let Ok(rd) = std::fs::read_dir(node_root) {
+        for e in rd.flatten() {
+            let path = e.path();
+            if !path.is_dir() {
+                continue;
+            }
+            if ignore.is_ignored(&path) {
+                continue;
+            }
+            let name = e.file_name().to_string_lossy().to_string();
+            if name.starts_with('.') {
+                continue;
+            }
+            if KNOWN_DIRS.contains(&name.as_str()) {
+                continue;
+            }
+            if dir_looks_like_source(&path) && !watch.iter().any(|w| w == &name) {
+                watch.push(name);
+            }
+        }
+    }
+    watch
+}
+
+fn dir_looks_like_source(dir: &Path) -> bool {
+    let Ok(rd) = std::fs::read_dir(dir) else {
+        return false;
+    };
+    for e in rd.flatten().take(30) {
+        let name = e.file_name().to_string_lossy().to_lowercase();
+        if name.ends_with(".ts")
+            || name.ends_with(".tsx")
+            || name.ends_with(".js")
+            || name.ends_with(".rs")
+            || name.ends_with(".cs")
+            || name.ends_with(".py")
+            || name == "src"
+            || name == "lib"
+        {
+            return true;
+        }
+    }
+    false
+}
+
+pub fn apply_planner(snapshot: &WorkspaceSnapshot, ignore: &IgnoreEngine) -> Vec<WatchScope> {
+    plan_scopes(&snapshot.model.nodes, ignore)
+}
+
+pub fn absolute_watch_paths(scope: &WatchScope) -> Vec<PathBuf> {
+    let root = PathBuf::from(&scope.root);
+    scope
+        .watch
+        .iter()
+        .map(|w| root.join(w))
+        .filter(|p| p.exists())
+        .collect()
+}

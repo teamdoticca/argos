@@ -1,0 +1,24 @@
+[package]
+name = "argos-ffi"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Argos C ABI (cdylib) for embedded consumers"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+argos-core = { workspace = true }
+argos-backend = { workspace = true }
+serde_json = { workspace = true }
+parking_lot = { workspace = true }
+
+[target.'cfg(windows)'.dependencies]
+argos-backend-windows = { path = "../argos-backend-windows" }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+argos-backend-linux = { path = "../argos-backend-linux" }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+argos-backend-macos = { path = "../argos-backend-macos" }

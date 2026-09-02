@@ -1,0 +1,11 @@
+[package]
+name = "argos-backend-windows"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Argos Windows watch backend (ReadDirectoryChangesW via notify)"
+
+[dependencies]
+argos-core = { workspace = true }
+argos-backend = { workspace = true }
+notify = { workspace = true }

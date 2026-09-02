@@ -1,0 +1,11 @@
+[package]
+name = "argos-backend-linux"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Argos Linux watch backend (inotify via notify)"
+
+[dependencies]
+argos-core = { workspace = true }
+argos-backend = { workspace = true }
+notify = { workspace = true }

@@ -1,0 +1,35 @@
+[workspace]
+resolver = "2"
+members = [
+  "crates/argos-core",
+  "crates/argos-backend",
+  "crates/argos-backend-windows",
+  "crates/argos-backend-linux",
+  "crates/argos-backend-macos",
+  "crates/argos-ffi",
+  "benches",
+]
+default-members = ["crates/argos-core", "crates/argos-ffi"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["Doticca"]
+repository = "https://github.com/teamdoticca/argos"
+
+[workspace.dependencies]
+argos-core = { path = "crates/argos-core" }
+argos-backend = { path = "crates/argos-backend" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+toml = "0.8"
+uuid = { version = "1", features = ["v4", "serde"] }
+thiserror = "2"
+globset = "0.4"
+ignore = "0.4"
+walkdir = "2"
+notify = "7"
+parking_lot = "0.12"
+crossbeam-channel = "0.5"
