@@ -10,6 +10,11 @@ Cargo.lock
 **/*.suo
 .vs/
 
+# Native binaries staged into NuGet runtimes (build locally)
+bindings/nuget/**/runtimes/**/native/*.dll
+bindings/nuget/**/runtimes/**/native/*.so
+bindings/nuget/**/runtimes/**/native/*.dylib
+
 # OS / IDE
 .DS_Store
 Thumbs.db
