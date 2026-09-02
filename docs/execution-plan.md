@@ -6,7 +6,7 @@ Live status. Update on every meaningful progress.
 
 - **Active epic:** [m17-typescript-napi](epics/m17-typescript-napi/)
 - **Status:** in_progress
-- **Last update:** 2026-09-02 — m17: `argos-napi` + `@doticca/argos`; win smoke/watch green; `pack-npm.yml` matrix win/linux/darwin-arm64
+- **Last update:** 2026-09-02 — npmjs prep wired (checklist, `NPM_TOKEN` publish path, dual-registry workflow)
 
 ## Completed
 
@@ -40,10 +40,12 @@ Path: [docs/done/m16-monorepo-discovery-parity](done/m16-monorepo-discovery-pari
 
 ## Next
 
-1. Finish m17: `argos-napi`, npm package, multi-OS CI, smoke, README Node section
-2. Mnemon PackageReference dogfood (NuGet)
-3. linux-x64 / osx-arm64 NuGet RID matrix
-4. Optional npmjs / NuGet.org listing after dogfood
+1. Verify m17 `pack-npm` CI green (win/linux/darwin-arm64)
+2. Human npmjs prep ([npmjs-prep.md](epics/m17-typescript-napi/npmjs-prep.md)): org/scope `@teamdoticca`, secret `NPM_TOKEN`, then workflow_dispatch `registry=npmjs`
+3. Switch README Node install to plain `npm install @teamdoticca/argos` after first npmjs publish
+4. Optional: MCP wrapper epic once public install works
+5. Mnemon PackageReference dogfood (NuGet)
+6. linux-x64 / osx-arm64 NuGet RID matrix
 
 ## Blockers
 

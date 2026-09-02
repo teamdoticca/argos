@@ -4,19 +4,19 @@
 
 | Question | Decision |
 |----------|----------|
-| Package name | `@doticca/argos` |
+| Package name | `@teamdoticca/argos` (matches GitHub org; required for GitHub Packages npm) |
 | Binding style | **napi-rs** crate `argos-napi` linking `argos-core` + OS backend (not ffi-dll) |
 | Truth model | Snapshot JSON / typed projections only — no parallel runtime business state |
 | Platforms | `win32-x64-msvc`, `linux-x64-gnu`, `darwin-arm64` |
-| Packaging | napi-rs optional platform packages / prebuilds via `@napi-rs/cli` |
-| Feed | GitHub Packages npm (`@doticca` scope) first; npmjs later |
+| Packaging | Single tarball with three `.node` natives + `binding.js` (not split platform packages) |
+| Feed | GitHub Packages for CI dogfood; npmjs.org for public install (explicit publish) — see [npmjs-prep.md](./npmjs-prep.md) |
 | API style | Class `Workspace` mirroring .NET; prefer parsed objects over raw JSON strings |
 
 ## Architecture
 
 ```text
 Node/TS app
-  → @doticca/argos (JS + .d.ts)
+  → @teamdoticca/argos (JS + .d.ts)
   → argos.*.node (napi addon)
   → argos-core + argos-backend-{windows|linux|macos}
   → WorkspaceSnapshot (sole business truth)
@@ -44,8 +44,10 @@ Watch remains optional and scope-driven from the snapshot planner.
 - Crate: `crates/argos-napi` + package root `bindings/npm/`
 - Prebuilds: `argos.win32-x64-msvc.node`, `argos.linux-x64-gnu.node`, `argos.darwin-arm64.node`
 - Single npm package ships platform `.node` files selected by `binding.js` loader
-- Main publish version: `{base}-ci.{GITHUB_RUN_NUMBER}` (npm semver; not NuGet 4-part)
-- Workflow: `.github/workflows/pack-npm.yml` (path-filtered)
+- GitHub Packages: `{base}-ci.{GITHUB_RUN_NUMBER}` on main (path-filtered)
+- npmjs.org: **workflow_dispatch only** (`registry=npmjs|both`) + secret `NPM_TOKEN`; release semver from `package.json`
+- Checklist: [npmjs-prep.md](./npmjs-prep.md)
+- Workflow: `.github/workflows/pack-npm.yml`
 
 ## Non-goals
 

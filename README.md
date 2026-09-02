@@ -84,18 +84,18 @@ await foreach (var changeJson in ws.WatchAsync())
 
 ## Add Argos to your Node / TypeScript project
 
-Package: **`@doticca/argos`** (napi-rs). Supported natives: **win32-x64**, **linux-x64-gnu**, **darwin-arm64**.
+Package: **`@teamdoticca/argos`** (napi-rs). Supported natives: **win32-x64**, **linux-x64-gnu**, **darwin-arm64**.
 
 ```bash
-# GitHub Packages (npm)
-npm login --scope=@doticca --registry=https://npm.pkg.github.com
+# GitHub Packages (npm) — scope matches GitHub org teamdoticca
+npm login --scope=@teamdoticca --registry=https://npm.pkg.github.com
 # use a PAT with read:packages as password
 
-npm install @doticca/argos --registry=https://npm.pkg.github.com
+npm install @teamdoticca/argos --registry=https://npm.pkg.github.com
 ```
 
 ```ts
-import { Workspace, watch } from '@doticca/argos'
+import { Workspace, watch } from '@teamdoticca/argos'
 
 const ws = Workspace.open('/path/to/repo')
 const snap = ws.currentSnapshot

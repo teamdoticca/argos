@@ -1,4 +1,4 @@
-# `@doticca/argos`
+# `@teamdoticca/argos`
 
 Node-API bindings for Argos. See the [repository README](../../README.md) for consumer docs.
 

@@ -1,6 +1,6 @@
 name: pack-npm
 
-# Pack/publish @doticca/argos when package-relevant paths change.
+# Pack/publish @teamdoticca/argos when package-relevant paths change.
 on:
   push:
     branches: [master, main]
@@ -20,9 +20,17 @@ on:
   workflow_dispatch:
     inputs:
       publish:
-        description: "Publish to GitHub Packages npm after build + smoke"
+        description: "Publish after build + smoke"
         type: boolean
         default: true
+      registry:
+        description: "Publish target (github Packages dogfood vs public npmjs)"
+        type: choice
+        options:
+          - github
+          - npmjs
+          - both
+        default: github
 
 concurrency:
   group: pack-npm-${{ github.workflow }}-${{ github.ref }}
@@ -58,8 +66,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-          registry-url: https://npm.pkg.github.com
-          scope: "@doticca"
 
       - name: Install npm deps
         working-directory: bindings/npm
@@ -95,12 +101,15 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-  publish:
-    name: Publish GitHub Packages npm
+  publish-github:
+    name: Publish GitHub Packages
     needs: build
     if: >
-      (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'))
-      || (github.event_name == 'workflow_dispatch' && (inputs.publish == true || inputs.publish == 'true'))
+      (
+        (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'))
+        || (github.event_name == 'workflow_dispatch' && (inputs.publish == true || inputs.publish == 'true')
+            && (inputs.registry == 'github' || inputs.registry == 'both' || inputs.registry == ''))
+      )
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -112,7 +121,7 @@ jobs:
         with:
           node-version: "20"
           registry-url: https://npm.pkg.github.com
-          scope: "@doticca"
+          scope: "@teamdoticca"
 
       - name: Download natives
         uses: actions/download-artifact@v4
@@ -124,17 +133,16 @@ jobs:
       - name: Stage natives into package
         working-directory: bindings/npm
         run: |
-          cp -f ../../artifacts/npm/*.node . || true
-          ls -la *.node binding.js || true
-          # Prefer downloaded binding.js if present
+          cp -f ../../artifacts/npm/*.node .
           if [ -f ../../artifacts/npm/binding.js ]; then cp -f ../../artifacts/npm/binding.js .; fi
           if [ -f ../../artifacts/npm/binding.d.ts ]; then cp -f ../../artifacts/npm/binding.d.ts .; fi
+          ls -la *.node
 
       - name: Install npm deps
         working-directory: bindings/npm
         run: npm ci
 
-      - name: Bump unique version for publish
+      - name: Bump CI prerelease version
         working-directory: bindings/npm
         run: |
           BASE=$(node -p "require('./package.json').version.split('-')[0]")
@@ -142,14 +150,74 @@ jobs:
           npm version "$VER" --no-git-tag-version
           echo "NPM_VERSION=$VER" >> "$GITHUB_ENV"
 
-      - name: Publish
+      - name: Publish (restricted, GitHub Packages)
         working-directory: bindings/npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm publish --access restricted
+        run: npm publish --access restricted --registry https://npm.pkg.github.com
 
       - name: Summary
         run: |
-          echo "## @doticca/argos published" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Version: \`${NPM_VERSION:-see package.json}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "## @teamdoticca/argos → GitHub Packages" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Version: \`${NPM_VERSION}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- Registry: https://npm.pkg.github.com" >> "$GITHUB_STEP_SUMMARY"
+
+  publish-npmjs:
+    name: Publish npmjs.org
+    needs: build
+    # Explicit only — never auto-publish CI builds to the public registry.
+    if: >
+      github.event_name == 'workflow_dispatch'
+      && (inputs.publish == true || inputs.publish == 'true')
+      && (inputs.registry == 'npmjs' || inputs.registry == 'both')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: https://registry.npmjs.org
+          scope: "@teamdoticca"
+
+      - name: Download natives
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/npm
+          pattern: argos-node-*
+          merge-multiple: true
+
+      - name: Stage natives into package
+        working-directory: bindings/npm
+        run: |
+          cp -f ../../artifacts/npm/*.node .
+          if [ -f ../../artifacts/npm/binding.js ]; then cp -f ../../artifacts/npm/binding.js .; fi
+          if [ -f ../../artifacts/npm/binding.d.ts ]; then cp -f ../../artifacts/npm/binding.d.ts .; fi
+          npm run check:natives
+          ls -la *.node
+
+      - name: Install npm deps
+        working-directory: bindings/npm
+        run: npm ci
+
+      - name: Use release version (no -ci suffix)
+        working-directory: bindings/npm
+        run: |
+          BASE=$(node -p "require('./package.json').version.split('-')[0]")
+          npm version "$BASE" --no-git-tag-version --allow-same-version
+          echo "NPM_VERSION=$BASE" >> "$GITHUB_ENV"
+
+      - name: Publish (public, npmjs)
+        working-directory: bindings/npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public --registry https://registry.npmjs.org/
+
+      - name: Summary
+        run: |
+          echo "## @teamdoticca/argos → npmjs.org" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Version: \`${NPM_VERSION}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Install: \`npm install @teamdoticca/argos\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Prep doc: docs/epics/m17-typescript-napi/npmjs-prep.md" >> "$GITHUB_STEP_SUMMARY"

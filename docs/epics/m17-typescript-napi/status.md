@@ -2,4 +2,4 @@
 
 `in_progress`
 
-Last update: 2026-09-02 — `@doticca/argos` builds on win-x64; smoke + watch smoke green; multi-OS CI workflow added.
+Last update: 2026-09-02 — Fixed publish: package `@teamdoticca/argos` (GPR scope), prepublish natives check (no napi release API).
