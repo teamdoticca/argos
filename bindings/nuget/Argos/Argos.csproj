@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>Argos</PackageId>
-    <Version>0.1.2</Version>
+    <Version>0.1.3</Version>
     <Authors>Doticca</Authors>
     <Description>Argos workspace intelligence engine (.NET wrapper)</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

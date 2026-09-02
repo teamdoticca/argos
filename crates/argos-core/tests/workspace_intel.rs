@@ -233,3 +233,86 @@ fn empty_tree_gets_explicit_fallback_root() {
         "fallback-root must still yield a watch plan"
     );
 }
+
+#[test]
+fn discovers_document_root_handbook_fixture() {
+    let root = fixture("docs-handbook");
+    assert!(root.is_dir(), "missing fixture {}", root.display());
+    let topo = discover_topology(&root).unwrap();
+    assert!(
+        topo.nodes.iter().any(|n| {
+            n.source.provider == "document-root" && n.root.ends_with("handbook")
+        }),
+        "expected handbook document-root, got {:?}",
+        topo.nodes
+            .iter()
+            .map(|n| (&n.id, &n.source.provider, &n.root))
+            .collect::<Vec<_>>()
+    );
+    let ws = Workspace::open(&root, OpenOptions::default()).unwrap();
+    let snap = ws.current_snapshot();
+    let scopes = list_scopes(&snap);
+    assert!(
+        scopes.iter().any(|s| s.package.starts_with("docs:")),
+        "expected docs scope, got {:?}",
+        scopes
+    );
+}
+
+#[test]
+fn discovers_guidance_seeded_odd_docs_and_rules() {
+    let root = fixture("docs-guidance-odd");
+    assert!(root.is_dir(), "missing fixture {}", root.display());
+    let topo = discover_topology(&root).unwrap();
+    assert!(
+        topo.nodes.iter().any(|n| {
+            n.source.provider == "document-root" && n.root.ends_with("knowledge-base")
+        }),
+        "expected knowledge-base document-root"
+    );
+    assert!(
+        topo.nodes.iter().any(|n| {
+            n.source.provider == "guidance-path"
+                && (n.root.ends_with("rules") || n.root.ends_with("AGENTS.md"))
+        }),
+        "expected guidance-path for rules or AGENTS.md, got {:?}",
+        topo.nodes
+            .iter()
+            .map(|n| (&n.id, &n.source.provider))
+            .collect::<Vec<_>>()
+    );
+    let ws = Workspace::open(&root, OpenOptions::default()).unwrap();
+    assert!(!list_scopes(&ws.current_snapshot()).is_empty());
+}
+
+#[test]
+fn argos_self_repo_includes_docs_and_guidance_scopes() {
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let root = root.canonicalize().unwrap_or(root);
+    if !root.join("AGENTS.md").is_file() || !root.join("docs/roadmap.md").is_file() {
+        return; // not the Argos checkout
+    }
+    let topo = discover_topology(&root).unwrap();
+    assert!(
+        topo.nodes
+            .iter()
+            .any(|n| n.source.provider == "document-root"),
+        "Argos repo should discover a document-root"
+    );
+    assert!(
+        topo.nodes.iter().any(|n| n.source.provider == "guidance-path"),
+        "Argos repo should discover guidance-path nodes"
+    );
+    let ws = Workspace::open(&root, OpenOptions::default()).unwrap();
+    let snap = ws.current_snapshot();
+    let scopes = list_scopes(&snap);
+    assert!(
+        scopes.iter().any(|s| {
+            s.root.contains("docs")
+                || s.package.starts_with("docs:")
+                || s.package.starts_with("guidance:")
+        }),
+        "expected docs/guidance scopes, got {} scopes",
+        scopes.len()
+    );
+}

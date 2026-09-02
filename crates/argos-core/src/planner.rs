@@ -34,10 +34,16 @@ pub fn plan_scopes(nodes: &[WorkspaceNode], ignore: &IgnoreEngine) -> Vec<WatchS
             node.kind,
             NodeKind::GitSubmodule | NodeKind::ImportedFolder | NodeKind::Package
         ) {
-            let watch = discover_watch_roots(&node.root, ignore);
+            let watch = match node.source.provider.as_str() {
+                "document-root" | "guidance-path" => {
+                    plan_document_or_guidance_watch(node, ignore)
+                }
+                _ => discover_watch_roots(&node.root, ignore),
+            };
             if watch.is_empty() {
                 continue;
             }
+            // For file-targeted guidance nodes, scope.root is the file path.
             scopes.push(WatchScope {
                 package: node.id.clone(),
                 root: node.root.to_string_lossy().replace('\\', "/"),
@@ -46,6 +52,28 @@ pub fn plan_scopes(nodes: &[WorkspaceNode], ignore: &IgnoreEngine) -> Vec<WatchS
         }
     }
     scopes
+}
+
+fn plan_document_or_guidance_watch(node: &WorkspaceNode, ignore: &IgnoreEngine) -> Vec<String> {
+    if node.root.is_file() {
+        if ignore.is_ignored(&node.root) {
+            return Vec::new();
+        }
+        return vec![".".into()];
+    }
+    if !node.root.is_dir() || ignore.is_ignored(&node.root) {
+        return Vec::new();
+    }
+    let manifest = node.source.manifest.as_str();
+    if !manifest.is_empty()
+        && manifest != "."
+        && !manifest.contains('/')
+        && !manifest.contains('\\')
+        && node.root.join(manifest).is_file()
+    {
+        return vec![manifest.to_string()];
+    }
+    vec![".".into()]
 }
 
 fn discover_watch_roots(node_root: &Path, ignore: &IgnoreEngine) -> Vec<String> {

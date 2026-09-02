@@ -18,8 +18,8 @@ Ship **`@teamdoticca/argos`** as a first-class Node/TypeScript package via **nap
 - [x] No second public truth model beside `WorkspaceSnapshot`
 - [x] Root README consumer Node section (no CI internals)
 - [x] `docs/roadmap.md` and `docs/execution-plan.md` updated on progress
-- [ ] CI green on all three OS runners + publish smoke (verify after push)
-- [ ] On completion, move to `docs/done/m17-typescript-napi`
+- [x] CI green on all three OS runners + publish to GitHub Packages and npmjs.org
+- [x] On completion, move to `docs/done/m17-typescript-napi`
 
 ## Out of scope
 

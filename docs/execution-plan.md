@@ -4,9 +4,10 @@ Live status. Update on every meaningful progress.
 
 ## Current
 
-- **Active epic:** [m17-typescript-napi](epics/m17-typescript-napi/)
-- **Status:** in_progress
-- **Last update:** 2026-09-02 — npmjs prep wired (checklist, `NPM_TOKEN` publish path, dual-registry workflow)
+- **Active epic:** [m18-document-root-discovery](epics/m18-document-root-discovery/)
+- **Status:** in_progress — core discovery + planner + tests green; ready to close
+- **Last update:** 2026-09-03 — m18 impl green; release line synced to **0.1.3** (Cargo / NuGet / npm)
+
 
 ## Completed
 
@@ -38,14 +39,21 @@ Path: [docs/done/m16-monorepo-discovery-parity](done/m16-monorepo-discovery-pari
 
 - Nested npm + .NET discovery; Mnemon scopes; NuGet `0.1.2`
 
+### m17-typescript-napi (done)
+
+Path: [docs/done/m17-typescript-napi](done/m17-typescript-napi/)
+
+- [x] `argos-napi` + `@teamdoticca/argos`
+- [x] win / linux-x64 / darwin-arm64 CI + smoke/watch
+- [x] GitHub Packages + **npmjs.org** public `0.1.2`
+
 ## Next
 
-1. Verify m17 `pack-npm` CI green (win/linux/darwin-arm64)
-2. Human npmjs prep ([npmjs-prep.md](epics/m17-typescript-napi/npmjs-prep.md)): org/scope `@teamdoticca`, secret `NPM_TOKEN`, then workflow_dispatch `registry=npmjs`
-3. Switch README Node install to plain `npm install @teamdoticca/argos` after first npmjs publish
-4. Optional: MCP wrapper epic once public install works
-5. Mnemon PackageReference dogfood (NuGet)
-6. linux-x64 / osx-arm64 NuGet RID matrix
+1. **m18-document-root-discovery** — scored document roots + guidance-cited important folders/files (not md-only)
+2. Optional: npm Trusted Publishing (OIDC) and revoke long-lived `NPM_TOKEN`
+3. Optional: MCP wrapper epic (`npx` / Cursor tools on `@teamdoticca/argos`)
+4. Mnemon PackageReference dogfood (NuGet)
+5. linux-x64 / osx-arm64 NuGet RID matrix
 
 ## Blockers
 

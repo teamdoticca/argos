@@ -28,7 +28,8 @@ English only. Update this file on every epic status change.
 | m14 Benchmark Suite | [done/m14-benchmark-suite](done/m14-benchmark-suite/) | done |
 | m15 NuGet Pack & CI | [done/m15-nuget-pack-ci](done/m15-nuget-pack-ci/) | done |
 | m16 Monorepo discovery parity | [done/m16-monorepo-discovery-parity](done/m16-monorepo-discovery-parity/) | done |
-| m17 TypeScript napi | [epics/m17-typescript-napi](epics/m17-typescript-napi/) | in_progress |
+| m17 TypeScript napi | [done/m17-typescript-napi](done/m17-typescript-napi/) | done |
+| m18 Document root discovery | [epics/m18-document-root-discovery](epics/m18-document-root-discovery/) | in_progress |
 
 ## Done
 
@@ -49,6 +50,7 @@ English only. Update this file on every epic status change.
 - [m14-benchmark-suite](done/m14-benchmark-suite/)
 - [m15-nuget-pack-ci](done/m15-nuget-pack-ci/)
 - [m16-monorepo-discovery-parity](done/m16-monorepo-discovery-parity/)
+- [m17-typescript-napi](done/m17-typescript-napi/)
 
 ## Deferred
 
@@ -63,5 +65,5 @@ English only. Update this file on every epic status change.
 - Snapshot persistence (`argos snapshot save` / `load`)
 - NuGet.org public listing (after GitHub Packages dogfood)
 - linux-x64 / osx-arm64 NuGet RID matrix
-- npmjs.org public listing (after GitHub Packages npm dogfood)
+- npm Trusted Publishing (OIDC; revoke long-lived NPM_TOKEN)
 - linux-arm64 / darwin-x64 / musl napi triples

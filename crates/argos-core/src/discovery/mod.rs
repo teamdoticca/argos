@@ -1,4 +1,5 @@
 mod cargo_ws;
+mod document;
 mod dotnet;
 mod git_submodules;
 mod nested_npm;
@@ -56,6 +57,26 @@ pub fn discover_topology(root: &Path) -> Result<TopologyResult> {
     for n in workspace_file::discover(root)? {
         push(n);
     }
+    // document-root / guidance-path need the package topology for dedupe.
+    drop(push);
+    for mut node in document::discover(root, &nodes)? {
+        if node.path_identity.key.is_empty() {
+            node.path_identity = PathIdentity::from_path(&node.root, case_sensitive);
+        }
+        let key = node.path_identity.key.clone();
+        if seen.insert(key) {
+            nodes.push(node);
+        }
+    }
+    let mut push = |mut node: WorkspaceNode| {
+        if node.path_identity.key.is_empty() {
+            node.path_identity = PathIdentity::from_path(&node.root, case_sensitive);
+        }
+        let key = node.path_identity.key.clone();
+        if seen.insert(key) {
+            nodes.push(node);
+        }
+    };
     for n in os_artifacts::discover(root)? {
         push(n);
     }

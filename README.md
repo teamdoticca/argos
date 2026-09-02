@@ -56,7 +56,7 @@ dotnet nuget add source https://nuget.pkg.github.com/teamdoticca/index.json `
 2. Reference a published version (pick the latest from the packages page, or float a line you trust):
 
 ```xml
-<PackageReference Include="Argos" Version="0.1.2.*" />
+<PackageReference Include="Argos" Version="0.1.3.*" />
 ```
 
 3. Run / publish your host as **win-x64** so `runtimes/win-x64/native/argos_ffi.dll` is available (`DllImport("argos_ffi")`).
@@ -84,14 +84,10 @@ await foreach (var changeJson in ws.WatchAsync())
 
 ## Add Argos to your Node / TypeScript project
 
-Package: **`@teamdoticca/argos`** (napi-rs). Supported natives: **win32-x64**, **linux-x64-gnu**, **darwin-arm64**.
+Package: **[`@teamdoticca/argos`](https://www.npmjs.com/package/@teamdoticca/argos)** (napi-rs). Supported natives: **win32-x64**, **linux-x64-gnu**, **darwin-arm64**.
 
 ```bash
-# GitHub Packages (npm) — scope matches GitHub org teamdoticca
-npm login --scope=@teamdoticca --registry=https://npm.pkg.github.com
-# use a PAT with read:packages as password
-
-npm install @teamdoticca/argos --registry=https://npm.pkg.github.com
+npm install @teamdoticca/argos
 ```
 
 ```ts

@@ -31,15 +31,15 @@ npm install @teamdoticca/argos
 
 | Feed | When | Version shape |
 |------|------|----------------|
-| GitHub Packages | Every main push (path-filtered) | `{base}-ci.{run}` e.g. `0.1.2-ci.42` |
-| **npmjs** | Explicit only (`workflow_dispatch`) | Semver **`0.1.2`** — **no** `-ci.*` spam |
+| GitHub Packages | Every main push (path-filtered) | `{base}-ci.{run}` e.g. `0.1.3-ci.42` |
+| **npmjs** | Explicit only (`workflow_dispatch`) | Semver **`0.1.3`** (same base as NuGet/Cargo) — **no** `-ci.*` spam |
 
 ## Repo wiring
 
 - [x] Package id `@teamdoticca/argos`
 - [x] `prepublishOnly` = native presence check (not `napi prepublish` — that tried to create GitHub Releases and failed CI)
 - [x] `pack-npm.yml` dual registry (`github` / `npmjs` / `both`)
-- [ ] First npmjs publish + README install without GitHub registry
+- [x] First npmjs publish + README install without GitHub registry
 
 ## CI publish
 
@@ -53,3 +53,5 @@ Actions → **pack-npm** → Run workflow:
 ```bash
 npm install @teamdoticca/argos
 ```
+
+**Status:** first public publish done (`0.1.2` on npmjs.org). Later: prefer Trusted Publishing (OIDC) and revoke long-lived `NPM_TOKEN` when ready.
