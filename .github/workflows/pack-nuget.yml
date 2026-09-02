@@ -1,0 +1,89 @@
+name: pack-nuget
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  pack-win-x64:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Test argos-core
+        run: cargo test -p argos-core
+
+      - name: Pack NuGet (win-x64)
+        shell: pwsh
+        run: ./scripts/pack-nuget.ps1 -Rid win-x64
+
+      - name: Upload nupkg artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: argos-nuget-win-x64
+          path: artifacts/nuget/*.nupkg
+          if-no-files-found: error
+
+      - name: Smoke PackageReference
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $nupkg = Get-ChildItem artifacts/nuget -Filter "Argos.*.nupkg" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          if (-not $nupkg) { throw "nupkg missing" }
+          if ($nupkg.BaseName -notmatch '^Argos\.(.+)$') { throw "unexpected nupkg name $($nupkg.Name)" }
+          $version = $Matches[1]
+          Push-Location bindings/nuget/smoke
+          try {
+            dotnet restore Argos.Smoke.csproj -p:ArgosPackageVersion=$version
+            if ($LASTEXITCODE -ne 0) { throw "restore failed" }
+            $fixture = (Resolve-Path "..\..\..\fixtures\small-pnpm").Path
+            dotnet run -c Release --no-restore -p:ArgosPackageVersion=$version -- $fixture
+            if ($LASTEXITCODE -ne 0) { throw "smoke failed" }
+          }
+          finally {
+            Pop-Location
+          }
+  # Optional: push to GitHub Packages on manual dispatch or version tags (requires NUGET_AUTH_TOKEN).
+  publish-github-packages:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')
+    needs: pack-win-x64
+    runs-on: windows-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Download nupkg
+        uses: actions/download-artifact@v4
+        with:
+          name: argos-nuget-win-x64
+          path: artifacts/nuget
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Push to GitHub Packages
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $source = "https://nuget.pkg.github.com/teamdoticca/index.json"
+          dotnet nuget add source $source --name github-argos --username ${{ github.actor }} --password $env:NUGET_AUTH_TOKEN --store-password-in-clear-text
+          Get-ChildItem artifacts/nuget -Filter "Argos.*.nupkg" | ForEach-Object {
+            Write-Host "Pushing $($_.Name)"
+            dotnet nuget push $_.FullName --source github-argos --api-key $env:NUGET_AUTH_TOKEN --skip-duplicate
+            if ($LASTEXITCODE -ne 0) { throw "nuget push failed" }
+          }

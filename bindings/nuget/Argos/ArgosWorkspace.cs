@@ -156,7 +156,7 @@ public sealed class ArgosException : Exception
 
 internal static class Native
 {
-    private const string Lib = "argos";
+    private const string Lib = "argos_ffi";
 
     [DllImport(Lib, CallingConvention = CallingConvention.Cdecl)]
     public static extern int argos_workspace_open([MarshalAs(UnmanagedType.LPUTF8Str)] string root, [MarshalAs(UnmanagedType.LPUTF8Str)] string optionsJson, out IntPtr outWorkspace);

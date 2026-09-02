@@ -1,6 +1,6 @@
 # 02 — Build / copy / pack scripts (spec only)
 
-**Status:** planned  
+**Status:** done  
 **Epic:** [m15-nuget-pack-ci](./README.md)  
 **Depends on:** [01-charter-and-pack-contract](./01-charter-and-pack-contract.md)
 

@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>Argos</PackageId>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <Authors>Doticca</Authors>
     <Description>Argos workspace intelligence engine (.NET wrapper)</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -13,6 +13,7 @@
     <RootNamespace>Argos</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="runtimes\**\*" Pack="true" PackagePath="runtimes\" />
+    <!-- Pack only RID native binaries; keep README out of the nupkg runtimes tree. -->
+    <None Include="runtimes\**\native\*" Pack="true" PackagePath="runtimes\" />
   </ItemGroup>
 </Project>

@@ -1,6 +1,6 @@
 # 01 — Charter and pack contract
 
-**Status:** planned  
+**Status:** done  
 **Epic:** [m15-nuget-pack-ci](./README.md)
 
 ## Outcome

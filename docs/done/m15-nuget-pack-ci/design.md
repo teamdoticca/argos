@@ -23,7 +23,7 @@ cargo build -p argos-ffi --release
         │
         ▼
 copy cdylib → bindings/nuget/Argos/runtimes/<rid>/native/
-        │     (win-x64: argos.dll)
+        │     (win-x64: argos_ffi.dll)
         ▼
 dotnet pack bindings/nuget/Argos/Argos.csproj
         │
@@ -49,9 +49,9 @@ flowchart LR
 ```text
 Argos.<version>.nupkg
   lib/net8.0/Argos.dll          # managed wrapper
-  runtimes/win-x64/native/argos.dll
-  runtimes/linux-x64/native/libargos.so      # later
-  runtimes/osx-arm64/native/libargos.dylib   # later
+  runtimes/win-x64/native/argos_ffi.dll
+  runtimes/linux-x64/native/libargos_ffi.so      # later
+  runtimes/osx-arm64/native/libargos_ffi.dylib   # later
 ```
 
 `Argos.csproj` already packs `runtimes/**/*` via:
@@ -66,7 +66,7 @@ Consumer RID graphs must resolve natives into the app output directory (standard
 
 1. Package id: `Argos`
 2. TFM: `net8.0` (current; expand only if Mnemon needs another TFM)
-3. Native library name: `argos` (Windows loads `argos.dll`; Unix `libargos.so` / `libargos.dylib` via default DllImport conventions — confirm on first linux/macos pack)
+3. Native library name: `argos_ffi` (Windows: `argos_ffi.dll`; Unix later: `libargos_ffi.so` / `libargos_ffi.dylib`) — **not** `argos`, which collides with managed `Argos.dll` on case-insensitive filesystems
 4. If RID native is missing at pack time for the **declared** RID set of that release: **fail pack** (do not ship empty `runtimes/` folders as “success”)
 5. If consumer runs on unsupported RID: clear `DllNotFoundException` / documented message — optional thin managed check deferred; document in smoke brief
 

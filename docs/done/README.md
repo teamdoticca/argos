@@ -19,5 +19,4 @@ Completed Argos epics. Each folder retains README / design / status for historic
 | m12-platform-recovery | Overflow → scoped rescan |
 | m13-nuget-wrapper | .NET Argos package |
 | m14-benchmark-suite | fixtures + argos-bench |
-
-Packaging follow-up (active/planned): see [`../epics/m15-nuget-pack-ci/`](../epics/m15-nuget-pack-ci/).
+| m15-nuget-pack-ci | pack script, CI, win-x64 nupkg + smoke |

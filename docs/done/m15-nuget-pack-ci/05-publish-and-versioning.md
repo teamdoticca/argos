@@ -1,6 +1,6 @@
 # 05 — Publish and versioning
 
-**Status:** planned  
+**Status:** done  
 **Epic:** [m15-nuget-pack-ci](./README.md)  
 **Depends on:** [03-ci-win-x64](./03-ci-win-x64.md), [04-consumer-smoke](./04-consumer-smoke.md)
 

@@ -13,14 +13,46 @@ await foreach (var change in workspace.WatchAsync())
 }
 ```
 
+## Pack (local)
+
+```powershell
+pwsh ./scripts/pack-nuget.ps1 -Rid win-x64
+```
+
+Produces `artifacts/nuget/Argos.<version>.nupkg` with:
+
+- `lib/net8.0/Argos.dll`
+- `runtimes/win-x64/native/argos_ffi.dll`
+
+Cargo builds `argos_ffi.dll`; the pack script stages it under that same name for `DllImport("argos_ffi")` (avoids colliding with managed `Argos.dll` on Windows).
+
+Natives are **never** committed. Smoke: `bindings/nuget/smoke/`.
+
 ## RIDs
 
-Native binaries are expected under:
+| RID | Status |
+|-----|--------|
+| `win-x64` | Current pack script + CI |
+| `linux-x64` | Deferred |
+| `osx-arm64` | Deferred |
 
-- `runtimes/win-x64/native/argos.dll`
-- `runtimes/linux-x64/native/libargos.so`
-- `runtimes/osx-arm64/native/libargos.dylib`
+## Consume (Mnemon / dogfood)
 
-Build the Rust `argos-ffi` crate and copy outputs into those folders before packing.
+1. Pack or download CI artifact `argos-nuget-win-x64`
+2. Add a NuGet source to `artifacts/nuget` (or GitHub Packages)
+3. `<PackageReference Include="Argos" Version="0.1.x" />`
+4. Host RID `win-x64`
+
+### GitHub Packages
+
+On `workflow_dispatch` or tags `v*`, CI can push to `https://nuget.pkg.github.com/teamdoticca/index.json` (see `.github/workflows/pack-nuget.yml`).
+
+### Rollback
+
+ProjectReference `bindings/nuget/Argos/Argos.csproj` and place `argos.dll` next to the host output.
+
+## Versioning
+
+Stay on `0.1.x` for packaging/native rebuilds. Minor bumps when public managed/C ABI changes.
 
 Watching is always optional — Product 1 (Workspace Intelligence) works without `WatchAsync`.

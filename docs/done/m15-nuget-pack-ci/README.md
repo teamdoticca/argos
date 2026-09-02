@@ -2,7 +2,7 @@
 
 **Epic:** `m15-nuget-pack-ci`  
 **Status:** see `status.md`  
-**Depends on:** [m13-nuget-wrapper](../../done/m13-nuget-wrapper/) (done)
+**Depends on:** [m13-nuget-wrapper](../m13-nuget-wrapper/) (done)
 
 ## Goal
 

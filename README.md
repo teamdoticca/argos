@@ -42,6 +42,13 @@ cargo test -p argos-core
 cargo run -p argos-benches -- fixtures/small-pnpm
 ```
 
+### NuGet pack (win-x64)
+
+```powershell
+pwsh ./scripts/pack-nuget.ps1
+dotnet run --project bindings/nuget/smoke/Argos.Smoke.csproj -- fixtures/small-pnpm
+```
+
 ### .NET (NuGet wrapper)
 
 ```csharp

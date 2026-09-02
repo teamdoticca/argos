@@ -1,6 +1,6 @@
 # 03 — CI win-x64
 
-**Status:** planned  
+**Status:** done  
 **Epic:** [m15-nuget-pack-ci](./README.md)  
 **Depends on:** [02-build-copy-pack-scripts](./02-build-copy-pack-scripts.md)
 

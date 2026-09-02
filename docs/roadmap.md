@@ -26,7 +26,7 @@ English only. Update this file on every epic status change.
 | m12 Platform Recovery | [done/m12-platform-recovery](done/m12-platform-recovery/) | done |
 | m13 NuGet Wrapper | [done/m13-nuget-wrapper](done/m13-nuget-wrapper/) | done |
 | m14 Benchmark Suite | [done/m14-benchmark-suite](done/m14-benchmark-suite/) | done |
-| m15 NuGet Pack & CI | [epics/m15-nuget-pack-ci](epics/m15-nuget-pack-ci/) | planned |
+| m15 NuGet Pack & CI | [done/m15-nuget-pack-ci](done/m15-nuget-pack-ci/) | done |
 
 ## Done
 
@@ -45,6 +45,7 @@ English only. Update this file on every epic status change.
 - [m12-platform-recovery](done/m12-platform-recovery/)
 - [m13-nuget-wrapper](done/m13-nuget-wrapper/)
 - [m14-benchmark-suite](done/m14-benchmark-suite/)
+- [m15-nuget-pack-ci](done/m15-nuget-pack-ci/)
 
 ## Deferred
 
@@ -59,3 +60,4 @@ English only. Update this file on every epic status change.
 - Extra `.workspace` fields beyond `imports:`
 - Snapshot persistence (`argos snapshot save` / `load`)
 - NuGet.org public listing (after GitHub Packages dogfood)
+- linux-x64 / osx-arm64 NuGet RID matrix
