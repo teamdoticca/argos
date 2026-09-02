@@ -3,18 +3,37 @@ name: pack-nuget
 on:
   push:
     branches: [master, main]
+    tags: ["v*"]
   pull_request:
   workflow_dispatch:
+    inputs:
+      publish:
+        description: "Push nupkg to GitHub Packages after pack + smoke"
+        type: boolean
+        default: true
+
+concurrency:
+  group: pack-nuget-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   pack-win-x64:
     runs-on: windows-latest
+    outputs:
+      package_version: ${{ steps.version.outputs.version }}
+      nupkg_name: ${{ steps.version.outputs.nupkg }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Rust stable
+      - name: Install Rust stable (MSVC)
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          targets: x86_64-pc-windows-msvc
 
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v4
@@ -28,21 +47,37 @@ jobs:
         shell: pwsh
         run: ./scripts/pack-nuget.ps1 -Rid win-x64
 
+      - name: Resolve package version
+        id: version
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $nupkg = Get-ChildItem artifacts/nuget -Filter "Argos.*.nupkg" |
+            Sort-Object LastWriteTime -Descending |
+            Select-Object -First 1
+          if (-not $nupkg) { throw "nupkg missing after pack" }
+          if ($nupkg.BaseName -notmatch '^Argos\.(.+)$') {
+            throw "unexpected nupkg name $($nupkg.Name)"
+          }
+          $version = $Matches[1]
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "nupkg=$($nupkg.Name)" >> $env:GITHUB_OUTPUT
+          Write-Host "Resolved Argos $version ($($nupkg.Name))"
+
       - name: Upload nupkg artifact
         uses: actions/upload-artifact@v4
         with:
           name: argos-nuget-win-x64
           path: artifacts/nuget/*.nupkg
           if-no-files-found: error
+          retention-days: 14
 
       - name: Smoke PackageReference
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          $nupkg = Get-ChildItem artifacts/nuget -Filter "Argos.*.nupkg" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-          if (-not $nupkg) { throw "nupkg missing" }
-          if ($nupkg.BaseName -notmatch '^Argos\.(.+)$') { throw "unexpected nupkg name $($nupkg.Name)" }
-          $version = $Matches[1]
+          $version = "${{ steps.version.outputs.version }}"
+          if ([string]::IsNullOrWhiteSpace($version)) { throw "package version output missing" }
           Push-Location bindings/nuget/smoke
           try {
             dotnet restore Argos.Smoke.csproj -p:ArgosPackageVersion=$version
@@ -54,10 +89,13 @@ jobs:
           finally {
             Pop-Location
           }
-  # Optional: push to GitHub Packages on manual dispatch or version tags (requires NUGET_AUTH_TOKEN).
+
   publish-github-packages:
-    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')
+    name: Publish GitHub Packages
     needs: pack-win-x64
+    if: >
+      (github.event_name == 'workflow_dispatch' && (inputs.publish == true || inputs.publish == 'true'))
+      || startsWith(github.ref, 'refs/tags/v')
     runs-on: windows-latest
     permissions:
       contents: read
@@ -69,10 +107,13 @@ jobs:
           name: argos-nuget-win-x64
           path: artifacts/nuget
 
-      - name: Setup .NET 8
+      - name: Setup .NET 8 (GitHub Packages auth)
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.x"
+          source-url: https://nuget.pkg.github.com/teamdoticca/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push to GitHub Packages
         env:
@@ -81,9 +122,43 @@ jobs:
         run: |
           $ErrorActionPreference = "Stop"
           $source = "https://nuget.pkg.github.com/teamdoticca/index.json"
-          dotnet nuget add source $source --name github-argos --username ${{ github.actor }} --password $env:NUGET_AUTH_TOKEN --store-password-in-clear-text
-          Get-ChildItem artifacts/nuget -Filter "Argos.*.nupkg" | ForEach-Object {
-            Write-Host "Pushing $($_.Name)"
-            dotnet nuget push $_.FullName --source github-argos --api-key $env:NUGET_AUTH_TOKEN --skip-duplicate
-            if ($LASTEXITCODE -ne 0) { throw "nuget push failed" }
+          $nupkgs = @(Get-ChildItem artifacts/nuget -Filter "Argos.*.nupkg")
+          if ($nupkgs.Count -eq 0) { throw "no nupkg downloaded for publish" }
+
+          foreach ($pkg in $nupkgs) {
+            Write-Host "Pushing $($pkg.FullName) -> $source"
+            # GitHub Packages accepts GITHUB_TOKEN as api-key; --skip-duplicate keeps re-runs safe.
+            & dotnet nuget push $pkg.FullName `
+              --source $source `
+              --api-key $env:NUGET_AUTH_TOKEN `
+              --skip-duplicate
+            if ($LASTEXITCODE -ne 0) {
+              throw "dotnet nuget push failed for $($pkg.Name) (exit $LASTEXITCODE)"
+            }
           }
+
+          Write-Host "Published: $($nupkgs.Name -join ', ')"
+          Write-Host "Consume feed: $source"
+          Write-Host "PackageReference: <PackageReference Include=`"Argos`" Version=`"${{ needs.pack-win-x64.outputs.package_version }}`" />"
+
+      - name: Job summary
+        shell: pwsh
+        run: |
+          @"
+          ## Argos NuGet published
+
+          - **Version:** `${{ needs.pack-win-x64.outputs.package_version }}`
+          - **File:** `${{ needs.pack-win-x64.outputs.nupkg_name }}`
+          - **Feed:** `https://nuget.pkg.github.com/teamdoticca/index.json`
+          - **Org packages:** https://github.com/orgs/teamdoticca/packages
+
+          ### Consumer NuGet.config
+
+          ``````xml
+          <packageSources>
+            <add key="github-argos" value="https://nuget.pkg.github.com/teamdoticca/index.json" />
+          </packageSources>
+          ``````
+
+          Use a PAT with ``read:packages`` (and org access if the package is private).
+          "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8
