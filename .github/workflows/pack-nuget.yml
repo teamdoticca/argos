@@ -1,10 +1,28 @@
 name: pack-nuget
 
+# Pack/publish only when package-relevant paths change (docs-only pushes skip this workflow).
+# Manual: workflow_dispatch. Release pin: tag v*.
 on:
   push:
     branches: [master, main]
     tags: ["v*"]
+    paths:
+      - "crates/**"
+      - "bindings/nuget/**"
+      - "scripts/pack-nuget.ps1"
+      - ".github/workflows/pack-nuget.yml"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "fixtures/**"
   pull_request:
+    paths:
+      - "crates/**"
+      - "bindings/nuget/**"
+      - "scripts/pack-nuget.ps1"
+      - ".github/workflows/pack-nuget.yml"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "fixtures/**"
   workflow_dispatch:
     inputs:
       publish:
@@ -192,8 +210,8 @@ jobs:
           - **Feed:** `https://nuget.pkg.github.com/teamdoticca/index.json`
           - **Org packages:** https://github.com/orgs/teamdoticca/packages
 
-          Main pushes publish as ``{csproj Version}.{GITHUB_RUN_NUMBER}`` (unique per run).
-          Tags ``v*`` publish the exact tag version.
+          Main pushes publish as ``{csproj Version}.{GITHUB_RUN_NUMBER}`` when package-relevant paths change (docs-only skips this workflow).
+          Tags ``v*`` publish the exact tag version. Manual: ``workflow_dispatch``.
 
           ### Consumer NuGet.config
 

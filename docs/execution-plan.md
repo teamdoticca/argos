@@ -6,7 +6,7 @@ Live status. Update on every meaningful progress.
 
 - **Active epic:** none
 - **Status:** m16 complete; NuGet CI publishes on main
-- **Last update:** 2026-09-02 — `pack-nuget` auto-publishes to GitHub Packages on push to `main`/`master` with version `{csproj}.{run_number}`
+- **Last update:** 2026-09-02 — `pack-nuget` path-filtered: docs/README-only pushes skip pack/publish; package paths still auto-publish `{csproj}.{run}` on main
 
 ## Completed
 
