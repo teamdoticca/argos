@@ -27,6 +27,7 @@ English only. Update this file on every epic status change.
 | m13 NuGet Wrapper | [done/m13-nuget-wrapper](done/m13-nuget-wrapper/) | done |
 | m14 Benchmark Suite | [done/m14-benchmark-suite](done/m14-benchmark-suite/) | done |
 | m15 NuGet Pack & CI | [done/m15-nuget-pack-ci](done/m15-nuget-pack-ci/) | done |
+| m16 Monorepo discovery parity | [done/m16-monorepo-discovery-parity](done/m16-monorepo-discovery-parity/) | done |
 
 ## Done
 
@@ -46,6 +47,7 @@ English only. Update this file on every epic status change.
 - [m13-nuget-wrapper](done/m13-nuget-wrapper/)
 - [m14-benchmark-suite](done/m14-benchmark-suite/)
 - [m15-nuget-pack-ci](done/m15-nuget-pack-ci/)
+- [m16-monorepo-discovery-parity](done/m16-monorepo-discovery-parity/)
 
 ## Deferred
 
@@ -56,7 +58,7 @@ English only. Update this file on every epic status change.
 - WorkspaceDependencyGraph
 - Watchman compatibility
 - Pluggable strategies (`sparse-root`, `hybrid-poll`)
-- Nx / Turborepo / go.work / `.sln`
+- Nx / Turborepo / go.work
 - Extra `.workspace` fields beyond `imports:`
 - Snapshot persistence (`argos snapshot save` / `load`)
 - NuGet.org public listing (after GitHub Packages dogfood)

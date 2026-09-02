@@ -63,7 +63,11 @@ impl WatchBackend for WindowsBackend {
             let mut roots = Vec::new();
             for scope in scopes {
                 for rel in &scope.watch {
-                    let path = PathBuf::from(&scope.root).join(rel);
+                    let path = if rel == "." {
+                        PathBuf::from(&scope.root)
+                    } else {
+                        PathBuf::from(&scope.root).join(rel)
+                    };
                     if path.is_dir() {
                         watcher
                             .watch(&path, RecursiveMode::Recursive)

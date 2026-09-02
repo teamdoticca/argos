@@ -5,13 +5,19 @@ use argos_core::{
     workspace_health, OpenOptions, Workspace,
 };
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 fn write(path: &Path, content: &str) {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent).unwrap();
     }
     fs::write(path, content).unwrap();
+}
+
+fn fixture(name: &str) -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../../fixtures")
+        .join(name)
 }
 
 #[test]
@@ -44,11 +50,74 @@ fn discovers_cargo_workspace() {
         &root.join("Cargo.toml"),
         "[workspace]\nmembers = [\"crates/*\"]\n",
     );
-    write(&root.join("crates/foo/Cargo.toml"), "[package]\nname=\"foo\"\nversion=\"0.1.0\"\n");
+    write(
+        &root.join("crates/foo/Cargo.toml"),
+        "[package]\nname=\"foo\"\nversion=\"0.1.0\"\n",
+    );
     write(&root.join("crates/foo/src/lib.rs"), "");
 
     let topo = discover_topology(root).unwrap();
     assert!(topo.nodes.iter().any(|n| n.id == "foo"));
+}
+
+#[test]
+fn discovers_nested_npm_without_workspace_root() {
+    let root = fixture("nested-npm");
+    assert!(root.is_dir(), "missing fixture {}", root.display());
+    let topo = discover_topology(&root).unwrap();
+    assert!(
+        topo.nodes
+            .iter()
+            .any(|n| n.id == "web" && n.source.provider == "npm-nested"),
+        "expected nested web package, got {:?}",
+        topo.nodes
+            .iter()
+            .map(|n| (&n.id, &n.source.provider))
+            .collect::<Vec<_>>()
+    );
+    let ws = Workspace::open(&root, OpenOptions::default()).unwrap();
+    let snap = ws.current_snapshot();
+    assert!(
+        !list_scopes(&snap).is_empty(),
+        "nested-npm must plan non-empty scopes"
+    );
+}
+
+#[test]
+fn discovers_dotnet_sln_and_csproj() {
+    let root = fixture("dotnet-sln");
+    assert!(root.is_dir(), "missing fixture {}", root.display());
+    let topo = discover_topology(&root).unwrap();
+    assert!(
+        topo.nodes.iter().any(|n| n.id == "App"),
+        "expected App csproj node, got {:?}",
+        topo.nodes.iter().map(|n| &n.id).collect::<Vec<_>>()
+    );
+    assert!(topo.nodes.iter().any(|n| {
+        n.source.provider == "dotnet-sln" || n.source.provider == "dotnet-csproj"
+    }));
+    let ws = Workspace::open(&root, OpenOptions::default()).unwrap();
+    let snap = ws.current_snapshot();
+    let scopes = list_scopes(&snap);
+    assert!(!scopes.is_empty(), "dotnet-sln must plan non-empty scopes");
+}
+
+#[test]
+fn fixture_small_pnpm_still_discovers() {
+    let root = fixture("small-pnpm");
+    assert!(root.is_dir(), "missing fixture {}", root.display());
+    let topo = discover_topology(&root).unwrap();
+    assert!(topo
+        .nodes
+        .iter()
+        .any(|n| n.id == "app" || n.root.ends_with("app")));
+    assert!(topo
+        .nodes
+        .iter()
+        .any(|n| n.id == "lib" || n.root.ends_with("lib")));
+    let ws = Workspace::open(&root, OpenOptions::default()).unwrap();
+    let snap = ws.current_snapshot();
+    assert!(!list_scopes(&snap).is_empty());
 }
 
 #[test]
@@ -145,4 +214,22 @@ fn find_owner_prefers_deepest_node() {
     let snap = ws.current_snapshot();
     let owner = find_owner(&snap, &root.join("packages/lib/src/a.ts")).unwrap();
     assert_eq!(owner.node_id, "lib");
+}
+
+#[test]
+fn empty_tree_gets_explicit_fallback_root() {
+    let dir = tempfile::tempdir().unwrap();
+    let root = dir.path();
+    write(&root.join("README.md"), "empty-ish");
+    let topo = discover_topology(root).unwrap();
+    assert!(topo
+        .nodes
+        .iter()
+        .any(|n| n.source.provider == "fallback-root"));
+    let ws = Workspace::open(root, OpenOptions::default()).unwrap();
+    let snap = ws.current_snapshot();
+    assert!(
+        !list_scopes(&snap).is_empty(),
+        "fallback-root must still yield a watch plan"
+    );
 }

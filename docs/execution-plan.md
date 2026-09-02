@@ -5,8 +5,8 @@ Live status. Update on every meaningful progress.
 ## Current
 
 - **Active epic:** none
-- **Status:** m15 complete
-- **Last update:** 2026-09-02 — NuGet pack/CI shipped (win-x64); Mnemon can PackageReference
+- **Status:** m16 complete; NuGet CI publishes on main
+- **Last update:** 2026-09-02 — `pack-nuget` auto-publishes to GitHub Packages on push to `main`/`master` with version `{csproj}.{run_number}`
 
 ## Completed
 
@@ -30,19 +30,25 @@ Live status. Update on every meaningful progress.
 
 Path: [docs/done/m15-nuget-pack-ci](done/m15-nuget-pack-ci/)
 
-- [x] Charter + gitignore for `artifacts/`
-- [x] `scripts/pack-nuget.ps1` (cargo → stage `argos_ffi.dll` → pack)
-- [x] CI `.github/workflows/pack-nuget.yml` (test, pack, artifact, smoke; optional Packages push)
-- [x] Smoke PackageReference consumer (`bindings/nuget/smoke`)
-- [x] Publish/versioning docs (`0.1.1`; GitHub Packages on tag/`workflow_dispatch`)
+- Pack/CI for win-x64; native `argos_ffi.dll`; GitHub Packages dogfood
 
-**Note:** Native library is `argos_ffi.dll` (not `argos.dll`) to avoid colliding with managed `Argos.dll` on Windows.
+### m16-monorepo-discovery-parity (done)
+
+Path: [docs/done/m16-monorepo-discovery-parity](done/m16-monorepo-discovery-parity/)
+
+- [x] Root cause: root-only manifests missed Mnemon nested npm + .NET
+- [x] Providers: `npm-nested`, `dotnet-sln`, `dotnet-csproj`; `fallback-root` when still empty
+- [x] Planner: package-root `.` when no conventional watch dirs; backends treat `.`
+- [x] Fixtures: `nested-npm`, `dotnet-sln`; `small-pnpm` regression
+- [x] Mnemon smoke: scopes > 0; watch on `mnemon-web` file edit
+- [x] NuGet `Argos` **0.1.2** at `artifacts/nuget/Argos.0.1.2.nupkg`
 
 ## Next
 
-1. Mnemon integration spike (PackageReference `Argos` 0.1.x, win-x64)
-2. linux-x64 / osx-arm64 pack matrix
-3. Optional NuGet.org listing after dogfood
+1. Push m16 + CI publish change to `main` → Packages gets `0.1.2.<run>` automatically
+2. Mnemon PackageReference that published 4-part version (win-x64)
+3. linux-x64 / osx-arm64 pack matrix
+4. Optional NuGet.org listing after dogfood
 
 ## Blockers
 

@@ -62,6 +62,22 @@ fn discover_watch_roots(node_root: &Path, ignore: &IgnoreEngine) -> Vec<String> 
             watch.push((*name).to_string());
         }
     }
+    // Include .csproj manifests at package root (.NET).
+    if let Ok(rd) = std::fs::read_dir(node_root) {
+        for e in rd.flatten() {
+            let path = e.path();
+            if path
+                .extension()
+                .and_then(|x| x.to_str())
+                .is_some_and(|x| x.eq_ignore_ascii_case("csproj"))
+            {
+                let name = e.file_name().to_string_lossy().to_string();
+                if !watch.iter().any(|w| w == &name) {
+                    watch.push(name);
+                }
+            }
+        }
+    }
     if let Ok(rd) = std::fs::read_dir(node_root) {
         for e in rd.flatten() {
             let path = e.path();
@@ -82,6 +98,12 @@ fn discover_watch_roots(node_root: &Path, ignore: &IgnoreEngine) -> Vec<String> 
                 watch.push(name);
             }
         }
+    }
+
+    // Scoped package-root watch when no conventional dirs found (flat .NET, fallback-root, etc.).
+    // Recursive on the *package* root only — never a silent empty plan.
+    if watch.is_empty() && node_root.is_dir() && !ignore.is_ignored(node_root) {
+        watch.push(".".into());
     }
     watch
 }
@@ -116,7 +138,13 @@ pub fn absolute_watch_paths(scope: &WatchScope) -> Vec<PathBuf> {
     scope
         .watch
         .iter()
-        .map(|w| root.join(w))
+        .map(|w| {
+            if w == "." {
+                root.clone()
+            } else {
+                root.join(w)
+            }
+        })
         .filter(|p| p.exists())
         .collect()
 }

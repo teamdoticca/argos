@@ -22,10 +22,13 @@ Private/early API surface; Mnemon is the reference consumer; Packages auth alrea
 
 ## Versioning
 
-- Package version in `Argos.csproj` starts `0.1.0`
-- **Patch** (`0.1.x`): packaging, native rebuild, docs, CI
+- Package base version lives in `Argos.csproj` (e.g. `0.1.2`)
+- **Patch** (`0.1.x`): packaging, native rebuild, discovery fixes, CI
 - **Minor** (`0.2.0`): public managed/C ABI change consumers must adopt
-- Align git tags: `nuget-v0.1.x` or `v0.1.x` — pick one convention in impl README
+- **CI on `main`/`master` push:** pack + publish as `{csproj Version}.{GITHUB_RUN_NUMBER}` (4-part, unique; NuGet `+metadata` is not unique)
+- **PR:** pack only as `{base}-pr.{run_number}` (no Packages publish)
+- **Tag `v*`:** pack + publish exact tag version (optional stable pin)
+- **workflow_dispatch:** publish only when ref is `main`/`master`
 
 `WorkspaceSnapshot.schemaVersion` is separate; include both in release notes.
 

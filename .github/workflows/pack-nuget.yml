@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       publish:
-        description: "Push nupkg to GitHub Packages after pack + smoke"
+        description: "Push nupkg to GitHub Packages after pack + smoke (main/master only)"
         type: boolean
         default: true
 
@@ -43,9 +43,41 @@ jobs:
       - name: Test argos-core
         run: cargo test -p argos-core
 
+      - name: Resolve pack version
+        id: packver
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $csproj = "bindings/nuget/Argos/Argos.csproj"
+          $raw = Get-Content $csproj -Raw
+          if ($raw -notmatch '<Version>([^<]+)</Version>') {
+            throw "Version missing in $csproj"
+          }
+          $base = $Matches[1].Trim()
+
+          $version = $base
+          if ($env:GITHUB_REF -match '^refs/tags/v(.+)$') {
+            # Explicit release tag → exact version from tag (no run suffix).
+            $version = $Matches[1]
+          }
+          elseif (
+            $env:GITHUB_EVENT_NAME -eq 'push' -and
+            ($env:GITHUB_REF -eq 'refs/heads/main' -or $env:GITHUB_REF -eq 'refs/heads/master')
+          ) {
+            # Main dogfood: unique immutable NuGet identity per CI run.
+            # NuGet build-metadata (+sha) is NOT unique — use 4th version component.
+            $version = "$base.$env:GITHUB_RUN_NUMBER"
+          }
+          elseif ($env:GITHUB_EVENT_NAME -eq 'pull_request') {
+            $version = "$base-pr.$env:GITHUB_RUN_NUMBER"
+          }
+
+          "version=$version" >> $env:GITHUB_OUTPUT
+          Write-Host "Pack version: $version (base=$base)"
+
       - name: Pack NuGet (win-x64)
         shell: pwsh
-        run: ./scripts/pack-nuget.ps1 -Rid win-x64
+        run: ./scripts/pack-nuget.ps1 -Rid win-x64 -Version "${{ steps.packver.outputs.version }}"
 
       - name: Resolve package version
         id: version
@@ -60,6 +92,10 @@ jobs:
             throw "unexpected nupkg name $($nupkg.Name)"
           }
           $version = $Matches[1]
+          $expected = "${{ steps.packver.outputs.version }}"
+          if ($version -ne $expected) {
+            throw "nupkg version '$version' != pack version '$expected'"
+          }
           "version=$version" >> $env:GITHUB_OUTPUT
           "nupkg=$($nupkg.Name)" >> $env:GITHUB_OUTPUT
           Write-Host "Resolved Argos $version ($($nupkg.Name))"
@@ -93,9 +129,13 @@ jobs:
   publish-github-packages:
     name: Publish GitHub Packages
     needs: pack-win-x64
+    # Auto-publish only from main/master pushes. Optional: tag releases + manual dispatch on main.
     if: >
-      (github.event_name == 'workflow_dispatch' && (inputs.publish == true || inputs.publish == 'true'))
+      (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'))
       || startsWith(github.ref, 'refs/tags/v')
+      || (github.event_name == 'workflow_dispatch'
+          && (inputs.publish == true || inputs.publish == 'true')
+          && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'))
     runs-on: windows-latest
     permissions:
       contents: read
@@ -152,6 +192,9 @@ jobs:
           - **Feed:** `https://nuget.pkg.github.com/teamdoticca/index.json`
           - **Org packages:** https://github.com/orgs/teamdoticca/packages
 
+          Main pushes publish as ``{csproj Version}.{GITHUB_RUN_NUMBER}`` (unique per run).
+          Tags ``v*`` publish the exact tag version.
+
           ### Consumer NuGet.config
 
           ``````xml
@@ -161,4 +204,5 @@ jobs:
           ``````
 
           Use a PAT with ``read:packages`` (and org access if the package is private).
+          Pin Mnemon to the published 4-part version from the Actions summary (or float carefully).
           "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8

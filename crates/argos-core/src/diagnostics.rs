@@ -140,7 +140,13 @@ fn path_in_scope(path: &Path, scope: &WatchScope) -> bool {
         return false;
     };
     let rel = rel.to_string_lossy().replace('\\', "/");
-    scope.watch.iter().any(|w| rel == *w || rel.starts_with(&format!("{w}/")))
+    scope.watch.iter().any(|w| {
+        // "." means the whole package root is in the watch plan.
+        if w == "." {
+            return true;
+        }
+        rel == *w || rel.starts_with(&format!("{w}/"))
+    })
 }
 
 pub fn explain_scope(snapshot: &WorkspaceSnapshot, scope_root: &str) -> ExplainScopeResult {

@@ -1,5 +1,7 @@
 mod cargo_ws;
+mod dotnet;
 mod git_submodules;
+mod nested_npm;
 mod npm;
 mod os_artifacts;
 mod pnpm;
@@ -39,7 +41,13 @@ pub fn discover_topology(root: &Path) -> Result<TopologyResult> {
     for n in npm::discover(root)? {
         push(n);
     }
+    for n in nested_npm::discover(root)? {
+        push(n);
+    }
     for n in cargo_ws::discover(root)? {
+        push(n);
+    }
+    for n in dotnet::discover(root)? {
         push(n);
     }
     for n in git_submodules::discover(root)? {
@@ -57,7 +65,22 @@ pub fn discover_topology(root: &Path) -> Result<TopologyResult> {
         .iter()
         .any(|n| !matches!(n.kind, crate::model::NodeKind::OsArtifact));
     if !has_topology {
-        if root.join("package.json").is_file() || root.join("Cargo.toml").is_file() {
+        // Last-resort heuristic: root package/cargo/.csproj/.sln markers only.
+        let root_csproj = std::fs::read_dir(root)
+            .ok()
+            .into_iter()
+            .flatten()
+            .flatten()
+            .any(|e| {
+                e.path()
+                    .extension()
+                    .and_then(|x| x.to_str())
+                    .is_some_and(|x| x.eq_ignore_ascii_case("csproj") || x.eq_ignore_ascii_case("sln"))
+            });
+        if root.join("package.json").is_file()
+            || root.join("Cargo.toml").is_file()
+            || root_csproj
+        {
             let mut node = WorkspaceNode {
                 id: root
                     .file_name()
@@ -79,6 +102,30 @@ pub fn discover_topology(root: &Path) -> Result<TopologyResult> {
             if seen.insert(key) {
                 nodes.push(node);
             }
+        }
+    }
+
+    let has_topology = nodes
+        .iter()
+        .any(|n| !matches!(n.kind, crate::model::NodeKind::OsArtifact));
+    if !has_topology {
+        // Explicit documented fallback — never leave Open with silent empty topology.
+        // Planner may emit package-root "." watch; ignore engine still applies.
+        let mut node = WorkspaceNode {
+            id: "workspace-root".into(),
+            kind: crate::model::NodeKind::Package,
+            root: root.to_path_buf(),
+            path_identity: blank_identity(),
+            source: crate::model::DiscoverySource {
+                provider: "fallback-root".into(),
+                manifest: "none".into(),
+            },
+            confidence: crate::model::Confidence::Low,
+        };
+        node.path_identity = PathIdentity::from_path(&node.root, case_sensitive);
+        let key = node.path_identity.key.clone();
+        if seen.insert(key) {
+            nodes.push(node);
         }
     }
 
