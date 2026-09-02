@@ -4,9 +4,26 @@ Live status. Update on every meaningful progress.
 
 ## Current
 
-- **Active epic:** none (m00–m14 complete)
-- **Status:** done
-- **Last update:** 2026-09-02 — product implementation complete through m14
+- **Active epic:** none
+- **Next planned:** `m15-nuget-pack-ci` (pack + CI for consumable NuGet)
+- **Status:** planned (docs ready; implementation not started)
+- **Last update:** 2026-09-02 — added m15 NuGet pack & CI planning epic
+
+## Planned
+
+### m15-nuget-pack-ci (planned)
+
+Path: [docs/epics/m15-nuget-pack-ci](epics/m15-nuget-pack-ci/)
+
+- [ ] 01 Charter and pack contract
+- [ ] 02 Build/copy/pack scripts (PowerShell)
+- [ ] 03 CI win-x64 + nupkg artifact
+- [ ] 04 Consumer smoke (Open/Snapshot)
+- [ ] 05 Publish path (GitHub Packages) + versioning notes
+
+**Decisions locked in design:** local `artifacts/nuget` → GitHub Packages; win-x64 first; never commit natives; stay on `0.1.x`.
+
+**Handoff:** implement briefs 01→05 in order. Unblocks Mnemon Argos package hosting / monitor integration.
 
 ## Completed
 
@@ -32,15 +49,15 @@ Live status. Update on every meaningful progress.
 
 ### m13–m14 Packaging & benchmarks (done)
 
-- NuGet `Argos` C# wrapper over C ABI (`argos-ffi`)
+- NuGet `Argos` C# wrapper over C ABI (`argos-ffi`) — wrapper only; natives not yet packed
 - `argos-bench` harness + `fixtures/small-pnpm`
 
 ## Next
 
-1. Harden CI across win/linux/macos RIDs
-2. Pack and publish NuGet when ready
-3. Mnemon integration spike (reference consumer)
+1. Implement `m15-nuget-pack-ci` (briefs 01→05)
+2. Mnemon integration spike (reference consumer; depends on consumable nupkg)
+3. linux-x64 / osx-arm64 pack matrix (after win-x64)
 
 ## Blockers
 
-None.
+None for planning. Mnemon monitor work is **blocked on** m15 implementation (or temporary ProjectReference escape hatch).

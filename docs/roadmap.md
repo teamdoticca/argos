@@ -26,6 +26,7 @@ English only. Update this file on every epic status change.
 | m12 Platform Recovery | [done/m12-platform-recovery](done/m12-platform-recovery/) | done |
 | m13 NuGet Wrapper | [done/m13-nuget-wrapper](done/m13-nuget-wrapper/) | done |
 | m14 Benchmark Suite | [done/m14-benchmark-suite](done/m14-benchmark-suite/) | done |
+| m15 NuGet Pack & CI | [epics/m15-nuget-pack-ci](epics/m15-nuget-pack-ci/) | planned |
 
 ## Done
 
@@ -57,3 +58,4 @@ English only. Update this file on every epic status change.
 - Nx / Turborepo / go.work / `.sln`
 - Extra `.workspace` fields beyond `imports:`
 - Snapshot persistence (`argos snapshot save` / `load`)
+- NuGet.org public listing (after GitHub Packages dogfood)

@@ -1,5 +1,9 @@
 # Epics
 
-Active epic folders live here while in progress.
+Active and planned epic folders live here.
 
-All current-scope epics (m00–m14) are complete and archived under [`../done/`](../done/).
+| Epic | Status |
+|------|--------|
+| [m15-nuget-pack-ci](m15-nuget-pack-ci/) | planned |
+
+Completed epics are archived under [`../done/`](../done/).
