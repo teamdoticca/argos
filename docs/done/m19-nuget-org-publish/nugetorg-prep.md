@@ -58,4 +58,8 @@ Actions → **pack-nuget** → Run workflow:
 
 ## Status
 
-Policy created by human. Wiring lands with m19. First public push after merge + `NUGET_USER` secret.
+**Done.** First public publish: **Argos 0.1.4** — https://www.nuget.org/packages/Argos/0.1.4
+
+```bash
+dotnet add package Argos --version 0.1.4
+```

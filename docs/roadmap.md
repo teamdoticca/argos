@@ -30,7 +30,7 @@ English only. Update this file on every epic status change.
 | m16 Monorepo discovery parity | [done/m16-monorepo-discovery-parity](done/m16-monorepo-discovery-parity/) | done |
 | m17 TypeScript napi | [done/m17-typescript-napi](done/m17-typescript-napi/) | done |
 | m18 Document root discovery | [done/m18-document-root-discovery](done/m18-document-root-discovery/) | done |
-| m19 NuGet.org publish | [epics/m19-nuget-org-publish](epics/m19-nuget-org-publish/) | in_progress |
+| m19 NuGet.org publish | [done/m19-nuget-org-publish](done/m19-nuget-org-publish/) | done |
 
 ## Done
 
@@ -53,6 +53,7 @@ English only. Update this file on every epic status change.
 - [m16-monorepo-discovery-parity](done/m16-monorepo-discovery-parity/)
 - [m17-typescript-napi](done/m17-typescript-napi/)
 - [m18-document-root-discovery](done/m18-document-root-discovery/)
+- [m19-nuget-org-publish](done/m19-nuget-org-publish/)
 
 ## Deferred
 

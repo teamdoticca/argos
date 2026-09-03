@@ -16,8 +16,8 @@ Publish the **`Argos`** NuGet package to **nuget.org** with the same discipline 
 - [x] Root README .NET install primary path is nuget.org (`dotnet add package Argos`)
 - [x] No author code-signing certificate required
 - [x] `docs/roadmap.md` and `docs/execution-plan.md` updated on progress
-- [ ] First public publish via Actions (`registry=nugetorg`) after `NUGET_USER` secret
-- [ ] On completion, move this folder to `docs/done/m19-nuget-org-publish`
+- [x] First public publish via Actions (`registry=nugetorg`) after `NUGET_USER` secret — **Argos 0.1.4** on nuget.org
+- [x] On completion, move this folder to `docs/done/m19-nuget-org-publish`
 
 ## Out of scope
 

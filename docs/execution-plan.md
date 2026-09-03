@@ -4,9 +4,9 @@ Live status. Update on every meaningful progress.
 
 ## Current
 
-- **Active epic:** [m19-nuget-org-publish](epics/m19-nuget-org-publish/)
-- **Status:** in_progress — Trusted Publishing + CI wiring for nuget.org
-- **Last update:** 2026-09-03 — Closed m18; m19: pack-nuget dual registry + OIDC publish job
+- **Active epic:** none
+- **Status:** m19 complete — **Argos 0.1.4** on nuget.org
+- **Last update:** 2026-09-03 — Closed m19; public `dotnet add package Argos`
 
 ## Completed
 
@@ -53,13 +53,21 @@ Path: [docs/done/m18-document-root-discovery](done/m18-document-root-discovery/)
 - [x] Scored `document-root` + `guidance-path` discovery
 - [x] Shallow docs root preference; release line `0.1.4`
 
+### m19-nuget-org-publish (done)
+
+Path: [docs/done/m19-nuget-org-publish](done/m19-nuget-org-publish/)
+
+- [x] Trusted Publishing OIDC + dual-registry `pack-nuget`
+- [x] Gallery metadata + README primary install via nuget.org
+- [x] Public **Argos 0.1.4** — https://www.nuget.org/packages/Argos/0.1.4
+
 ## Next
 
-1. Finish **m19** — first nuget.org publish after `NUGET_USER` secret + dispatch `registry=nugetorg`
-2. Optional: npm Trusted Publishing (OIDC) and revoke long-lived `NPM_TOKEN`
-3. Optional: MCP wrapper epic (`npx` / Cursor tools on `@teamdoticca/argos`)
-4. linux-x64 / osx-arm64 NuGet RID matrix
+1. Optional: npm Trusted Publishing (OIDC) and revoke long-lived `NPM_TOKEN`
+2. Optional: MCP wrapper epic (`npx` / Cursor tools on `@teamdoticca/argos`)
+3. linux-x64 / osx-arm64 NuGet RID matrix
+4. Mnemon PackageReference from nuget.org (`0.1.4`) dogfood
 
 ## Blockers
 
-- GitHub Actions secret `NUGET_USER` (nuget.org profile username) required before first public push
+None.

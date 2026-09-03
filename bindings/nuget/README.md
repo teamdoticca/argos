@@ -48,7 +48,7 @@ CI workflow: `.github/workflows/pack-nuget.yml`
 | `workflow_dispatch` `registry=nugetorg` | yes | no | yes (exact `{base}`, OIDC) |
 | `workflow_dispatch` `registry=both` | yes | yes | yes |
 
-nuget.org uses **Trusted Publishing** (`NuGet/login@v1`). See [nugetorg-prep.md](../../docs/epics/m19-nuget-org-publish/nugetorg-prep.md).
+nuget.org uses **Trusted Publishing** (`NuGet/login@v1`). See [nugetorg-prep.md](../../docs/done/m19-nuget-org-publish/nugetorg-prep.md).
 
 ### Dogfood feed (optional)
 
