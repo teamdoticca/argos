@@ -154,12 +154,15 @@ jobs:
         working-directory: bindings/npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm publish --access restricted --registry https://npm.pkg.github.com
+        run: |
+          # npm requires an explicit dist-tag for prerelease versions (e.g. 0.1.5-ci.12).
+          npm publish --access restricted --tag ci --registry https://npm.pkg.github.com
 
       - name: Summary
         run: |
           echo "## @teamdoticca/argos → GitHub Packages" >> "$GITHUB_STEP_SUMMARY"
           echo "- Version: \`${NPM_VERSION}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Dist-tag: \`ci\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- Registry: https://npm.pkg.github.com" >> "$GITHUB_STEP_SUMMARY"
 
   publish-npmjs:
