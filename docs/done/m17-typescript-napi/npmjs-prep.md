@@ -31,8 +31,8 @@ npm install @teamdoticca/argos
 
 | Feed | When | Version shape |
 |------|------|----------------|
-| GitHub Packages | Every main push (path-filtered) | `{base}-ci.{run}` e.g. `0.1.3-ci.42` |
-| **npmjs** | Explicit only (`workflow_dispatch`) | Semver **`0.1.3`** (same base as NuGet/Cargo) — **no** `-ci.*` spam |
+| GitHub Packages | Every main push (path-filtered) | `{base}-ci.{run}` e.g. `0.1.4-ci.42` |
+| **npmjs** | Explicit only (`workflow_dispatch`) | Semver **`0.1.4`** (same base as NuGet/Cargo) — **no** `-ci.*` spam |
 
 ## Repo wiring
 

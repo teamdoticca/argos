@@ -6,7 +6,8 @@ Live status. Update on every meaningful progress.
 
 - **Active epic:** [m18-document-root-discovery](epics/m18-document-root-discovery/)
 - **Status:** in_progress — core discovery + planner + tests green; ready to close
-- **Last update:** 2026-09-03 — m18 impl green; release line synced to **0.1.3** (Cargo / NuGet / npm)
+- **Last update:** 2026-09-03 — Fix: prefer shallow `docs/` over `docs/done|roadmap`; Mnemon Focused must treat watch `.` as scope root
+
 
 
 ## Completed

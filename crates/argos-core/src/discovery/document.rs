@@ -145,7 +145,12 @@ pub fn discover(root: &Path, existing: &[WorkspaceNode]) -> Result<Vec<Workspace
         }
     }
 
-    scored.sort_by(|a, b| b.1.cmp(&a.1).then_with(|| a.0.cmp(&b.0)));
+    scored.sort_by(|a, b| {
+        let da = path_depth(root, &a.0);
+        let db = path_depth(root, &b.0);
+        // Prefer shallower document roots (docs/ over docs/done), then higher score.
+        da.cmp(&db).then_with(|| b.1.cmp(&a.1)).then_with(|| a.0.cmp(&b.0))
+    });
 
     let mut out = Vec::new();
     let mut emitted_roots: HashSet<PathBuf> = HashSet::new();
@@ -154,7 +159,7 @@ pub fn discover(root: &Path, existing: &[WorkspaceNode]) -> Result<Vec<Workspace
         if doc_count >= 2 {
             break;
         }
-        // Skip if nested under an already chosen stronger document root.
+        // Skip if nested under an already chosen document root (parent won).
         if emitted_roots.iter().any(|r| dir.starts_with(r) && dir != *r) {
             continue;
         }
@@ -176,6 +181,10 @@ pub fn discover(root: &Path, existing: &[WorkspaceNode]) -> Result<Vec<Workspace
     guidance_dir_list.sort();
     for dir in guidance_dir_list {
         if emitted_roots.contains(&dir) {
+            continue;
+        }
+        // Covered by a document-root ancestor (e.g. docs/ already watches recursively).
+        if emitted_roots.iter().any(|r| dir.starts_with(r)) {
             continue;
         }
         if dir == root {
@@ -268,6 +277,12 @@ fn make_node(
         },
         confidence,
     }
+}
+
+fn path_depth(workspace: &Path, dir: &Path) -> usize {
+    dir.strip_prefix(workspace)
+        .map(|p| p.components().count())
+        .unwrap_or(usize::MAX)
 }
 
 fn confidence_from_score(score: i32) -> Confidence {
@@ -585,6 +600,33 @@ mod tests {
             fs::create_dir_all(parent).unwrap();
         }
         fs::write(path, content).unwrap();
+    }
+
+    #[test]
+    fn prefers_shallow_docs_over_dense_children() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path();
+        write(&root.join("docs/roadmap.md"), "# Roadmap\n");
+        write(&root.join("docs/architecture.md"), "# Arch\n");
+        write(&root.join("docs/done/old-epic.md"), "# Done\n");
+        write(&root.join("docs/done/another.md"), "# Done2\n");
+        write(&root.join("docs/done/third.md"), "# Done3\n");
+        write(&root.join("docs/roadmap/detail.md"), "# Detail\n");
+
+        let nodes = discover(root, &[]).unwrap();
+        let docs_nodes: Vec<_> = nodes
+            .iter()
+            .filter(|n| n.source.provider == "document-root")
+            .collect();
+        assert!(
+            docs_nodes.iter().any(|n| n.root == root.join("docs")),
+            "expected top-level docs/ document-root, got {:?}",
+            docs_nodes.iter().map(|n| &n.root).collect::<Vec<_>>()
+        );
+        assert!(
+            !docs_nodes.iter().any(|n| n.root.ends_with("done")),
+            "must not prefer docs/done over docs/"
+        );
     }
 
     #[test]

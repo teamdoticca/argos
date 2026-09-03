@@ -56,7 +56,7 @@ dotnet nuget add source https://nuget.pkg.github.com/teamdoticca/index.json `
 2. Reference a published version (pick the latest from the packages page, or float a line you trust):
 
 ```xml
-<PackageReference Include="Argos" Version="0.1.3.*" />
+<PackageReference Include="Argos" Version="0.1.4.*" />
 ```
 
 3. Run / publish your host as **win-x64** so `runtimes/win-x64/native/argos_ffi.dll` is available (`DllImport("argos_ffi")`).
