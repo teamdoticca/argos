@@ -57,7 +57,7 @@ Natives are **never** committed. Smoke: `bindings/nuget/smoke/` (`--watch` for w
 |-----|-----------------|-------|
 | `win-x64` | `argos_ffi.dll` | Required |
 | `osx-arm64` | `libargos_ffi.dylib` | Apple Silicon |
-| `osx-x64` | `libargos_ffi.dylib` | Intel Mac |
+| `osx-x64` | `libargos_ffi.dylib` | Intel Mac — built + packed; PR smoke deferred (no dedicated Intel runner) |
 | `linux-x64` | `libargos_ffi.so` | **glibc** (`x86_64-unknown-linux-gnu`) |
 | `linux-arm64` | `libargos_ffi.so` | **glibc** (`aarch64-unknown-linux-gnu`) |
 
