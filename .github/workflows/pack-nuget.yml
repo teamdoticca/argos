@@ -2,6 +2,7 @@ name: pack-nuget
 
 # Pack/publish only when package-relevant paths change (docs-only pushes skip this workflow).
 # Manual: workflow_dispatch. Release pin: tag v*.
+# nuget.org: explicit dispatch only (Trusted Publishing OIDC) — never auto on main.
 on:
   push:
     branches: [master, main]
@@ -26,9 +27,17 @@ on:
   workflow_dispatch:
     inputs:
       publish:
-        description: "Push nupkg to GitHub Packages after pack + smoke (main/master only)"
+        description: "Publish after pack + smoke"
         type: boolean
         default: true
+      registry:
+        description: "Publish target (GitHub Packages dogfood vs public nuget.org)"
+        type: choice
+        options:
+          - github
+          - nugetorg
+          - both
+        default: github
 
 concurrency:
   group: pack-nuget-${{ github.workflow }}-${{ github.ref }}
@@ -43,6 +52,7 @@ jobs:
     outputs:
       package_version: ${{ steps.version.outputs.version }}
       nupkg_name: ${{ steps.version.outputs.nupkg }}
+      base_version: ${{ steps.packver.outputs.base }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -89,8 +99,10 @@ jobs:
           elseif ($env:GITHUB_EVENT_NAME -eq 'pull_request') {
             $version = "$base-pr.$env:GITHUB_RUN_NUMBER"
           }
+          # workflow_dispatch → exact $base (safe for nuget.org public semver)
 
           "version=$version" >> $env:GITHUB_OUTPUT
+          "base=$base" >> $env:GITHUB_OUTPUT
           Write-Host "Pack version: $version (base=$base)"
 
       - name: Pack NuGet (win-x64)
@@ -147,13 +159,13 @@ jobs:
   publish-github-packages:
     name: Publish GitHub Packages
     needs: pack-win-x64
-    # Auto-publish only from main/master pushes. Optional: tag releases + manual dispatch on main.
     if: >
       (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'))
       || startsWith(github.ref, 'refs/tags/v')
       || (github.event_name == 'workflow_dispatch'
           && (inputs.publish == true || inputs.publish == 'true')
-          && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'))
+          && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+          && (inputs.registry == 'github' || inputs.registry == 'both' || inputs.registry == ''))
     runs-on: windows-latest
     permissions:
       contents: read
@@ -185,7 +197,6 @@ jobs:
 
           foreach ($pkg in $nupkgs) {
             Write-Host "Pushing $($pkg.FullName) -> $source"
-            # GitHub Packages accepts GITHUB_TOKEN as api-key; --skip-duplicate keeps re-runs safe.
             & dotnet nuget push $pkg.FullName `
               --source $source `
               --api-key $env:NUGET_AUTH_TOKEN `
@@ -203,24 +214,124 @@ jobs:
         shell: pwsh
         run: |
           @"
-          ## Argos NuGet published
+          ## Argos → GitHub Packages
 
           - **Version:** `${{ needs.pack-win-x64.outputs.package_version }}`
           - **File:** `${{ needs.pack-win-x64.outputs.nupkg_name }}`
           - **Feed:** `https://nuget.pkg.github.com/teamdoticca/index.json`
           - **Org packages:** https://github.com/orgs/teamdoticca/packages
 
-          Main pushes publish as ``{csproj Version}.{GITHUB_RUN_NUMBER}`` when package-relevant paths change (docs-only skips this workflow).
-          Tags ``v*`` publish the exact tag version. Manual: ``workflow_dispatch``.
+          Main pushes publish as ``{csproj Version}.{GITHUB_RUN_NUMBER}``.
+          Tags ``v*`` and manual github/both dispatch publish the packed version.
+          "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8
 
-          ### Consumer NuGet.config
+  publish-nuget-org:
+    name: Publish nuget.org
+    needs: pack-win-x64
+    # Explicit only — never auto-publish CI 4-part versions to the public gallery.
+    if: >
+      github.event_name == 'workflow_dispatch'
+      && (inputs.publish == true || inputs.publish == 'true')
+      && (inputs.registry == 'nugetorg' || inputs.registry == 'both')
+      && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    runs-on: windows-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-          ``````xml
-          <packageSources>
-            <add key="github-argos" value="https://nuget.pkg.github.com/teamdoticca/index.json" />
-          </packageSources>
-          ``````
+      - name: Install Rust stable (MSVC)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          targets: x86_64-pc-windows-msvc
 
-          Use a PAT with ``read:packages`` (and org access if the package is private).
-          Pin Mnemon to the published 4-part version from the Actions summary (or float carefully).
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Resolve exact public version
+        id: pubver
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $packed = "${{ needs.pack-win-x64.outputs.package_version }}"
+          $base = "${{ needs.pack-win-x64.outputs.base_version }}"
+          if ([string]::IsNullOrWhiteSpace($base)) {
+            $raw = Get-Content bindings/nuget/Argos/Argos.csproj -Raw
+            if ($raw -notmatch '<Version>([^<]+)</Version>') { throw "Version missing" }
+            $base = $Matches[1].Trim()
+          }
+          # nuget.org must get exact semver (csproj base). Reject accidental 4-part CI ids.
+          if ($packed -eq $base) {
+            $version = $packed
+            $needRepack = 'false'
+          } else {
+            Write-Host "Packed version $packed differs from base $base — re-packing for nuget.org"
+            $version = $base
+            $needRepack = 'true'
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "need_repack=$needRepack" >> $env:GITHUB_OUTPUT
+          Write-Host "nuget.org version: $version (repack=$needRepack)"
+
+      - name: Download packed nupkg
+        if: steps.pubver.outputs.need_repack != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: argos-nuget-win-x64
+          path: artifacts/nuget
+
+      - name: Re-pack exact base for nuget.org
+        if: steps.pubver.outputs.need_repack == 'true'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          Remove-Item -Recurse -Force artifacts/nuget -ErrorAction SilentlyContinue
+          ./scripts/pack-nuget.ps1 -Rid win-x64 -Version "${{ steps.pubver.outputs.version }}"
+
+      - name: NuGet login (OIDC → temp API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          # nuget.org profile username (not email). Set repo secret NUGET_USER.
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Publish (public, nuget.org)
+        shell: pwsh
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          if ([string]::IsNullOrWhiteSpace($env:NUGET_API_KEY)) {
+            throw "NUGET_API_KEY missing — check Trusted Publishing policy + secrets.NUGET_USER"
+          }
+          $nupkgs = @(Get-ChildItem artifacts/nuget -Filter "Argos.*.nupkg")
+          if ($nupkgs.Count -eq 0) { throw "no nupkg for nuget.org publish" }
+          $source = "https://api.nuget.org/v3/index.json"
+          foreach ($pkg in $nupkgs) {
+            Write-Host "Pushing $($pkg.Name) -> nuget.org"
+            & dotnet nuget push $pkg.FullName `
+              --source $source `
+              --api-key $env:NUGET_API_KEY `
+              --skip-duplicate
+            if ($LASTEXITCODE -ne 0) {
+              throw "dotnet nuget push failed for $($pkg.Name) (exit $LASTEXITCODE)"
+            }
+          }
+
+      - name: Summary
+        shell: pwsh
+        run: |
+          @"
+          ## Argos → nuget.org
+
+          - **Version:** `${{ steps.pubver.outputs.version }}`
+          - **Install:** ``dotnet add package Argos --version ${{ steps.pubver.outputs.version }}``
+          - **Gallery:** https://www.nuget.org/packages/Argos
+          - **Auth:** Trusted Publishing (OIDC) via ``NuGet/login@v1``
+          - **Prep:** ``docs/epics/m19-nuget-org-publish/nugetorg-prep.md``
           "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8

@@ -6,13 +6,19 @@
     <PackageId>Argos</PackageId>
     <Version>0.1.4</Version>
     <Authors>Doticca</Authors>
-    <Description>Argos workspace intelligence engine (.NET wrapper)</Description>
+    <Company>Doticca</Company>
+    <Description>Argos workspace intelligence engine (.NET wrapper). Opens a repo root and answers what parts of the workspace matter right now via an immutable WorkspaceSnapshot.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/teamdoticca/argos</PackageProjectUrl>
     <RepositoryUrl>https://github.com/teamdoticca/argos</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>PackageReadme.md</PackageReadmeFile>
+    <PackageTags>argos;workspace;monorepo;watch;dotnet;intelligence</PackageTags>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>Argos</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="PackageReadme.md" Pack="true" PackagePath="\" />
     <!-- Pack only RID native binaries; keep README out of the nupkg runtimes tree. -->
     <None Include="runtimes\**\native\*" Pack="true" PackagePath="runtimes\" />
   </ItemGroup>

@@ -19,7 +19,7 @@ During the initial topology scan, Argos must discover important **document root(
 - [x] Argos self-repo: Open → scopes include planning tree and guidance-cited agent surfaces (watch plan covers those roots)
 - [x] Existing package discovery (`small-pnpm`, nested npm, .NET, cargo) regressions stay green
 - [x] `docs/roadmap.md` and `docs/execution-plan.md` updated on progress
-- [ ] On completion, move this folder to `docs/done/m18-document-root-discovery`
+- [x] On completion, move this folder to `docs/done/m18-document-root-discovery`
 
 ## Out of scope
 

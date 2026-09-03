@@ -29,7 +29,8 @@ English only. Update this file on every epic status change.
 | m15 NuGet Pack & CI | [done/m15-nuget-pack-ci](done/m15-nuget-pack-ci/) | done |
 | m16 Monorepo discovery parity | [done/m16-monorepo-discovery-parity](done/m16-monorepo-discovery-parity/) | done |
 | m17 TypeScript napi | [done/m17-typescript-napi](done/m17-typescript-napi/) | done |
-| m18 Document root discovery | [epics/m18-document-root-discovery](epics/m18-document-root-discovery/) | in_progress |
+| m18 Document root discovery | [done/m18-document-root-discovery](done/m18-document-root-discovery/) | done |
+| m19 NuGet.org publish | [epics/m19-nuget-org-publish](epics/m19-nuget-org-publish/) | in_progress |
 
 ## Done
 
@@ -51,6 +52,7 @@ English only. Update this file on every epic status change.
 - [m15-nuget-pack-ci](done/m15-nuget-pack-ci/)
 - [m16-monorepo-discovery-parity](done/m16-monorepo-discovery-parity/)
 - [m17-typescript-napi](done/m17-typescript-napi/)
+- [m18-document-root-discovery](done/m18-document-root-discovery/)
 
 ## Deferred
 
@@ -63,7 +65,7 @@ English only. Update this file on every epic status change.
 - Nx / Turborepo / go.work
 - Extra `.workspace` fields beyond `imports:`
 - Snapshot persistence (`argos snapshot save` / `load`)
-- NuGet.org public listing (after GitHub Packages dogfood)
 - linux-x64 / osx-arm64 NuGet RID matrix
 - npm Trusted Publishing (OIDC; revoke long-lived NPM_TOKEN)
 - linux-arm64 / darwin-x64 / musl napi triples
+- Author NuGet package signing (code-signing certificates)

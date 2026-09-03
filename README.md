@@ -29,37 +29,19 @@ Typical consumers: IDE overlays, repo monitors, agent tooling (e.g. [Mnemon](htt
 
 ## Add Argos to your .NET project (win-x64)
 
-Package id: **`Argos`** (managed wrapper + native `argos_ffi` for **win-x64**).
+Package id: **`Argos`** on [nuget.org](https://www.nuget.org/packages/Argos) (managed wrapper + native `argos_ffi` for **win-x64**).
 
-Feed: GitHub Packages — [teamdoticca packages](https://github.com/orgs/teamdoticca/packages).
+```bash
+dotnet add package Argos
+```
 
-1. Add the source and authenticate with a GitHub PAT that has `read:packages` (org SSO if required):
+Or pin a version:
 
 ```xml
-<!-- NuGet.config -->
-<configuration>
-  <packageSources>
-    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
-    <add key="github-argos" value="https://nuget.pkg.github.com/teamdoticca/index.json" />
-  </packageSources>
-</configuration>
+<PackageReference Include="Argos" Version="0.1.4" />
 ```
 
-```powershell
-dotnet nuget add source https://nuget.pkg.github.com/teamdoticca/index.json `
-  --name github-argos `
-  --username YOUR_GITHUB_USERNAME `
-  --password YOUR_PAT `
-  --store-password-in-clear-text
-```
-
-2. Reference a published version (pick the latest from the packages page, or float a line you trust):
-
-```xml
-<PackageReference Include="Argos" Version="0.1.4.*" />
-```
-
-3. Run / publish your host as **win-x64** so `runtimes/win-x64/native/argos_ffi.dll` is available (`DllImport("argos_ffi")`).
+Run / publish your host as **win-x64** so `runtimes/win-x64/native/argos_ffi.dll` is available (`DllImport("argos_ffi")`).
 
 ```csharp
 using System.Text.Json;
@@ -79,6 +61,8 @@ await foreach (var changeJson in ws.WatchAsync())
     // refresh from ws.CurrentSnapshot when needed
 }
 ```
+
+Dogfood / CI builds also publish to [GitHub Packages](https://github.com/orgs/teamdoticca/packages) as `{version}.{run}` (PAT with `read:packages` required). Public releases use exact semver on nuget.org.
 
 ---
 

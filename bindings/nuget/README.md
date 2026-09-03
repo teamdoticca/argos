@@ -13,6 +13,14 @@ await foreach (var change in workspace.WatchAsync())
 }
 ```
 
+## Install (public)
+
+```bash
+dotnet add package Argos
+```
+
+Gallery: https://www.nuget.org/packages/Argos
+
 ## Pack (local)
 
 ```powershell
@@ -28,25 +36,27 @@ Cargo builds `argos_ffi.dll`; the pack script stages it under that same name for
 
 Natives are **never** committed. Smoke: `bindings/nuget/smoke/`.
 
-## Publish (GitHub Packages)
+## Publish
 
 CI workflow: `.github/workflows/pack-nuget.yml`
 
-| Trigger | Pack + smoke | Publish to GitHub Packages |
-|---------|--------------|----------------------------|
-| Push to `master` / PR | yes | no |
-| Tag `v*` (e.g. `v0.1.1`) | yes | yes |
-| Actions → **Run workflow** (`workflow_dispatch`, publish=true) | yes | yes |
+| Trigger | Pack + smoke | GitHub Packages | nuget.org |
+|---------|--------------|-----------------|-----------|
+| Push to `master` / PR | yes | yes on main (`{base}.{run}`) | no |
+| Tag `v*` | yes | yes (tag version) | no |
+| `workflow_dispatch` `registry=github` | yes | yes | no |
+| `workflow_dispatch` `registry=nugetorg` | yes | no | yes (exact `{base}`, OIDC) |
+| `workflow_dispatch` `registry=both` | yes | yes | yes |
 
-After publish, the package appears under the org packages page for `teamdoticca`.
+nuget.org uses **Trusted Publishing** (`NuGet/login@v1`). See [nugetorg-prep.md](../../docs/epics/m19-nuget-org-publish/nugetorg-prep.md).
 
-### Consumer feed
+### Dogfood feed (optional)
 
 ```text
 https://nuget.pkg.github.com/teamdoticca/index.json
 ```
 
-Needs a GitHub PAT with `read:packages` (and org SSO authorized if required).
+Needs a GitHub PAT with `read:packages`.
 
 ## RIDs
 
@@ -55,17 +65,6 @@ Needs a GitHub PAT with `read:packages` (and org SSO authorized if required).
 | `win-x64` | Current pack script + CI |
 | `linux-x64` | Deferred |
 | `osx-arm64` | Deferred |
-
-## Consume (Mnemon / dogfood)
-
-1. Pack or download CI artifact `argos-nuget-win-x64`
-2. Add a NuGet source to `artifacts/nuget` (or GitHub Packages)
-3. `<PackageReference Include="Argos" Version="0.1.x" />`
-4. Host RID `win-x64`
-
-### Rollback
-
-ProjectReference `bindings/nuget/Argos/Argos.csproj` and place `argos_ffi.dll` next to the host output.
 
 ## Versioning
 
