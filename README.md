@@ -27,9 +27,9 @@ Typical consumers: IDE overlays, repo monitors, agent tooling (e.g. [Mnemon](htt
 
 ---
 
-## Add Argos to your .NET project (win-x64)
+## Add Argos to your .NET project
 
-Package id: **`Argos`** on [nuget.org](https://www.nuget.org/packages/Argos) (managed wrapper + native `argos_ffi` for **win-x64**).
+Package id: **`Argos`** on [nuget.org](https://www.nuget.org/packages/Argos) (managed wrapper + multi-RID natives).
 
 ```bash
 dotnet add package Argos
@@ -38,10 +38,22 @@ dotnet add package Argos
 Or pin a version:
 
 ```xml
-<PackageReference Include="Argos" Version="0.1.4" />
+<PackageReference Include="Argos" Version="0.1.5" />
 ```
 
-Run / publish your host as **win-x64** so `runtimes/win-x64/native/argos_ffi.dll` is available (`DllImport("argos_ffi")`).
+Publish / run with a supported RID so natives resolve (`DllImport("argos_ffi")`):
+
+| RID | Native file |
+|-----|-------------|
+| `win-x64` | `argos_ffi.dll` |
+| `osx-arm64` / `osx-x64` | `libargos_ffi.dylib` |
+| `linux-x64` / `linux-arm64` | `libargos_ffi.so` (glibc) |
+
+```bash
+dotnet publish -r osx-arm64
+dotnet publish -r linux-x64
+dotnet publish -r win-x64
+```
 
 ```csharp
 using System.Text.Json;

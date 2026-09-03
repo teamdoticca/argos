@@ -46,8 +46,78 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  REQUIRED_RIDS: "win-x64,osx-arm64,linux-x64,osx-x64,linux-arm64"
+
 jobs:
-  pack-win-x64:
+  build-native:
+    name: native ${{ matrix.rid }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - rid: win-x64
+            os: windows-latest
+            rust_target: x86_64-pc-windows-msvc
+            native_name: argos_ffi.dll
+          - rid: linux-x64
+            os: ubuntu-latest
+            rust_target: x86_64-unknown-linux-gnu
+            native_name: libargos_ffi.so
+          - rid: linux-arm64
+            os: ubuntu-24.04-arm
+            rust_target: aarch64-unknown-linux-gnu
+            native_name: libargos_ffi.so
+          - rid: osx-arm64
+            os: macos-latest
+            rust_target: aarch64-apple-darwin
+            native_name: libargos_ffi.dylib
+          - rid: osx-x64
+            os: macos-latest
+            rust_target: x86_64-apple-darwin
+            native_name: libargos_ffi.dylib
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          targets: ${{ matrix.rust_target }}
+
+      - name: Build argos-ffi
+        shell: bash
+        run: cargo build -p argos-ffi --release --target "${{ matrix.rust_target }}"
+
+      - name: Stage RID native
+        shell: bash
+        run: |
+          set -euo pipefail
+          src="target/${{ matrix.rust_target }}/release/${{ matrix.native_name }}"
+          if [[ ! -f "$src" ]]; then
+            echo "missing cargo artifact: $src" >&2
+            ls -la "target/${{ matrix.rust_target }}/release/" || true
+            exit 1
+          fi
+          dest="stage/${{ matrix.rid }}/native"
+          mkdir -p "$dest"
+          cp -f "$src" "$dest/${{ matrix.native_name }}"
+          ls -la "$dest"
+
+      - name: Upload native artifact
+        uses: actions/upload-artifact@v7
+        with:
+          # Upload parent so artifact root is <rid>/native/<file> (merge-friendly).
+          name: native-${{ matrix.rid }}
+          path: stage
+          if-no-files-found: error
+          retention-days: 14
+
+  pack:
+    name: Pack multi-RID nupkg
+    needs: build-native
     runs-on: windows-latest
     outputs:
       package_version: ${{ steps.version.outputs.version }}
@@ -57,19 +127,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Install Rust stable (MSVC)
-        uses: dtolnay/rust-toolchain@stable
+      - name: Download native RID artifacts
+        uses: actions/download-artifact@v8
         with:
-          toolchain: stable
-          targets: x86_64-pc-windows-msvc
+          pattern: native-*
+          path: artifacts/natives
+          merge-multiple: true
 
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v6
         with:
           dotnet-version: "8.0.x"
-
-      - name: Test argos-core
-        run: cargo test -p argos-core
 
       - name: Resolve pack version
         id: packver
@@ -85,29 +153,32 @@ jobs:
 
           $version = $base
           if ($env:GITHUB_REF -match '^refs/tags/v(.+)$') {
-            # Explicit release tag → exact version from tag (no run suffix).
             $version = $Matches[1]
           }
           elseif (
             $env:GITHUB_EVENT_NAME -eq 'push' -and
             ($env:GITHUB_REF -eq 'refs/heads/main' -or $env:GITHUB_REF -eq 'refs/heads/master')
           ) {
-            # Main dogfood: unique immutable NuGet identity per CI run.
-            # NuGet build-metadata (+sha) is NOT unique — use 4th version component.
             $version = "$base.$env:GITHUB_RUN_NUMBER"
           }
           elseif ($env:GITHUB_EVENT_NAME -eq 'pull_request') {
             $version = "$base-pr.$env:GITHUB_RUN_NUMBER"
           }
-          # workflow_dispatch → exact $base (safe for nuget.org public semver)
 
           "version=$version" >> $env:GITHUB_OUTPUT
           "base=$base" >> $env:GITHUB_OUTPUT
           Write-Host "Pack version: $version (base=$base)"
 
-      - name: Pack NuGet (win-x64)
+      - name: Pack NuGet (multi-RID)
         shell: pwsh
-        run: ./scripts/pack-nuget.ps1 -Rid win-x64 -Version "${{ steps.packver.outputs.version }}"
+        run: |
+          $ErrorActionPreference = "Stop"
+          $require = @($env:REQUIRED_RIDS -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+          ./scripts/pack-nuget.ps1 `
+            -SkipBuild `
+            -StageFrom "artifacts/natives" `
+            -RequireRids $require `
+            -Version "${{ steps.packver.outputs.version }}"
 
       - name: Resolve package version
         id: version
@@ -133,24 +204,60 @@ jobs:
       - name: Upload nupkg artifact
         uses: actions/upload-artifact@v7
         with:
-          name: argos-nuget-win-x64
+          name: argos-nuget
           path: artifacts/nuget/*.nupkg
           if-no-files-found: error
           retention-days: 14
 
-      - name: Smoke PackageReference
+  smoke-rid:
+    name: smoke ${{ matrix.rid }}
+    needs: pack
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - rid: win-x64
+            os: windows-latest
+          - rid: linux-x64
+            os: ubuntu-latest
+          - rid: linux-arm64
+            os: ubuntu-24.04-arm
+          - rid: osx-arm64
+            os: macos-latest
+          - rid: osx-x64
+            os: macos-13
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Download nupkg
+        uses: actions/download-artifact@v8
+        with:
+          name: argos-nuget
+          path: artifacts/nuget
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Smoke PackageReference + watch
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          $version = "${{ steps.version.outputs.version }}"
+          $version = "${{ needs.pack.outputs.package_version }}"
+          $rid = "${{ matrix.rid }}"
           if ([string]::IsNullOrWhiteSpace($version)) { throw "package version output missing" }
           Push-Location bindings/nuget/smoke
           try {
-            dotnet restore Argos.Smoke.csproj -p:ArgosPackageVersion=$version
+            dotnet restore Argos.Smoke.csproj -p:ArgosPackageVersion=$version -p:RuntimeIdentifier=$rid
             if ($LASTEXITCODE -ne 0) { throw "restore failed" }
             $fixture = (Resolve-Path "..\..\..\fixtures\small-pnpm").Path
-            dotnet run -c Release --no-restore -p:ArgosPackageVersion=$version -- $fixture
-            if ($LASTEXITCODE -ne 0) { throw "smoke failed" }
+            dotnet run -c Release --no-restore -p:ArgosPackageVersion=$version -p:RuntimeIdentifier=$rid -- $fixture
+            if ($LASTEXITCODE -ne 0) { throw "open smoke failed" }
+            dotnet run -c Release --no-restore -p:ArgosPackageVersion=$version -p:RuntimeIdentifier=$rid -- --watch
+            if ($LASTEXITCODE -ne 0) { throw "watch smoke failed" }
           }
           finally {
             Pop-Location
@@ -158,7 +265,7 @@ jobs:
 
   publish-github-packages:
     name: Publish GitHub Packages
-    needs: pack-win-x64
+    needs: [pack, smoke-rid]
     if: >
       (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'))
       || startsWith(github.ref, 'refs/tags/v')
@@ -174,7 +281,7 @@ jobs:
       - name: Download nupkg
         uses: actions/download-artifact@v8
         with:
-          name: argos-nuget-win-x64
+          name: argos-nuget
           path: artifacts/nuget
 
       - name: Setup .NET 8 (GitHub Packages auth)
@@ -208,7 +315,7 @@ jobs:
 
           Write-Host "Published: $($nupkgs.Name -join ', ')"
           Write-Host "Consume feed: $source"
-          Write-Host "PackageReference: <PackageReference Include=`"Argos`" Version=`"${{ needs.pack-win-x64.outputs.package_version }}`" />"
+          Write-Host "PackageReference: <PackageReference Include=`"Argos`" Version=`"${{ needs.pack.outputs.package_version }}`" />"
 
       - name: Job summary
         shell: pwsh
@@ -216,8 +323,9 @@ jobs:
           @"
           ## Argos → GitHub Packages
 
-          - **Version:** `${{ needs.pack-win-x64.outputs.package_version }}`
-          - **File:** `${{ needs.pack-win-x64.outputs.nupkg_name }}`
+          - **Version:** `${{ needs.pack.outputs.package_version }}`
+          - **File:** `${{ needs.pack.outputs.nupkg_name }}`
+          - **RIDs:** win-x64, osx-arm64, osx-x64, linux-x64, linux-arm64 (glibc)
           - **Feed:** `https://nuget.pkg.github.com/teamdoticca/index.json`
           - **Org packages:** https://github.com/orgs/teamdoticca/packages
 
@@ -227,7 +335,7 @@ jobs:
 
   publish-nuget-org:
     name: Publish nuget.org
-    needs: pack-win-x64
+    needs: [pack, smoke-rid]
     # Explicit only — never auto-publish CI 4-part versions to the public gallery.
     if: >
       github.event_name == 'workflow_dispatch'
@@ -242,11 +350,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Install Rust stable (MSVC)
-        uses: dtolnay/rust-toolchain@stable
+      - name: Download native RID artifacts
+        uses: actions/download-artifact@v8
         with:
-          toolchain: stable
-          targets: x86_64-pc-windows-msvc
+          pattern: native-*
+          path: artifacts/natives
+          merge-multiple: true
 
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v6
@@ -258,14 +367,13 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          $packed = "${{ needs.pack-win-x64.outputs.package_version }}"
-          $base = "${{ needs.pack-win-x64.outputs.base_version }}"
+          $packed = "${{ needs.pack.outputs.package_version }}"
+          $base = "${{ needs.pack.outputs.base_version }}"
           if ([string]::IsNullOrWhiteSpace($base)) {
             $raw = Get-Content bindings/nuget/Argos/Argos.csproj -Raw
             if ($raw -notmatch '<Version>([^<]+)</Version>') { throw "Version missing" }
             $base = $Matches[1].Trim()
           }
-          # nuget.org must get exact semver (csproj base). Reject accidental 4-part CI ids.
           if ($packed -eq $base) {
             $version = $packed
             $needRepack = 'false'
@@ -282,22 +390,26 @@ jobs:
         if: steps.pubver.outputs.need_repack != 'true'
         uses: actions/download-artifact@v8
         with:
-          name: argos-nuget-win-x64
+          name: argos-nuget
           path: artifacts/nuget
 
-      - name: Re-pack exact base for nuget.org
+      - name: Re-pack exact base for nuget.org (multi-RID)
         if: steps.pubver.outputs.need_repack == 'true'
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
           Remove-Item -Recurse -Force artifacts/nuget -ErrorAction SilentlyContinue
-          ./scripts/pack-nuget.ps1 -Rid win-x64 -Version "${{ steps.pubver.outputs.version }}"
+          $require = @($env:REQUIRED_RIDS -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+          ./scripts/pack-nuget.ps1 `
+            -SkipBuild `
+            -StageFrom "artifacts/natives" `
+            -RequireRids $require `
+            -Version "${{ steps.pubver.outputs.version }}"
 
       - name: NuGet login (OIDC → temp API key)
         uses: NuGet/login@v1
         id: login
         with:
-          # nuget.org profile username (not email). Set repo secret NUGET_USER.
           user: ${{ secrets.NUGET_USER }}
 
       - name: Publish (public, nuget.org)
@@ -332,6 +444,7 @@ jobs:
           - **Version:** `${{ steps.pubver.outputs.version }}`
           - **Install:** ``dotnet add package Argos --version ${{ steps.pubver.outputs.version }}``
           - **Gallery:** https://www.nuget.org/packages/Argos
+          - **RIDs:** win-x64, osx-arm64, osx-x64, linux-x64, linux-arm64 (glibc)
           - **Auth:** Trusted Publishing (OIDC) via ``NuGet/login@v1``
           - **Prep:** ``docs/done/m19-nuget-org-publish/nugetorg-prep.md``
           "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8

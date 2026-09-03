@@ -31,6 +31,7 @@ English only. Update this file on every epic status change.
 | m17 TypeScript napi | [done/m17-typescript-napi](done/m17-typescript-napi/) | done |
 | m18 Document root discovery | [done/m18-document-root-discovery](done/m18-document-root-discovery/) | done |
 | m19 NuGet.org publish | [done/m19-nuget-org-publish](done/m19-nuget-org-publish/) | done |
+| m20 NuGet multi-RID natives | [epics/m20-nuget-multi-rid](epics/m20-nuget-multi-rid/) | in_progress |
 
 ## Done
 
@@ -66,7 +67,7 @@ English only. Update this file on every epic status change.
 - Nx / Turborepo / go.work
 - Extra `.workspace` fields beyond `imports:`
 - Snapshot persistence (`argos snapshot save` / `load`)
-- linux-x64 / osx-arm64 NuGet RID matrix
 - npm Trusted Publishing (OIDC; revoke long-lived NPM_TOKEN)
+- linux-musl NuGet RIDs
 - linux-arm64 / darwin-x64 / musl napi triples
 - Author NuGet package signing (code-signing certificates)

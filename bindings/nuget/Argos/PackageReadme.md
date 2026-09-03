@@ -8,14 +8,24 @@
 dotnet add package Argos
 ```
 
-Requires a **win-x64** host so `runtimes/win-x64/native/argos_ffi.dll` is available (`DllImport("argos_ffi")`).
+Native libraries ship under `runtimes/<rid>/native/` for:
+
+| RID | File |
+|-----|------|
+| `win-x64` | `argos_ffi.dll` |
+| `osx-arm64` | `libargos_ffi.dylib` |
+| `osx-x64` | `libargos_ffi.dylib` |
+| `linux-x64` | `libargos_ffi.so` (glibc) |
+| `linux-arm64` | `libargos_ffi.so` (glibc) |
+
+Publish / run with a matching `-r` / `RuntimeIdentifier`. Managed code uses `DllImport("argos_ffi")`.
 
 ## Quick start
 
 ```csharp
 using Argos;
 
-await using var ws = await ArgosWorkspace.OpenAsync(@"Z:\path\to\repo");
+await using var ws = await ArgosWorkspace.OpenAsync("/path/to/repo");
 var snapshotJson = ws.CurrentSnapshot;
 var scopesJson = ws.ListScopes();
 
