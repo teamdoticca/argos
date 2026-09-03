@@ -19,7 +19,7 @@ Or pass an explicit package version:
 
 ```powershell
 dotnet run --project bindings/nuget/smoke/Argos.Smoke.csproj `
-  -p:ArgosPackageVersion=0.1.5 -p:RuntimeIdentifier=win-x64 -- fixtures/small-pnpm
+  -p:ArgosPackageVersion=0.1.6 -p:RuntimeIdentifier=win-x64 -- fixtures/small-pnpm
 ```
 
 ## Failure UX

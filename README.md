@@ -38,7 +38,7 @@ dotnet add package Argos
 Or pin a version:
 
 ```xml
-<PackageReference Include="Argos" Version="0.1.5" />
+<PackageReference Include="Argos" Version="0.1.6" />
 ```
 
 Publish / run with a supported RID so natives resolve (`DllImport("argos_ffi")`):

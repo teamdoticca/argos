@@ -4,9 +4,9 @@ Live status. Update on every meaningful progress.
 
 ## Current
 
-- **Active epic:** none
-- **Status:** m20 complete — multi-RID **Argos 0.1.5** on nuget.org; `@teamdoticca/argos@0.1.5` on npmjs
-- **Last update:** 2026-09-03 — Closed m20
+- **Active epic:** [m21-planner-root-source-watch](epics/m21-planner-root-source-watch/)
+- **Status:** Flat package roots (Tray/Api/Electron) must plan `watch: ["."]` so Focused sees root `.cs` / `main.js`
+- **Last update:** 2026-09-03 — m21 planner fix; releasing **0.1.6** for Mnemon Focused
 
 ## Completed
 
@@ -72,9 +72,10 @@ Path: [docs/done/m20-nuget-multi-rid](done/m20-nuget-multi-rid/)
 
 ## Next
 
-1. Mnemon PackageReference bump to `Argos` `0.1.5` + remove Windows-only RID default (separate repo)
-2. Optional: npm Trusted Publishing (OIDC) and revoke long-lived `NPM_TOKEN`
-3. Optional: MCP wrapper epic (`npx` / Cursor tools on `@teamdoticca/argos`)
+1. Finish m21 planner fix + ship Argos patch for Mnemon Focused
+2. Mnemon PackageReference bump + remove Windows-only RID default (separate repo)
+3. Optional: npm Trusted Publishing (OIDC) and revoke long-lived `NPM_TOKEN`
+4. Optional: MCP wrapper epic (`npx` / Cursor tools on `@teamdoticca/argos`)
 
 ## Blockers
 

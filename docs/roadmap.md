@@ -32,6 +32,7 @@ English only. Update this file on every epic status change.
 | m18 Document root discovery | [done/m18-document-root-discovery](done/m18-document-root-discovery/) | done |
 | m19 NuGet.org publish | [done/m19-nuget-org-publish](done/m19-nuget-org-publish/) | done |
 | m20 NuGet multi-RID natives | [done/m20-nuget-multi-rid](done/m20-nuget-multi-rid/) | done |
+| m21 Planner root source watch | [epics/m21-planner-root-source-watch](epics/m21-planner-root-source-watch/) | in_progress |
 
 ## Done
 
