@@ -32,7 +32,8 @@ English only. Update this file on every epic status change.
 | m18 Document root discovery | [done/m18-document-root-discovery](done/m18-document-root-discovery/) | done |
 | m19 NuGet.org publish | [done/m19-nuget-org-publish](done/m19-nuget-org-publish/) | done |
 | m20 NuGet multi-RID natives | [done/m20-nuget-multi-rid](done/m20-nuget-multi-rid/) | done |
-| m21 Planner root source watch | [epics/m21-planner-root-source-watch](epics/m21-planner-root-source-watch/) | in_progress |
+| m21 Planner root source watch | [done/m21-planner-root-source-watch](done/m21-planner-root-source-watch/) | done |
+| m22 Polyglot + ops discovery | [epics/m22-polyglot-ops-discovery](epics/m22-polyglot-ops-discovery/) | planned |
 
 ## Done
 
@@ -57,6 +58,7 @@ English only. Update this file on every epic status change.
 - [m18-document-root-discovery](done/m18-document-root-discovery/)
 - [m19-nuget-org-publish](done/m19-nuget-org-publish/)
 - [m20-nuget-multi-rid](done/m20-nuget-multi-rid/)
+- [m21-planner-root-source-watch](done/m21-planner-root-source-watch/)
 
 ## Deferred
 
@@ -66,7 +68,7 @@ English only. Update this file on every epic status change.
 - WorkspaceDependencyGraph
 - Watchman compatibility
 - Pluggable strategies (`sparse-root`, `hybrid-poll`)
-- Nx / Turborepo / go.work
+- Nx / Turborepo
 - Extra `.workspace` fields beyond `imports:`
 - Snapshot persistence (`argos snapshot save` / `load`)
 - npm Trusted Publishing (OIDC; revoke long-lived NPM_TOKEN)

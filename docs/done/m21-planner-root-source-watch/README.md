@@ -1,7 +1,7 @@
 # Planner: package-root source watch
 
 **Epic:** `m21-planner-root-source-watch`
-**Status:** see `status.md`
+**Status:** done
 
 ## Goal
 
@@ -18,7 +18,7 @@ Focused consumers (Mnemon) must include dirty files that live at a **package roo
 - [x] Flat Node package (`package.json` + root `main.js`) plans `"."`
 - [x] Packages with only conventional dirs and no root sources keep prior behavior (no forced widen unless needed)
 - [x] Unit tests in `argos-core` planner
-- [ ] Public **0.1.6** on nuget.org / GitHub Packages; then close → `docs/done/`
+- [x] Public **0.1.6** on nuget.org / GitHub Packages; this folder moved to `docs/done/`
 
 ## Out of scope
 

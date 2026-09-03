@@ -4,9 +4,9 @@ Live status. Update on every meaningful progress.
 
 ## Current
 
-- **Active epic:** [m21-planner-root-source-watch](epics/m21-planner-root-source-watch/)
-- **Status:** Flat package roots (Tray/Api/Electron) must plan `watch: ["."]` so Focused sees root `.cs` / `main.js`
-- **Last update:** 2026-09-03 — m21 planner fix; releasing **0.1.6** for Mnemon Focused
+- **Active epic:** none
+- **Status:** m21 complete — package-root `"."` watch; **Argos 0.1.6** published
+- **Last update:** 2026-09-03 — Closed m21; next is planned m22
 
 ## Completed
 
@@ -70,10 +70,18 @@ Path: [docs/done/m20-nuget-multi-rid](done/m20-nuget-multi-rid/)
 - [x] Public **Argos 0.1.5** — https://www.nuget.org/packages/Argos/0.1.5
 - [x] npm line **`@teamdoticca/argos@0.1.5`** on npmjs; GH Packages dogfood `--tag latest`
 
+### m21-planner-root-source-watch (done)
+
+Path: [docs/done/m21-planner-root-source-watch](done/m21-planner-root-source-watch/)
+
+- [x] Flat package roots plan `watch: ["."]` (Tray / Api / Electron-style)
+- [x] Planner unit tests
+- [x] Public **Argos 0.1.6** — nuget.org + GitHub Packages; npm `0.1.6`
+
 ## Next
 
-1. Finish m21 planner fix + ship Argos patch for Mnemon Focused
-2. Mnemon PackageReference bump + remove Windows-only RID default (separate repo)
+1. Start [m22-polyglot-ops-discovery](epics/m22-polyglot-ops-discovery/) when ready — PHP/Python/Go, Gradle/JVM, Dockerfile/Compose/Bicep
+2. Mnemon PackageReference bump to `0.1.6` + remove Windows-only RID default (separate repo)
 3. Optional: npm Trusted Publishing (OIDC) and revoke long-lived `NPM_TOKEN`
 4. Optional: MCP wrapper epic (`npx` / Cursor tools on `@teamdoticca/argos`)
 
