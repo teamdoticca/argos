@@ -3,22 +3,6 @@ use crate::Result;
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 
-const SKIP_DIR_NAMES: &[&str] = &[
-    ".git",
-    "node_modules",
-    "dist",
-    "build",
-    "target",
-    "coverage",
-    ".next",
-    ".turbo",
-    ".cache",
-    "bin",
-    "obj",
-    ".vs",
-    "artifacts",
-];
-
 /// Discover .NET projects (`.csproj`) and solution members as package nodes.
 pub fn discover(root: &Path) -> Result<Vec<WorkspaceNode>> {
     let mut out = Vec::new();
@@ -82,24 +66,13 @@ fn csproj_node(dir: &Path, manifest: &Path, provider: &str) -> WorkspaceNode {
 
 fn find_files(root: &Path, extension: &str) -> Result<Vec<PathBuf>> {
     let mut out = Vec::new();
-    let walker = walkdir::WalkDir::new(root)
-        .follow_links(false)
-        .into_iter()
-        .filter_entry(|e| {
-            if !e.file_type().is_dir() {
-                return true;
-            }
-            let name = e.file_name().to_string_lossy();
-            !SKIP_DIR_NAMES.iter().any(|s| name.eq_ignore_ascii_case(s))
-        });
-    for entry in walker.flatten() {
-        let path = entry.path();
+    for path in super::walk::walk_entries(root) {
         if path
             .extension()
             .and_then(|e| e.to_str())
             .is_some_and(|e| e.eq_ignore_ascii_case(extension))
         {
-            out.push(path.to_path_buf());
+            out.push(path);
         }
     }
     Ok(out)

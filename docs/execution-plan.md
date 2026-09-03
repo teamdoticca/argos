@@ -5,8 +5,8 @@ Live status. Update on every meaningful progress.
 ## Current
 
 - **Active epic:** none
-- **Status:** m21 complete — package-root `"."` watch; **Argos 0.1.6** published
-- **Last update:** 2026-09-03 — Closed m21; next is planned m22
+- **Status:** m22 closed; awaiting next epic
+- **Last update:** 2026-09-03 — Closed m22; public **Argos 0.1.7** (polyglot + ops discovery)
 
 ## Completed
 
@@ -78,10 +78,19 @@ Path: [docs/done/m21-planner-root-source-watch](done/m21-planner-root-source-wat
 - [x] Planner unit tests
 - [x] Public **Argos 0.1.6** — nuget.org + GitHub Packages; npm `0.1.6`
 
+### m22-polyglot-ops-discovery (done)
+
+Path: [docs/done/m22-polyglot-ops-discovery](done/m22-polyglot-ops-discovery/)
+
+- [x] PHP / Python / Go / Android-Gradle / Maven / ops (Dockerfile, Compose, Bicep, azure.yaml)
+- [x] Shared skip-dirs + ignore hard-defaults (`vendor`, `.venv`, …)
+- [x] Fixture `mixed-polyglot-ops`; `cargo test -p argos-core` green
+- [x] Public **Argos 0.1.7** — nuget.org + GitHub Packages; npm `0.1.7`
+
 ## Next
 
-1. Start [m22-polyglot-ops-discovery](epics/m22-polyglot-ops-discovery/) when ready — PHP/Python/Go, Gradle/JVM, Dockerfile/Compose/Bicep
-2. Mnemon PackageReference bump to `0.1.6` + remove Windows-only RID default (separate repo)
+1. Mnemon PackageReference bump to `0.1.7` (separate repo); optional live Intalepoint smoke
+2. Optional: drop Windows-only RID default in Mnemon.Api
 3. Optional: npm Trusted Publishing (OIDC) and revoke long-lived `NPM_TOKEN`
 4. Optional: MCP wrapper epic (`npx` / Cursor tools on `@teamdoticca/argos`)
 

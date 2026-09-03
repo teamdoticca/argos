@@ -46,7 +46,7 @@ Dedupe by `path_identity` as today. Ops **file** nodes use the file path as `roo
 | Kind | `node.root` | Watch |
 |------|-------------|--------|
 | Dockerfile | file path | `"."` (the file) |
-| Compose | file path | `"."` plus sibling dirs named in `services.*.build` if they exist (best-effort YAML; ignore parse failures) |
+| Compose | file path | `"."` (the compose file) plus `../<context>` for sibling `services.*.build` dirs that exist (best-effort YAML; ignore parse failures) |
 | Bicep | file path | `"."` |
 | azure.yaml | file path | `"."` |
 

@@ -13,6 +13,13 @@ const HARD_DEFAULTS: &[&str] = &[
     ".next",
     ".turbo",
     ".cache",
+    "vendor",
+    ".venv",
+    "venv",
+    "__pycache__",
+    ".tox",
+    ".mypy_cache",
+    "Pods",
 ];
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

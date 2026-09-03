@@ -13,6 +13,12 @@ const CONFIG_FILES: &[&str] = &[
     "Cargo.toml",
     "tsconfig.json",
     "pyproject.toml",
+    "Pipfile",
+    "requirements.txt",
+    "composer.json",
+    "go.mod",
+    "go.work",
+    "pom.xml",
     ".workspace",
 ];
 
@@ -35,9 +41,10 @@ pub fn plan_scopes(nodes: &[WorkspaceNode], ignore: &IgnoreEngine) -> Vec<WatchS
             NodeKind::GitSubmodule | NodeKind::ImportedFolder | NodeKind::Package
         ) {
             let watch = match node.source.provider.as_str() {
-                "document-root" | "guidance-path" => {
+                "document-root" | "guidance-path" | "dockerfile" | "bicep" | "azure-yaml" => {
                     plan_document_or_guidance_watch(node, ignore)
                 }
+                "compose" => plan_compose_watch(node, ignore),
                 _ => discover_watch_roots(&node.root, ignore),
             };
             if watch.is_empty() {
@@ -74,6 +81,47 @@ fn plan_document_or_guidance_watch(node: &WorkspaceNode, ignore: &IgnoreEngine) 
         return vec![manifest.to_string()];
     }
     vec![".".into()]
+}
+
+fn plan_compose_watch(node: &WorkspaceNode, ignore: &IgnoreEngine) -> Vec<String> {
+    if ignore.is_ignored(&node.root) {
+        return Vec::new();
+    }
+    let compose_file = if node.root.is_file() {
+        node.root.clone()
+    } else {
+        let manifest = node.source.manifest.as_str();
+        let candidate = node.root.join(manifest);
+        if !candidate.is_file() {
+            return vec![".".into()];
+        }
+        candidate
+    };
+    let mut watch = if node.root.is_file() {
+        vec![".".into()]
+    } else {
+        vec![node.source.manifest.clone()]
+    };
+    let extra = crate::discovery::ops_compose_build_contexts(&compose_file);
+    let parent = compose_file.parent();
+    for dir in extra {
+        let Some(parent) = parent else {
+            break;
+        };
+        let abs = parent.join(&dir);
+        if !abs.is_dir() || ignore.is_ignored(&abs) {
+            continue;
+        }
+        let rel = if node.root.is_file() {
+            format!("../{}", dir.trim_start_matches("./"))
+        } else {
+            dir
+        };
+        if !watch.iter().any(|w| w == &rel) {
+            watch.push(rel);
+        }
+    }
+    watch
 }
 
 fn discover_watch_roots(node_root: &Path, ignore: &IgnoreEngine) -> Vec<String> {
@@ -171,7 +219,11 @@ fn package_root_has_source_files(node_root: &Path) -> bool {
             || name.ends_with(".cjs")
             || name.ends_with(".rs")
             || name.ends_with(".py")
+            || name.ends_with(".php")
             || name.ends_with(".go")
+            || name.ends_with(".java")
+            || name.ends_with(".kt")
+            || name.ends_with(".kts")
             || name.ends_with(".html")
             || name.ends_with(".vue")
             || name.ends_with(".svelte")
@@ -194,6 +246,10 @@ fn dir_looks_like_source(dir: &Path) -> bool {
             || name.ends_with(".rs")
             || name.ends_with(".cs")
             || name.ends_with(".py")
+            || name.ends_with(".php")
+            || name.ends_with(".go")
+            || name.ends_with(".java")
+            || name.ends_with(".kt")
             || name == "src"
             || name == "lib"
         {
@@ -343,6 +399,50 @@ mod tests {
         assert!(
             !scopes[0].watch.iter().any(|w| w == "."),
             "no root sources → should not force '.', got {:?}",
+            scopes[0].watch
+        );
+    }
+
+    #[test]
+    fn dockerfile_file_node_watches_dot() {
+        let dir = tempfile::tempdir().unwrap();
+        let file = dir.path().join("Dockerfile");
+        fs::write(&file, "FROM alpine\n").unwrap();
+        let ignore = IgnoreEngine::build(dir.path(), true).unwrap();
+        let scopes = plan_scopes(
+            &[package_node("df", file, "dockerfile", "Dockerfile")],
+            &ignore,
+        );
+        assert_eq!(scopes.len(), 1);
+        assert_eq!(scopes[0].watch, vec![".".to_string()]);
+    }
+
+    #[test]
+    fn compose_file_watches_dot_and_build_context() {
+        let dir = tempfile::tempdir().unwrap();
+        let svc = dir.path().join("svc");
+        fs::create_dir_all(svc.join("web")).unwrap();
+        let compose = svc.join("docker-compose.yml");
+        fs::write(
+            &compose,
+            "services:\n  web:\n    build: ./web\n",
+        )
+        .unwrap();
+        let ignore = IgnoreEngine::build(dir.path(), true).unwrap();
+        let scopes = plan_scopes(
+            &[package_node(
+                "compose",
+                compose,
+                "compose",
+                "docker-compose.yml",
+            )],
+            &ignore,
+        );
+        assert_eq!(scopes.len(), 1);
+        assert!(scopes[0].watch.iter().any(|w| w == "."));
+        assert!(
+            scopes[0].watch.iter().any(|w| w == "../web"),
+            "expected ../web build context, got {:?}",
             scopes[0].watch
         );
     }

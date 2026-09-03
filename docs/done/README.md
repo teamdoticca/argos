@@ -20,3 +20,10 @@ Completed Argos epics. Each folder retains README / design / status for historic
 | m13-nuget-wrapper | .NET Argos package |
 | m14-benchmark-suite | fixtures + argos-bench |
 | m15-nuget-pack-ci | pack script, CI, win-x64 nupkg + smoke |
+| m16-monorepo-discovery-parity | Nested npm + .NET discovery |
+| m17-typescript-napi | `@teamdoticca/argos` napi |
+| m18-document-root-discovery | document-root + guidance-path |
+| m19-nuget-org-publish | Public nuget.org |
+| m20-nuget-multi-rid | Multi-RID nupkg |
+| m21-planner-root-source-watch | Package-root `"."` watch |
+| m22-polyglot-ops-discovery | PHP/Python/Go/Gradle/Maven + ops |

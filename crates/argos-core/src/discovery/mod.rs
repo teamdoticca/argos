@@ -2,10 +2,17 @@ mod cargo_ws;
 mod document;
 mod dotnet;
 mod git_submodules;
+mod golang;
+mod gradle;
+mod maven;
 mod nested_npm;
 mod npm;
+mod ops;
 mod os_artifacts;
+mod php;
 mod pnpm;
+mod python;
+mod walk;
 mod workspace_file;
 
 use crate::model::{TopologyResult, WorkspaceNode};
@@ -19,6 +26,10 @@ pub(crate) fn blank_identity() -> PathIdentity {
         key: String::new(),
         display: String::new(),
     }
+}
+
+pub(crate) fn ops_compose_build_contexts(compose_file: &Path) -> Vec<String> {
+    ops::compose_build_contexts(compose_file)
 }
 
 pub fn discover_topology(root: &Path) -> Result<TopologyResult> {
@@ -51,10 +62,28 @@ pub fn discover_topology(root: &Path) -> Result<TopologyResult> {
     for n in dotnet::discover(root)? {
         push(n);
     }
+    for n in php::discover(root)? {
+        push(n);
+    }
+    for n in python::discover(root)? {
+        push(n);
+    }
+    for n in golang::discover(root)? {
+        push(n);
+    }
+    for n in gradle::discover(root)? {
+        push(n);
+    }
+    for n in maven::discover(root)? {
+        push(n);
+    }
     for n in git_submodules::discover(root)? {
         push(n);
     }
     for n in workspace_file::discover(root)? {
+        push(n);
+    }
+    for n in ops::discover(root)? {
         push(n);
     }
     // document-root / guidance-path need the package topology for dedupe.

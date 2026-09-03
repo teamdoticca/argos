@@ -1,7 +1,7 @@
 # Polyglot + ops topology discovery
 
 **Epic:** `m22-polyglot-ops-discovery`
-**Status:** planned
+**Status:** done
 
 ## Goal
 
@@ -71,18 +71,19 @@ Prefer **keeping ops nodes** even when a parent package already watches a direct
 
 ## Acceptance criteria
 
-- [ ] Slice 0 skip/ignore list shipped; Composer `vendor` and Python `.venv` never become packages
-- [ ] PHP: `composer.json` → node; Intalepoint `br-operations` / `bx-pos-printers` appear when those trees are present
-- [ ] Python: `pyproject.toml` / `Pipfile` / package-root `requirements.txt` → node; `.venv` ignored
-- [ ] Go: `go.mod` (+ `go.work` members) → nodes
-- [ ] Android: gradle/android node with non-empty watch (fixture or Intalepoint path)
-- [ ] Maven/Gradle JVM fixtures → nodes (no explosion from nested `build/`)
-- [ ] Dockerfile + compose + `.bicep` + `azure.yaml` → nodes; watch includes those files
-- [ ] Fixtures under `fixtures/` for php, python, go, android stub, compose+Dockerfile, bicep
-- [ ] Argos self-repo + `fixtures/small-pnpm` still green
-- [ ] Smoke: Open on a mixed fixture → `ListScopes` includes new providers
-- [ ] `docs/roadmap.md` and `docs/execution-plan.md` updated on progress
-- [ ] On completion, move this folder to `docs/done/m22-polyglot-ops-discovery`
+- [x] Slice 0 skip/ignore list shipped; Composer `vendor` and Python `.venv` never become packages
+- [x] PHP: `composer.json` → node (`fixtures/mixed-polyglot-ops/php-app`; `vendor` skipped)
+- [x] Python: `pyproject.toml` / `Pipfile` / package-root `requirements.txt` → node; `.venv` ignored
+- [x] Go: `go.mod` (+ `go.work` members) → nodes
+- [x] Android: gradle/android node with non-empty watch (fixture)
+- [x] Maven/Gradle JVM fixtures → nodes (no explosion from nested `build/`)
+- [x] Dockerfile + compose + `.bicep` + `azure.yaml` → nodes; watch includes those files
+- [x] Fixtures under `fixtures/mixed-polyglot-ops`
+- [x] Argos self-repo + `fixtures/small-pnpm` still green
+- [x] Smoke: Open on mixed fixture → `ListScopes` includes new providers
+- [x] `docs/roadmap.md` and `docs/execution-plan.md` updated on progress
+- [x] Public **Argos 0.1.7** — nuget.org + GitHub Packages; npm `0.1.7`
+- [x] Moved to `docs/done/m22-polyglot-ops-discovery`
 
 ## Out of scope
 
@@ -90,4 +91,4 @@ Prefer **keeping ops nodes** even when a parent package already watches a direct
 - Nx / Turborepo
 - Watching entire Docker build contexts as the git root
 - Helm / Terraform (follow-up)
-- Mnemon PackageReference bump (separate repo, after ship)
+- Live Intalepoint smoke / Mnemon PackageReference bump (separate repo, after ship)

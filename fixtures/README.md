@@ -9,3 +9,4 @@ Synthetic workspaces used by tests and `argos-bench`.
 | `dotnet-sln` | Minimal `.sln` + `.csproj` tree (`src/App`) |
 | `docs-handbook` | Planning tree named `handbook/` (not `docs/`) with roadmap + architecture |
 | `docs-guidance-odd` | `AGENTS.md` points at `knowledge-base/` + `.cursor/rules` |
+| `mixed-polyglot-ops` | PHP, Python, Go, Android Gradle, Maven, Dockerfile, Compose, Bicep, `azure.yaml` |

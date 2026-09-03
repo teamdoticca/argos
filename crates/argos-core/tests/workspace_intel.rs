@@ -316,3 +316,57 @@ fn argos_self_repo_includes_docs_and_guidance_scopes() {
         scopes.len()
     );
 }
+
+#[test]
+fn discovers_mixed_polyglot_ops_fixture() {
+    let root = fixture("mixed-polyglot-ops");
+    assert!(root.is_dir(), "missing fixture {}", root.display());
+    let topo = discover_topology(&root).unwrap();
+    let providers: Vec<&str> = topo.nodes.iter().map(|n| n.source.provider.as_str()).collect();
+    for needed in [
+        "php-composer",
+        "python",
+        "go-mod",
+        "android-gradle",
+        "gradle",
+        "maven",
+        "dockerfile",
+        "compose",
+        "bicep",
+        "azure-yaml",
+    ] {
+        assert!(
+            providers.contains(&needed),
+            "expected provider {needed}, got {:?}",
+            providers
+        );
+    }
+    assert!(
+        !topo.nodes.iter().any(|n| n.root.ends_with("vendor")
+            || n.root.to_string_lossy().replace('\\', "/").contains("/vendor/")
+            || n.root.ends_with(".venv")
+            || n.root.to_string_lossy().replace('\\', "/").contains("/.venv/")),
+        "vendor/.venv must not become nodes, got {:?}",
+        topo.nodes.iter().map(|n| &n.root).collect::<Vec<_>>()
+    );
+    let ws = Workspace::open(&root, OpenOptions::default()).unwrap();
+    let snap = ws.current_snapshot();
+    let scopes = list_scopes(&snap);
+    assert!(
+        scopes.iter().any(|s| s.root.ends_with("php-app") || s.package == "php-app"),
+        "expected php-app scope, got {:?}",
+        scopes
+    );
+    assert!(
+        scopes.iter().any(|s| s.root.contains("Dockerfile") || s.package.contains("Dockerfile")),
+        "expected Dockerfile scope, got {:?}",
+        scopes
+    );
+    assert!(
+        scopes
+            .iter()
+            .any(|s| s.root.contains("docker-compose.yml") && s.watch.iter().any(|w| w == ".")),
+        "expected compose file watch, got {:?}",
+        scopes
+    );
+}

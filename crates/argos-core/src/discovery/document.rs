@@ -8,22 +8,7 @@ use crate::Result;
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 
-const SKIP_DIR_NAMES: &[&str] = &[
-    ".git",
-    "node_modules",
-    "dist",
-    "build",
-    "target",
-    "coverage",
-    ".next",
-    ".turbo",
-    ".cache",
-    "bin",
-    "obj",
-    ".vs",
-    "artifacts",
-    "vendor",
-];
+use crate::discovery::walk::is_skip_dir_name;
 
 const DOC_NAME_ALIASES: &[&str] = &[
     "docs",
@@ -312,9 +297,7 @@ fn is_junk_path(root: &Path, path: &Path) -> bool {
     };
     for c in rel.components() {
         let name = c.as_os_str().to_string_lossy();
-        if SKIP_DIR_NAMES
-            .iter()
-            .any(|s| name.eq_ignore_ascii_case(s))
+        if is_skip_dir_name(&name)
         {
             return true;
         }
@@ -333,7 +316,7 @@ fn walk_candidate_dirs(root: &Path) -> Vec<PathBuf> {
                 return true;
             }
             let name = e.file_name().to_string_lossy();
-            !SKIP_DIR_NAMES.iter().any(|s| name.eq_ignore_ascii_case(s))
+            !is_skip_dir_name(&name)
         });
     for entry in walker.flatten() {
         let path = entry.path();
@@ -372,7 +355,7 @@ fn score_document_dir(dir: &Path, from_guidance: bool) -> (i32, String) {
                 return true;
             }
             let name = e.file_name().to_string_lossy();
-            !SKIP_DIR_NAMES.iter().any(|s| name.eq_ignore_ascii_case(s))
+            !is_skip_dir_name(&name)
         });
 
     for entry in walker.flatten() {

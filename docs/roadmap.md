@@ -33,7 +33,7 @@ English only. Update this file on every epic status change.
 | m19 NuGet.org publish | [done/m19-nuget-org-publish](done/m19-nuget-org-publish/) | done |
 | m20 NuGet multi-RID natives | [done/m20-nuget-multi-rid](done/m20-nuget-multi-rid/) | done |
 | m21 Planner root source watch | [done/m21-planner-root-source-watch](done/m21-planner-root-source-watch/) | done |
-| m22 Polyglot + ops discovery | [epics/m22-polyglot-ops-discovery](epics/m22-polyglot-ops-discovery/) | planned |
+| m22 Polyglot + ops discovery | [done/m22-polyglot-ops-discovery](done/m22-polyglot-ops-discovery/) | done |
 
 ## Done
 
@@ -59,6 +59,7 @@ English only. Update this file on every epic status change.
 - [m19-nuget-org-publish](done/m19-nuget-org-publish/)
 - [m20-nuget-multi-rid](done/m20-nuget-multi-rid/)
 - [m21-planner-root-source-watch](done/m21-planner-root-source-watch/)
+- [m22-polyglot-ops-discovery](done/m22-polyglot-ops-discovery/)
 
 ## Deferred
 

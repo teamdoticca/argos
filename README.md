@@ -38,7 +38,7 @@ dotnet add package Argos
 Or pin a version:
 
 ```xml
-<PackageReference Include="Argos" Version="0.1.6" />
+<PackageReference Include="Argos" Version="0.1.7" />
 ```
 
 Publish / run with a supported RID so natives resolve (`DllImport("argos_ffi")`):
@@ -181,3 +181,4 @@ Not a build system, package manager, IDE, language server, dependency-graph engi
 - [docs/README.md](docs/README.md) — full documentation map  
 
 Package license: **MIT**.
+
