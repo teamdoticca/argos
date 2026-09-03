@@ -3,20 +3,37 @@
   Build argos-ffi, stage RID natives, and pack the Argos NuGet package.
 
 .DESCRIPTION
-  Cargo artifact (Windows): target/<profile>/argos_ffi.dll
-  Packaged native name:     runtimes/<rid>/native/argos_ffi.dll  (DllImport "argos_ffi")
-  Note: do not use argos.dll — collides with managed Argos.dll on Windows.
+  Stages standard NuGet RID assets under bindings/nuget/Argos/runtimes/<rid>/native/:
+
+    win-x64      → argos_ffi.dll
+    osx-arm64    → libargos_ffi.dylib
+    osx-x64      → libargos_ffi.dylib
+    linux-x64    → libargos_ffi.so
+    linux-arm64  → libargos_ffi.so
+
+  Managed wrapper uses DllImport("argos_ffi"). On Unix the CLR loads libargos_ffi.so / .dylib.
+  Do not package as argos.dll — collides with managed Argos.dll on case-insensitive filesystems.
+
 .PARAMETER Configuration
   Rust/dotnet configuration. Release maps to cargo --release.
 
 .PARAMETER Version
   Optional package version override (passed as -p:Version=).
 
-.PARAMETER Rid
-  Runtime identifier. First supported: win-x64.
+.PARAMETER Rids
+  One or more RIDs to build/stage. Default: current host RID only.
+
+.PARAMETER AllSupported
+  Build/stage every supported RID (only useful where cross-compile works; CI prefers -StageFrom).
 
 .PARAMETER SkipBuild
-  Skip cargo build (use existing artifact).
+  Do not run cargo; stage from -StageFrom and/or already-present runtimes files.
+
+.PARAMETER StageFrom
+  Directory containing <rid>/native/<filename> trees (CI artifact merge root).
+
+.PARAMETER RequireRids
+  RIDs that must exist inside the packed nupkg (fail if missing).
 #>
 [CmdletBinding()]
 param(
@@ -25,48 +42,197 @@ param(
 
     [string] $Version = "",
 
-    [ValidateSet("win-x64")]
-    [string] $Rid = "win-x64",
+    [string[]] $Rids = @(),
 
-    [switch] $SkipBuild
+    [switch] $AllSupported,
+
+    [switch] $SkipBuild,
+
+    [string] $StageFrom = "",
+
+    [string[]] $RequireRids = @()
 )
 
 $ErrorActionPreference = "Stop"
 
+$RidCatalog = [ordered]@{
+    "win-x64"      = @{ Triple = "x86_64-pc-windows-msvc";      File = "argos_ffi.dll" }
+    "osx-arm64"    = @{ Triple = "aarch64-apple-darwin";         File = "libargos_ffi.dylib" }
+    "osx-x64"      = @{ Triple = "x86_64-apple-darwin";          File = "libargos_ffi.dylib" }
+    "linux-x64"    = @{ Triple = "x86_64-unknown-linux-gnu";     File = "libargos_ffi.so" }
+    "linux-arm64"  = @{ Triple = "aarch64-unknown-linux-gnu";    File = "libargos_ffi.so" }
+}
+
+function Get-DefaultHostRid {
+    $arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString().ToLowerInvariant()
+    if ($IsWindows -or ($env:OS -match "Windows")) {
+        if ($arch -eq "arm64") { return "win-arm64" } # not in catalog; callers should pass -Rids
+        return "win-x64"
+    }
+    if ($IsMacOS) {
+        if ($arch -eq "arm64") { return "osx-arm64" }
+        return "osx-x64"
+    }
+    if ($IsLinux) {
+        if ($arch -eq "arm64") { return "linux-arm64" }
+        return "linux-x64"
+    }
+    throw "Unsupported host OS for default RID"
+}
+
+function Resolve-CargoArtifact {
+    param(
+        [string] $RepoRoot,
+        [string] $Profile,
+        [string] $Triple,
+        [string] $FileName
+    )
+    $candidates = @(
+        (Join-Path $RepoRoot "target\$Triple\$Profile\$FileName"),
+        (Join-Path $RepoRoot "target/$Triple/$Profile/$FileName"),
+        (Join-Path $RepoRoot "target\$Profile\$FileName"),
+        (Join-Path $RepoRoot "target/$Profile/$FileName")
+    )
+    foreach ($c in $candidates) {
+        if (Test-Path $c) { return (Resolve-Path $c).Path }
+    }
+    return $null
+}
+
+function Invoke-CargoWithHostToolchain {
+    param([string[]] $CargoArgs)
+
+    $isWin = $IsWindows -or ($env:OS -match "Windows")
+    if ($isWin) {
+        $vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
+        if (Test-Path $vswhere) {
+            $vsPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+            if (-not [string]::IsNullOrWhiteSpace($vsPath)) {
+                $devCmd = Join-Path $vsPath "Common7\Tools\VsDevCmd.bat"
+                if (Test-Path $devCmd) {
+                    $quoted = ($CargoArgs | ForEach-Object {
+                            if ($_ -match '[\s"]') { '"' + ($_ -replace '"', '\"') + '"' } else { $_ }
+                        }) -join " "
+                    Write-Host ">> (VsDevCmd) cargo $quoted"
+                    cmd /c "`"$devCmd`" -arch=amd64 -host_arch=amd64 >nul && cargo $quoted"
+                    return $LASTEXITCODE
+                }
+            }
+        }
+    }
+
+    Write-Host ">> cargo $($CargoArgs -join ' ')"
+    & cargo @CargoArgs
+    return $LASTEXITCODE
+}
+
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
 Set-Location $repoRoot
 
-$cargoProfile = if ($Configuration -eq "Release") { "release" } else { "debug" }
-$cargoArgs = @("build", "-p", "argos-ffi")
-if ($Configuration -eq "Release") {
-    $cargoArgs += "--release"
+if ($AllSupported) {
+    $Rids = @($RidCatalog.Keys)
 }
-
-if (-not $SkipBuild) {
-    Write-Host ">> cargo $($cargoArgs -join ' ')"
-    & cargo @cargoArgs
-    if ($LASTEXITCODE -ne 0) {
-        throw "cargo build failed with exit code $LASTEXITCODE"
+elseif ($Rids.Count -eq 0) {
+    if (-not [string]::IsNullOrWhiteSpace($StageFrom) -and (Test-Path $StageFrom)) {
+        $Rids = @(Get-ChildItem $StageFrom -Directory | ForEach-Object { $_.Name } | Where-Object { $RidCatalog.Contains($_) })
+        if ($Rids.Count -eq 0) {
+            # download-artifact without merge may nest as native-<rid>/<rid>/...
+            $Rids = @(
+                Get-ChildItem $StageFrom -Directory |
+                    ForEach-Object {
+                        if ($_.Name -match '^native-(.+)$' -and $RidCatalog.Contains($Matches[1])) {
+                            $Matches[1]
+                        }
+                        elseif ($RidCatalog.Contains($_.Name)) {
+                            $_.Name
+                        }
+                    } |
+                    Select-Object -Unique
+            )
+        }
+        if ($Rids.Count -eq 0) {
+            throw "No known RID folders under StageFrom: $StageFrom"
+        }
+    }
+    else {
+        $hostRid = Get-DefaultHostRid
+        if (-not $RidCatalog.Contains($hostRid)) {
+            throw "Host RID '$hostRid' is not in the supported NuGet matrix. Pass -Rids explicitly."
+        }
+        $Rids = @($hostRid)
     }
 }
 
-# Cargo renames crate argos-ffi → argos_ffi.dll on Windows.
-# Packaged native keeps that name so it does not collide with managed Argos.dll on case-insensitive FS.
-$cargoArtifact = Join-Path $repoRoot "target\$cargoProfile\argos_ffi.dll"
-if (-not (Test-Path $cargoArtifact)) {
-    throw "Cargo artifact not found: $cargoArtifact"
+foreach ($rid in $Rids) {
+    if (-not $RidCatalog.Contains($rid)) {
+        throw "Unsupported RID '$rid'. Supported: $($RidCatalog.Keys -join ', ')"
+    }
 }
 
-$nativeDir = Join-Path $repoRoot "bindings\nuget\Argos\runtimes\$Rid\native"
-New-Item -ItemType Directory -Force -Path $nativeDir | Out-Null
-$destNative = Join-Path $nativeDir "argos_ffi.dll"
-Copy-Item -Force $cargoArtifact $destNative
+$cargoProfile = if ($Configuration -eq "Release") { "release" } else { "debug" }
+$runtimesRoot = Join-Path $repoRoot "bindings\nuget\Argos\runtimes"
 
-$info = Get-Item $destNative
-if ($info.Length -le 0) {
-    throw "Native library is empty: $destNative"
+foreach ($rid in $Rids) {
+    $meta = $RidCatalog[$rid]
+    $fileName = $meta.File
+    $triple = $meta.Triple
+    $nativeDir = Join-Path $runtimesRoot "$rid\native"
+    New-Item -ItemType Directory -Force -Path $nativeDir | Out-Null
+    $destNative = Join-Path $nativeDir $fileName
+
+    $staged = $false
+
+    if (-not [string]::IsNullOrWhiteSpace($StageFrom)) {
+        $fromCandidates = @(
+            (Join-Path $StageFrom "$rid\native\$fileName"),
+            (Join-Path $StageFrom "native-$rid\native\$fileName"),
+            (Join-Path $StageFrom "native-$rid\$rid\native\$fileName"),
+            (Join-Path $StageFrom "$rid\$fileName")
+        )
+        foreach ($from in $fromCandidates) {
+            if (Test-Path $from) {
+                Copy-Item -Force $from $destNative
+                $staged = $true
+                Write-Host ">> staged from $from"
+                break
+            }
+        }
+    }
+
+    if (-not $staged -and -not $SkipBuild) {
+        # Host RID: build without --target so the default MSVC/unix linker env applies.
+        # Cross RIDs: require rustup target + --target <triple>.
+        $hostRid = $null
+        try { $hostRid = Get-DefaultHostRid } catch { $hostRid = $null }
+        $cargoArgs = @("build", "-p", "argos-ffi")
+        if ($rid -ne $hostRid) {
+            $cargoArgs += @("--target", $triple)
+        }
+        if ($Configuration -eq "Release") {
+            $cargoArgs += "--release"
+        }
+        $cargoExit = Invoke-CargoWithHostToolchain -CargoArgs $cargoArgs
+        if ($cargoExit -ne 0) {
+            throw "cargo build failed for $rid ($triple) with exit code $cargoExit"
+        }
+        $cargoArtifact = Resolve-CargoArtifact -RepoRoot $repoRoot -Profile $cargoProfile -Triple $triple -FileName $fileName
+        if (-not $cargoArtifact) {
+            throw "Cargo artifact not found for $rid ($fileName under target/$triple/$cargoProfile or target/$cargoProfile)"
+        }
+        Copy-Item -Force $cargoArtifact $destNative
+        $staged = $true
+    }
+
+    if (-not (Test-Path $destNative)) {
+        throw "Native missing for ${rid}: expected $destNative (build, StageFrom, or pre-stage under runtimes/)"
+    }
+
+    $info = Get-Item $destNative
+    if ($info.Length -le 0) {
+        throw "Native library is empty: $destNative"
+    }
+    Write-Host ">> staged $($info.FullName) ($($info.Length) bytes)"
 }
-Write-Host ">> staged $($info.FullName) ($($info.Length) bytes)"
 
 $outDir = Join-Path $repoRoot "artifacts\nuget"
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null
@@ -88,11 +254,6 @@ if ($LASTEXITCODE -ne 0) {
     throw "dotnet pack failed with exit code $LASTEXITCODE"
 }
 
-# Fail if declared RID native was not included (sanity: staged file must still exist).
-if (-not (Test-Path $destNative)) {
-    throw "RID native missing after pack staging: $destNative"
-}
-
 $nupkgs = Get-ChildItem $outDir -Filter "Argos.*.nupkg" | Sort-Object LastWriteTime -Descending
 if ($nupkgs.Count -eq 0) {
     throw "No Argos.*.nupkg found under $outDir"
@@ -100,15 +261,29 @@ if ($nupkgs.Count -eq 0) {
 
 $nupkg = $nupkgs[0].FullName
 
-# Verify nupkg contains win-x64 native (requires Expand-Archive on zip copy).
+$verifyRids = @($RequireRids)
+if ($verifyRids.Count -eq 0) {
+    $verifyRids = @($Rids)
+}
+
 $tmpZip = Join-Path $env:TEMP ("argos-nupkg-" + [guid]::NewGuid().ToString("n") + ".zip")
 $tmpExtract = Join-Path $env:TEMP ("argos-nupkg-" + [guid]::NewGuid().ToString("n"))
 try {
     Copy-Item $nupkg $tmpZip
     Expand-Archive -Path $tmpZip -DestinationPath $tmpExtract -Force
-    $expectedInside = Join-Path $tmpExtract "runtimes\$Rid\native\argos_ffi.dll"
-    if (-not (Test-Path $expectedInside)) {
-        throw "Packed nupkg is missing runtimes/$Rid/native/argos_ffi.dll"
+    foreach ($rid in $verifyRids) {
+        if (-not $RidCatalog.Contains($rid)) {
+            throw "RequireRids contains unknown RID '$rid'"
+        }
+        $fileName = $RidCatalog[$rid].File
+        $expectedInside = Join-Path $tmpExtract "runtimes\$rid\native\$fileName"
+        if (-not (Test-Path $expectedInside)) {
+            $expectedInside = Join-Path $tmpExtract "runtimes/$rid/native/$fileName"
+        }
+        if (-not (Test-Path $expectedInside)) {
+            throw "Packed nupkg is missing runtimes/$rid/native/$fileName"
+        }
+        Write-Host ">> verified runtimes/$rid/native/$fileName"
     }
 }
 finally {

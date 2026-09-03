@@ -4,9 +4,9 @@ Live status. Update on every meaningful progress.
 
 ## Current
 
-- **Active epic:** none
-- **Status:** m19 complete — **Argos 0.1.4** on nuget.org
-- **Last update:** 2026-09-03 — Closed m19; public `dotnet add package Argos`
+- **Active epic:** [m20-nuget-multi-rid](epics/m20-nuget-multi-rid/)
+- **Status:** Multi-RID NuGet — one nupkg with win/osx/linux natives for Mnemon
+- **Last update:** 2026-09-03 — Multi-RID pack script + CI matrix; local win-x64 smoke OK (`0.1.5`)
 
 ## Completed
 
@@ -63,10 +63,10 @@ Path: [docs/done/m19-nuget-org-publish](done/m19-nuget-org-publish/)
 
 ## Next
 
-1. Optional: npm Trusted Publishing (OIDC) and revoke long-lived `NPM_TOKEN`
-2. Optional: MCP wrapper epic (`npx` / Cursor tools on `@teamdoticca/argos`)
-3. linux-x64 / osx-arm64 NuGet RID matrix
-4. Mnemon PackageReference from nuget.org (`0.1.4`) dogfood
+1. Finish m20: pack script + CI matrix + smoke + publish `0.1.5`
+2. Mnemon PackageReference bump + remove Windows-only RID default (separate repo)
+3. Optional: npm Trusted Publishing (OIDC) and revoke long-lived `NPM_TOKEN`
+4. Optional: MCP wrapper epic (`npx` / Cursor tools on `@teamdoticca/argos`)
 
 ## Blockers
 
