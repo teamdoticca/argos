@@ -31,7 +31,7 @@ English only. Update this file on every epic status change.
 | m17 TypeScript napi | [done/m17-typescript-napi](done/m17-typescript-napi/) | done |
 | m18 Document root discovery | [done/m18-document-root-discovery](done/m18-document-root-discovery/) | done |
 | m19 NuGet.org publish | [done/m19-nuget-org-publish](done/m19-nuget-org-publish/) | done |
-| m20 NuGet multi-RID natives | [epics/m20-nuget-multi-rid](epics/m20-nuget-multi-rid/) | in_progress |
+| m20 NuGet multi-RID natives | [done/m20-nuget-multi-rid](done/m20-nuget-multi-rid/) | done |
 
 ## Done
 
@@ -55,6 +55,7 @@ English only. Update this file on every epic status change.
 - [m17-typescript-napi](done/m17-typescript-napi/)
 - [m18-document-root-discovery](done/m18-document-root-discovery/)
 - [m19-nuget-org-publish](done/m19-nuget-org-publish/)
+- [m20-nuget-multi-rid](done/m20-nuget-multi-rid/)
 
 ## Deferred
 
