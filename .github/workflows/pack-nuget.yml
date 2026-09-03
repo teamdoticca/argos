@@ -55,7 +55,7 @@ jobs:
       base_version: ${{ steps.packver.outputs.base }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install Rust stable (MSVC)
         uses: dtolnay/rust-toolchain@stable
@@ -64,7 +64,7 @@ jobs:
           targets: x86_64-pc-windows-msvc
 
       - name: Setup .NET 8
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: "8.0.x"
 
@@ -131,7 +131,7 @@ jobs:
           Write-Host "Resolved Argos $version ($($nupkg.Name))"
 
       - name: Upload nupkg artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: argos-nuget-win-x64
           path: artifacts/nuget/*.nupkg
@@ -172,13 +172,13 @@ jobs:
       packages: write
     steps:
       - name: Download nupkg
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: argos-nuget-win-x64
           path: artifacts/nuget
 
       - name: Setup .NET 8 (GitHub Packages auth)
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: "8.0.x"
           source-url: https://nuget.pkg.github.com/teamdoticca/index.json
@@ -240,7 +240,7 @@ jobs:
       id-token: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install Rust stable (MSVC)
         uses: dtolnay/rust-toolchain@stable
@@ -249,7 +249,7 @@ jobs:
           targets: x86_64-pc-windows-msvc
 
       - name: Setup .NET 8
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: "8.0.x"
 
@@ -280,7 +280,7 @@ jobs:
 
       - name: Download packed nupkg
         if: steps.pubver.outputs.need_repack != 'true'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: argos-nuget-win-x64
           path: artifacts/nuget
