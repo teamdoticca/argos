@@ -333,5 +333,5 @@ jobs:
           - **Install:** ``dotnet add package Argos --version ${{ steps.pubver.outputs.version }}``
           - **Gallery:** https://www.nuget.org/packages/Argos
           - **Auth:** Trusted Publishing (OIDC) via ``NuGet/login@v1``
-          - **Prep:** ``docs/epics/m19-nuget-org-publish/nugetorg-prep.md``
+          - **Prep:** ``docs/done/m19-nuget-org-publish/nugetorg-prep.md``
           "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8
