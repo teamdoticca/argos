@@ -39,6 +39,9 @@ Argos is public; anonymous clone and README access succeeded. Master requires PR
 | m21 Planner root source watch | [done/m21-planner-root-source-watch](done/m21-planner-root-source-watch/) | done |
 | m22 Polyglot + ops discovery | [done/m22-polyglot-ops-discovery](done/m22-polyglot-ops-discovery/) | done |
 | m23 Public repository readiness | [done/m23-public-readiness](done/m23-public-readiness/) | done |
+| m24 Dependency upgrade compatibility | [epics/m24-dependency-upgrades](epics/m24-dependency-upgrades/) | in_progress |
+
+Dependency maintenance 2026-09-19: TOML document parsing and coordinated napi 3/CLI migration are implemented with uuid/napi-build patch updates and grouped Cargo napi proposals. Windows/Linux strict Rust gates and 38 tests per platform passed, as did Windows Node API/Watch, npm audit/archive and package metadata checks. Hosted verification remains required before the approved consolidated merge and closure of superseded Dependabot PRs.
 
 ## Done
 

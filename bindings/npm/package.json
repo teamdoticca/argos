@@ -33,15 +33,12 @@
     "*.node"
   ],
   "napi": {
-    "name": "argos",
-    "triples": {
-      "defaults": false,
-      "additional": [
-        "x86_64-pc-windows-msvc",
-        "x86_64-unknown-linux-gnu",
-        "aarch64-apple-darwin"
-      ]
-    }
+    "binaryName": "argos",
+    "targets": [
+      "x86_64-pc-windows-msvc",
+      "x86_64-unknown-linux-gnu",
+      "aarch64-apple-darwin"
+    ]
   },
   "engines": {
     "node": ">= 18"
@@ -49,8 +46,8 @@
   "scripts": {
     "prepack": "node prepare-package.mjs",
     "artifacts": "napi artifacts",
-    "build": "napi build --platform --release --cargo-flags=--locked --cargo-cwd ../../crates/argos-napi --js binding.js --dts binding.d.ts",
-    "build:debug": "napi build --platform --cargo-flags=--locked --cargo-cwd ../../crates/argos-napi --js binding.js --dts binding.d.ts",
+    "build": "node build.mjs --release",
+    "build:debug": "node build.mjs",
     "check:natives": "node check-natives.mjs",
     "prepublishOnly": "node check-natives.mjs",
     "smoke": "node smoke.mjs",
@@ -61,7 +58,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "@napi-rs/cli": "^2.18.4"
+    "@napi-rs/cli": "^3.10.1"
   },
   "optionalDependencies": {}
 }

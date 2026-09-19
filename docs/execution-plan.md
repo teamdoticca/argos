@@ -4,10 +4,10 @@ Live status. Update on every meaningful progress.
 
 ## Current
 
-- **Active epic:** none
-- **Status:** m23-public-readiness done; Argos is public and PR #2 is merged.
+- **Active epic:** m24-dependency-upgrades
+- **Status:** in_progress; repair all six initial Dependabot proposals while preserving public APIs and package versions.
 - **Owner approval (2026-09-19):** Policies, monitored mailbox and distribution rights confirmed; completion of public launch authorized after readiness checks passed.
-- **Last update:** 2026-09-19 - Anonymous clone/docs access verified. Master and version-tag protections, secret scanning, push protection, Dependabot security updates and private vulnerability reporting enabled and verified. No packages, version tags or credentials changed.
+- **Last update:** 2026-09-19 - TOML parsing and coordinated napi 3/CLI migration implemented with uuid/napi-build updates. Windows/Linux strict Rust checks and 38 tests each passed; Windows Node API/Watch, npm audit/archive and package metadata checks passed. Owner approved consolidated PR, gated merge and closure of superseded Dependabot PRs. Hosted matrices are pending; no publication or credential changes.
 
 ## Completed
 
@@ -99,10 +99,10 @@ Path: [docs/done/m23-public-readiness](done/m23-public-readiness/)
 
 ## Next
 
-1. Maintain public issues, vulnerability reports and dependency alerts.
+1. Complete m24 hosted verification, merge the consolidated dependency repair only when green and close superseded PRs #3 through #8. Continue maintaining public issues, vulnerability reports and dependency alerts.
 2. Before a separately authorized package release, verify protected environments and registry trust, choose a new version, and validate OIDC before revoking the old npm token. Follow the [release checklist](RELEASING.md).
-3. Later: Mnemon integration updates and an optional MCP wrapper epic, in separately scoped work. No next epic is started.
+3. Later: Mnemon integration updates and an optional MCP wrapper epic, in separately scoped work. No epic beyond m24 is started.
 
 ## Blockers
 
-No public-launch blockers remain. Registry trust and publication-environment verification remain prerequisites for the next package release, not unfinished repository launch work.
+No public-launch blockers remain. m24 awaits hosted cross-platform verification and audit. Registry trust and publication-environment verification remain prerequisites for the next package release, not unfinished repository launch work.
