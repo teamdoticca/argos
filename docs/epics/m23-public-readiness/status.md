@@ -23,11 +23,20 @@ in_progress
 - Actionlint passed locally and in the exact configured container. ShellCheck was not run by this gate.
 - git diff --check and relative-link validation across 18 changed Markdown files passed.
 
+## Hosted Evidence (2026-09-19)
+
+PR [#2](https://github.com/teamdoticca/argos/pull/2), implementation commit `964b0c8843515fa31c678396303c5534ec74ef3a`:
+
+- [verify](https://github.com/teamdoticca/argos/actions/runs/35418017626): passed Windows/Linux/macOS Rust gates, metadata, workflow lint and history/dependency scanning.
+- [pack-npm](https://github.com/teamdoticca/argos/actions/runs/35418017812): passed all three native targets and Node smokes.
+- [pack-nuget](https://github.com/teamdoticca/argos/actions/runs/35418017729): built all five RIDs, packed successfully and passed Windows x64, Linux x64/ARM64 and macOS ARM64 consumer smokes. Intel Mac remains pack-verified only.
+- All public and GitHub Packages publication jobs were skipped. No merge or visibility change was performed.
+
 ## Remaining Launch Gates
 
 On 2026-09-19, the current working tree passed Windows and Docker Linux format, strict lint and all 38 Rust tests per platform again. Workflow lint, package metadata/license checks and diff whitespace checks also passed. The owner authorized a dedicated branch, commit, push and pull request for non-publishing GitHub CI; merge, publication and visibility changes remain unauthorized.
 
-- Run the prepared workflows on GitHub with publication disabled, including macOS and native RID matrices. Intel Mac remains pack-verified, not runtime-certified.
+- Review and approve PR #2 before merge; require passing checks on the final reviewed revision. Hosted implementation checks are green; Intel Mac remains pack-verified, not runtime-certified.
 - Confirm distribution rights and that the security/conduct mailbox is monitored. Assign CODEOWNERS only to a verified write-enabled maintainer/team.
 - Protect the default branch/release tags, enable available GitHub security features, and configure protected environments and registry trust policies.
 - Verify an OIDC release before revoking the old npm token; use a new release version because public 0.1.7 already exists.

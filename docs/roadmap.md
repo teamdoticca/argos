@@ -20,6 +20,8 @@ Public-readiness update 2026-09-18: licensing, contributor guidance, pinned CI, 
 
 2026-09-19: current Windows/Linux Rust gates, workflow lint and metadata/license checks passed again. The owner approved a readiness branch and PR for GitHub CI; merge, publication and visibility changes remain separate decisions.
 
+Hosted validation is now green for implementation commit 964b0c8 in [PR #2](https://github.com/teamdoticca/argos/pull/2): Windows/Linux/macOS verification, all npm targets, five NuGet native builds and four RID consumer smokes. Every publish job was skipped. Remaining launch gates are PR approval, ownership/contact confirmation and repository protections; registry trust is required before the next package release.
+
 | Epic | Path | Status |
 | ------ | ------ | -------- |
 | m07 Backend Abstraction | [done/m07-backend-abstraction](done/m07-backend-abstraction/) | done |
