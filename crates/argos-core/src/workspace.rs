@@ -42,13 +42,21 @@ impl Workspace {
         }
         let root = crate::path_identity::canonicalize_lossy(root);
         let case_sensitive = detect_case_sensitivity(&root);
-        let symlink_mode = options
-            .symlink_mode
-            .unwrap_or_else(|| "follow".to_string());
+        let symlink_mode = options.symlink_mode.unwrap_or_else(|| "follow".to_string());
         let workspace_id = Uuid::new_v4();
         let ignore = IgnoreEngine::build(&root, case_sensitive)?;
-        let (snapshot, snap_v, content_v) =
-            build_snapshot(&root, workspace_id, case_sensitive, &symlink_mode, &ignore, 1, 1, None, None, SnapshotState::Ready)?;
+        let (snapshot, snap_v, content_v) = build_snapshot(
+            &root,
+            workspace_id,
+            case_sensitive,
+            &symlink_mode,
+            &ignore,
+            1,
+            1,
+            None,
+            None,
+            SnapshotState::Ready,
+        )?;
 
         Ok(Self {
             root,
@@ -140,6 +148,10 @@ impl Workspace {
     }
 }
 
+#[allow(
+    clippy::too_many_arguments,
+    reason = "Keeps snapshot identity and version inputs explicit at the construction boundary"
+)]
 fn build_snapshot(
     root: &Path,
     workspace_id: Uuid,

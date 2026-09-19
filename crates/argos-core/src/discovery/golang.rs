@@ -84,10 +84,7 @@ fn parse_go_work(path: &Path) -> Vec<String> {
 }
 
 fn unquote(s: &str) -> String {
-    s.trim()
-        .trim_matches('"')
-        .trim_end_matches('/')
-        .to_string()
+    s.trim().trim_matches('"').trim_end_matches('/').to_string()
 }
 
 #[cfg(test)]
@@ -103,24 +100,24 @@ mod tests {
         fs::write(root.join("svc/go.mod"), "module example.com/svc\n").unwrap();
         fs::write(root.join("svc/main.go"), "package main\n").unwrap();
         let nodes = discover(root).unwrap();
-        assert!(nodes.iter().any(|n| n.id == "svc" && n.source.provider == "go-mod"));
+        assert!(nodes
+            .iter()
+            .any(|n| n.id == "svc" && n.source.provider == "go-mod"));
     }
 
     #[test]
     fn finds_go_work_members() {
         let dir = tempfile::tempdir().unwrap();
         let root = dir.path();
-        fs::write(
-            root.join("go.work"),
-            "go 1.22\n\nuse (\n  ./a\n  ./b\n)\n",
-        )
-        .unwrap();
+        fs::write(root.join("go.work"), "go 1.22\n\nuse (\n  ./a\n  ./b\n)\n").unwrap();
         fs::create_dir_all(root.join("a")).unwrap();
         fs::create_dir_all(root.join("b")).unwrap();
         fs::write(root.join("a/go.mod"), "module a\n").unwrap();
         fs::write(root.join("b/go.mod"), "module b\n").unwrap();
         let nodes = discover(root).unwrap();
-        assert!(nodes.iter().any(|n| n.id == "a" && n.source.provider == "go-work"));
+        assert!(nodes
+            .iter()
+            .any(|n| n.id == "a" && n.source.provider == "go-work"));
         assert!(nodes.iter().any(|n| n.id == "b"));
     }
 }

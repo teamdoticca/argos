@@ -84,9 +84,7 @@ impl Workspace {
     pub fn watch_start(&self) -> Result<()> {
         let scopes = self.inner.current_snapshot().planning.scopes.clone();
         let mut backend = create_native_backend();
-        backend
-            .start(&self.inner, &scopes)
-            .map_err(to_napi_err)?;
+        backend.start(&self.inner, &scopes).map_err(to_napi_err)?;
         *self.watch.lock() = Some(WatchSession { backend });
         Ok(())
     }
@@ -244,11 +242,7 @@ impl WatchBackend for UnsupportedBackend {
             max_watch_resources: None,
         }
     }
-    fn start(
-        &mut self,
-        _: &CoreWorkspace,
-        _: &[argos_core::WatchScope],
-    ) -> argos_core::Result<()> {
+    fn start(&mut self, _: &CoreWorkspace, _: &[argos_core::WatchScope]) -> argos_core::Result<()> {
         Err(argos_core::ArgosError::UnsupportedPlatform(
             "no watch backend for this OS".into(),
         ))

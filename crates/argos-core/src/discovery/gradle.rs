@@ -47,13 +47,18 @@ mod tests {
     fn finds_android_settings_and_module() {
         let dir = tempfile::tempdir().unwrap();
         let root = dir.path();
-        fs::write(root.join("settings.gradle.kts"), "rootProject.name = \"app\"\n").unwrap();
+        fs::write(
+            root.join("settings.gradle.kts"),
+            "rootProject.name = \"app\"\n",
+        )
+        .unwrap();
         fs::create_dir_all(root.join("app")).unwrap();
         fs::write(root.join("app/build.gradle.kts"), "plugins {}\n").unwrap();
         let nodes = discover(root).unwrap();
         assert!(nodes
             .iter()
-            .any(|n| n.source.provider == "android-gradle" && n.source.manifest == "settings.gradle.kts"));
+            .any(|n| n.source.provider == "android-gradle"
+                && n.source.manifest == "settings.gradle.kts"));
         assert!(nodes
             .iter()
             .any(|n| n.id == "app" && n.source.provider == "gradle"));

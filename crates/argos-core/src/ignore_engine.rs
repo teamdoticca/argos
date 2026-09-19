@@ -151,7 +151,9 @@ fn collect_nested_gitignores(root: &Path, rules: &mut Vec<IgnoreRule>) {
         if path.parent() == Some(root) {
             continue;
         }
-        let Some(parent) = path.parent() else { continue };
+        let Some(parent) = path.parent() else {
+            continue;
+        };
         let Ok(rel) = parent.strip_prefix(root) else {
             continue;
         };
@@ -175,4 +177,3 @@ fn collect_nested_gitignores(root: &Path, rules: &mut Vec<IgnoreRule>) {
 pub fn hard_default_names() -> &'static [&'static str] {
     HARD_DEFAULTS
 }
-

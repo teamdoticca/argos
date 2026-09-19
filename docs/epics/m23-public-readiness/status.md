@@ -1,0 +1,36 @@
+# Status
+
+in_progress
+
+## Implemented
+
+- MIT license and Doticca attribution; verified license/readme inclusion in npm and NuGet archives.
+- Contributor, conduct, security, support, compatibility and release guidance; issue and PR templates; Dependabot configuration.
+- Committed-lockfile policy, pinned Rust toolchain, strict cross-platform format/lint/test workflow, version/archive checks, dependency audits and full-history secret scanning.
+- Immutable action revisions and scanner images, credential-free checkouts, read-only default permissions and explicit publication behind verification gates.
+- npm OIDC/provenance workflow and protected environment references for npm/NuGet. Registry activation remains a maintainer task.
+- Shared complete-MSVC selection and Docker Desktop Linux verification fallback; locked native builds and reliable watch-smoke cleanup.
+- Upgrade notify from 7 to 8.2 to remove the unmaintained instant dependency. WorkspaceSnapshot remains the sole business truth; public APIs and package versions are unchanged.
+
+## Local Evidence (2026-09-18)
+
+- Windows and Docker Linux: rustfmt, strict clippy and 38 Rust tests passed on each platform.
+- Windows Node 22.23.2 and 24.21.0: native Open and Watch passed. A fresh npm tarball consumer passed Open; package contents validated.
+- Docker Linux Node 24.21.0: freshly built native addon passed Open and Watch against a temporary fixture.
+- Windows NuGet: fresh local 0.1.7-publiccheck package passed PackageReference Open and Watch; native, managed, README and license assets verified.
+- npm audit: zero vulnerabilities. cargo-audit 0.22.0 with --deny warnings: clean across 109 locked dependencies.
+- Gitleaks 8.24.3: no findings in 26 locally reachable commits or 227 Git-visible working files at scan time. This is not a guarantee about unfetched refs or previously distributed artifacts.
+- Actionlint passed locally and in the exact configured container. ShellCheck was not run by this gate.
+- git diff --check and relative-link validation across 18 changed Markdown files passed.
+
+## Remaining Launch Gates
+
+On 2026-09-19, the current working tree passed Windows and Docker Linux format, strict lint and all 38 Rust tests per platform again. Workflow lint, package metadata/license checks and diff whitespace checks also passed. The owner authorized a dedicated branch, commit, push and pull request for non-publishing GitHub CI; merge, publication and visibility changes remain unauthorized.
+
+- Run the prepared workflows on GitHub with publication disabled, including macOS and native RID matrices. Intel Mac remains pack-verified, not runtime-certified.
+- Confirm distribution rights and that the security/conduct mailbox is monitored. Assign CODEOWNERS only to a verified write-enabled maintainer/team.
+- Protect the default branch/release tags, enable available GitHub security features, and configure protected environments and registry trust policies.
+- Verify an OIDC release before revoking the old npm token; use a new release version because public 0.1.7 already exists.
+- Explicit owner approval is required for visibility changes, publication, tags and credential rotation. None of those operations was performed.
+
+The epic remains in_progress until the remote launch gates are verified. See [release checklist](../../RELEASING.md).

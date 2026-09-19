@@ -13,12 +13,14 @@ Open → Snapshot → List nodes / scopes / explain / find owner
 
 Typical consumers: IDE overlays, repo monitors, agent tooling (e.g. [Mnemon](https://github.com/teamdoticca/Mnemon)).
 
+**Project status:** early-stage 0.x library maintained by Doticca. See [compatibility and lifecycle](docs/COMPATIBILITY.md) before integrating. API stability, older operating systems and every filesystem layout are not guaranteed.
+
 ---
 
 ## Problems it solves
 
 | Pain without Argos | With Argos |
-|--------------------|------------|
+| -------------------- | ------------ |
 | “Watch the whole monorepo” and drown in noise | Scoped watch roots per package |
 | Guessing package roots by hand | Discovers pnpm/npm workspaces, nested `package.json`, Cargo, `.sln`/`.csproj`, … |
 | Ignoring `node_modules` / build dirs inconsistently | Ignore engine + planner share one snapshot |
@@ -44,7 +46,7 @@ Or pin a version:
 Publish / run with a supported RID so natives resolve (`DllImport("argos_ffi")`):
 
 | RID | Native file |
-|-----|-------------|
+| ----- | ------------- |
 | `win-x64` | `argos_ffi.dll` |
 | `osx-arm64` / `osx-x64` | `libargos_ffi.dylib` |
 | `linux-x64` / `linux-arm64` | `libargos_ffi.so` (glibc) |
@@ -62,7 +64,7 @@ using Argos;
 var root = @"Z:\path\to\your\repo";
 await using var ws = await ArgosWorkspace.OpenAsync(root);
 
-var snap = JsonDocument.Parse(ws.CurrentSnapshot);
+using var snap = JsonDocument.Parse(ws.CurrentSnapshot);
 // expected: identity.state == "ready"
 var scopesJson = ws.ListScopes();
 // expected: length > 0 on a real multi-package repo
@@ -95,18 +97,21 @@ const snap = ws.currentSnapshot
 const scopes = ws.listScopes()
 // expected: scopes.length > 0 on a real multi-package repo
 
-for await (const change of watch(ws, AbortSignal.timeout(30_000))) {
-  const affected = ws.getAffectedScopes(change)
-  // refresh from ws.currentSnapshot when needed
+try {
+  for await (const change of watch(ws, AbortSignal.timeout(30_000))) {
+    const affected = ws.getAffectedScopes(change)
+    // refresh from ws.currentSnapshot when needed
+  }
+} finally {
+  ws.close()
 }
-ws.close()
 ```
 
 ---
 
 ## Snapshot contract (what “truth” looks like)
 
-```json
+```jsonc
 {
   "identity": { "state": "ready", "snapshotVersion": 1, "contentVersion": 1 },
   "model": { "nodes": [ { "id": "app", "kind": "package", /* … */ } ] },
@@ -158,7 +163,7 @@ Same `OpenAsync` — expect **both** nested npm packages and .NET projects in `L
 ## API cheat sheet
 
 | You want… | Call |
-|-----------|------|
+| ----------- | ------ |
 | Full truth | `CurrentSnapshot` |
 | Discovered packages | `ListNodes()` |
 | Where to watch | `ListScopes()` |
@@ -180,5 +185,11 @@ Not a build system, package manager, IDE, language server, dependency-graph engi
 - [docs/architecture.md](docs/architecture.md) — frozen `WorkspaceSnapshot` contract  
 - [docs/README.md](docs/README.md) — full documentation map  
 
-Package license: **MIT**.
+## Contributing and Support
 
+- [Contributing](CONTRIBUTING.md): prerequisites, Windows MSVC setup, Docker fallback and verification commands.
+- [Support](SUPPORT.md) and [security reporting](SECURITY.md).
+- [Code of conduct](CODE_OF_CONDUCT.md) and [changelog](CHANGELOG.md).
+- [Release process and public-launch checklist](docs/RELEASING.md).
+
+Licensed under the [MIT license](LICENSE). Maintained by **Doticca**.

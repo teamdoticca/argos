@@ -4,9 +4,9 @@ Live status. Update on every meaningful progress.
 
 ## Current
 
-- **Active epic:** none
-- **Status:** m22 closed; awaiting next epic
-- **Last update:** 2026-09-03 — Closed m22; public **Argos 0.1.7** (polyglot + ops discovery)
+- **Active epic:** m23-public-readiness
+- **Status:** in_progress; local public-readiness implementation and checks complete; remote launch gates pending
+- **Last update:** 2026-09-19 - Revalidated the current working tree: Windows/Linux format, strict lint and 38 tests per platform, workflow lint, metadata/license checks and diff whitespace checks passed. Previous Node/NuGet smoke evidence remains in the epic status. Owner approved branch/commit/push/PR for non-publishing CI, not merge or public launch. Package versions unchanged.
 
 ## Completed
 
@@ -59,7 +59,7 @@ Path: [docs/done/m19-nuget-org-publish](done/m19-nuget-org-publish/)
 
 - [x] Trusted Publishing OIDC + dual-registry `pack-nuget`
 - [x] Gallery metadata + README primary install via nuget.org
-- [x] Public **Argos 0.1.4** — https://www.nuget.org/packages/Argos/0.1.4
+- [x] Public **Argos 0.1.4** — <https://www.nuget.org/packages/Argos/0.1.4>
 
 ### m20-nuget-multi-rid (done)
 
@@ -67,7 +67,7 @@ Path: [docs/done/m20-nuget-multi-rid](done/m20-nuget-multi-rid/)
 
 - [x] One multi-RID nupkg: win-x64, osx-arm64, osx-x64, linux-x64, linux-arm64 (glibc)
 - [x] CI matrix + assemble + smoke (osx-x64 pack-verified)
-- [x] Public **Argos 0.1.5** — https://www.nuget.org/packages/Argos/0.1.5
+- [x] Public **Argos 0.1.5** — <https://www.nuget.org/packages/Argos/0.1.5>
 - [x] npm line **`@teamdoticca/argos@0.1.5`** on npmjs; GH Packages dogfood `--tag latest`
 
 ### m21-planner-root-source-watch (done)
@@ -89,11 +89,11 @@ Path: [docs/done/m22-polyglot-ops-discovery](done/m22-polyglot-ops-discovery/)
 
 ## Next
 
-1. Mnemon PackageReference bump to `0.1.7` (separate repo); optional live Intalepoint smoke
-2. Optional: drop Windows-only RID default in Mnemon.Api
-3. Optional: npm Trusted Publishing (OIDC) and revoke long-lived `NPM_TOKEN`
-4. Optional: MCP wrapper epic (`npx` / Cursor tools on `@teamdoticca/argos`)
+1. Review and merge readiness changes; run all GitHub workflows with publication disabled.
+2. Complete the [public launch checklist](RELEASING.md): ownership/contact review, branch/security protections, verified code owner, environments and registry trust.
+3. Approve visibility separately; release a new version through OIDC, then revoke the old npm token after successful replacement validation.
+4. Later: Mnemon integration updates and an optional MCP wrapper epic, in separately scoped work.
 
 ## Blockers
 
-None.
+Public launch is blocked on owner approval and remote settings/CI verification. Local Docker cannot certify macOS or every native RID. No GitHub setting, public package or credential was changed.

@@ -13,11 +13,12 @@ pub struct SnapshotDelta {
 
 /// Compute delta using content-version semantics.
 /// Rebuild-without-change (same contentVersion) yields empty business delta.
-pub fn compute_delta(old: &WorkspaceSnapshot, new: &WorkspaceSnapshot) -> crate::Result<SnapshotDelta> {
+pub fn compute_delta(
+    old: &WorkspaceSnapshot,
+    new: &WorkspaceSnapshot,
+) -> crate::Result<SnapshotDelta> {
     if old.identity.workspace_id != new.identity.workspace_id {
-        return Err(ArgosError::InvalidDelta(
-            "workspaceId mismatch".into(),
-        ));
+        return Err(ArgosError::InvalidDelta("workspaceId mismatch".into()));
     }
     if new.identity.previous_content_version != Some(old.identity.content_version)
         && new.identity.content_version != old.identity.content_version

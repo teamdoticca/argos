@@ -5,7 +5,7 @@ English only. Update this file on every epic status change.
 ## Locked core (Product 1 — Workspace Intelligence)
 
 | Epic | Path | Status |
-|------|------|--------|
+| ------ | ------ | -------- |
 | m00 Foundation | [done/m00-foundation](done/m00-foundation/) | done |
 | m01 Topology Discovery | [done/m01-topology-discovery](done/m01-topology-discovery/) | done |
 | m02 Filesystem Semantics | [done/m02-filesystem-semantics](done/m02-filesystem-semantics/) | done |
@@ -16,8 +16,12 @@ English only. Update this file on every epic status change.
 
 ## Platform / integration (Product 2 + packaging)
 
+Public-readiness update 2026-09-18: licensing, contributor guidance, pinned CI, dependency/secret scans and explicit release safeguards implemented. Windows/Linux Rust gates, Windows Node 22/24, Linux Node 24 and Windows NuGet package smokes passed. Remote CI, security settings, registry trust and owner approval remain launch gates; see [release checklist](RELEASING.md).
+
+2026-09-19: current Windows/Linux Rust gates, workflow lint and metadata/license checks passed again. The owner approved a readiness branch and PR for GitHub CI; merge, publication and visibility changes remain separate decisions.
+
 | Epic | Path | Status |
-|------|------|--------|
+| ------ | ------ | -------- |
 | m07 Backend Abstraction | [done/m07-backend-abstraction](done/m07-backend-abstraction/) | done |
 | m08 Windows Backend | [done/m08-windows-backend](done/m08-windows-backend/) | done |
 | m09 Linux Backend | [done/m09-linux-backend](done/m09-linux-backend/) | done |
@@ -34,6 +38,7 @@ English only. Update this file on every epic status change.
 | m20 NuGet multi-RID natives | [done/m20-nuget-multi-rid](done/m20-nuget-multi-rid/) | done |
 | m21 Planner root source watch | [done/m21-planner-root-source-watch](done/m21-planner-root-source-watch/) | done |
 | m22 Polyglot + ops discovery | [done/m22-polyglot-ops-discovery](done/m22-polyglot-ops-discovery/) | done |
+| m23 Public repository readiness | [epics/m23-public-readiness](epics/m23-public-readiness/) | in_progress |
 
 ## Done
 
@@ -72,7 +77,6 @@ English only. Update this file on every epic status change.
 - Nx / Turborepo
 - Extra `.workspace` fields beyond `imports:`
 - Snapshot persistence (`argos snapshot save` / `load`)
-- npm Trusted Publishing (OIDC; revoke long-lived NPM_TOKEN)
 - linux-musl NuGet RIDs
 - linux-arm64 / darwin-x64 / musl napi triples
 - Author NuGet package signing (code-signing certificates)

@@ -134,7 +134,9 @@ pub fn discover(root: &Path, existing: &[WorkspaceNode]) -> Result<Vec<Workspace
         let da = path_depth(root, &a.0);
         let db = path_depth(root, &b.0);
         // Prefer shallower document roots (docs/ over docs/done), then higher score.
-        da.cmp(&db).then_with(|| b.1.cmp(&a.1)).then_with(|| a.0.cmp(&b.0))
+        da.cmp(&db)
+            .then_with(|| b.1.cmp(&a.1))
+            .then_with(|| a.0.cmp(&b.0))
     });
 
     let mut out = Vec::new();
@@ -145,7 +147,10 @@ pub fn discover(root: &Path, existing: &[WorkspaceNode]) -> Result<Vec<Workspace
             break;
         }
         // Skip if nested under an already chosen document root (parent won).
-        if emitted_roots.iter().any(|r| dir.starts_with(r) && dir != *r) {
+        if emitted_roots
+            .iter()
+            .any(|r| dir.starts_with(r) && dir != *r)
+        {
             continue;
         }
         let conf = confidence_from_score(score);
@@ -178,10 +183,15 @@ pub fn discover(root: &Path, existing: &[WorkspaceNode]) -> Result<Vec<Workspace
         if is_junk_path(root, &dir) {
             continue;
         }
-        if package_roots.iter().any(|p| p == &dir || dir.starts_with(p)) {
+        if package_roots
+            .iter()
+            .any(|p| p == &dir || dir.starts_with(p))
+        {
             // Allow agent surfaces under repo even when a fallback package owns root —
             // only skip when under a *real* package root that isn't the workspace root.
-            let under_real = package_roots.iter().any(|p| p != root && dir.starts_with(p));
+            let under_real = package_roots
+                .iter()
+                .any(|p| p != root && dir.starts_with(p));
             if under_real {
                 continue;
             }
@@ -297,8 +307,7 @@ fn is_junk_path(root: &Path, path: &Path) -> bool {
     };
     for c in rel.components() {
         let name = c.as_os_str().to_string_lossy();
-        if is_skip_dir_name(&name)
-        {
+        if is_skip_dir_name(&name) {
             return true;
         }
     }
@@ -375,10 +384,7 @@ fn score_document_dir(dir: &Path, from_guidance: bool) -> (i32, String) {
 
         if DOC_EXTENSIONS.iter().any(|e| *e == ext) {
             md += 1;
-            if PLANNING_NAME_HINTS
-                .iter()
-                .any(|h| name_lower.contains(h))
-            {
+            if PLANNING_NAME_HINTS.iter().any(|h| name_lower.contains(h)) {
                 planning += 1;
                 best_manifest = path
                     .file_name()
@@ -564,13 +570,11 @@ fn is_primary_agent_guidance(path: &Path) -> bool {
         c.as_os_str()
             .to_str()
             .is_some_and(|s| s.eq_ignore_ascii_case("rules"))
-    }) && path
-        .components()
-        .any(|c| {
-            c.as_os_str()
-                .to_str()
-                .is_some_and(|s| s.eq_ignore_ascii_case(".cursor"))
-        })
+    }) && path.components().any(|c| {
+        c.as_os_str()
+            .to_str()
+            .is_some_and(|s| s.eq_ignore_ascii_case(".cursor"))
+    })
 }
 
 #[cfg(test)]
@@ -620,9 +624,9 @@ mod tests {
         write(&root.join("handbook/architecture.md"), "# Arch\n");
         let nodes = discover(root, &[]).unwrap();
         assert!(
-            nodes.iter().any(|n| {
-                n.source.provider == "document-root" && n.root.ends_with("handbook")
-            }),
+            nodes
+                .iter()
+                .any(|n| { n.source.provider == "document-root" && n.root.ends_with("handbook") }),
             "got {:?}",
             nodes
                 .iter()
@@ -655,24 +659,21 @@ mod tests {
                 .collect::<Vec<_>>()
         );
         assert!(
-            nodes.iter().any(|n| {
-                n.source.provider == "guidance-path" && n.root.ends_with("rules")
-            }),
+            nodes
+                .iter()
+                .any(|n| { n.source.provider == "guidance-path" && n.root.ends_with("rules") }),
             "expected .cursor/rules guidance-path"
         );
-        assert!(nodes.iter().any(|n| {
-            n.source.provider == "guidance-path" && n.root.ends_with("AGENTS.md")
-        }));
+        assert!(nodes
+            .iter()
+            .any(|n| { n.source.provider == "guidance-path" && n.root.ends_with("AGENTS.md") }));
     }
 
     #[test]
     fn skips_node_modules_docs() {
         let dir = tempfile::tempdir().unwrap();
         let root = dir.path();
-        write(
-            &root.join("node_modules/pkg/docs/readme.md"),
-            "# Vendor\n",
-        );
+        write(&root.join("node_modules/pkg/docs/readme.md"), "# Vendor\n");
         write(&root.join("node_modules/pkg/docs/roadmap.md"), "# R\n");
         let nodes = discover(root, &[]).unwrap();
         assert!(
@@ -706,7 +707,8 @@ mod tests {
         }];
         let nodes = discover(root, &existing).unwrap();
         assert!(nodes.iter().any(|n| n.source.provider == "document-root"));
-        assert!(!nodes.iter().any(|n| n.root.ends_with("app")
-            && n.source.provider == "guidance-path"));
+        assert!(!nodes
+            .iter()
+            .any(|n| n.root.ends_with("app") && n.source.provider == "guidance-path"));
     }
 }

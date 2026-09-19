@@ -24,6 +24,9 @@ fn main() {
     let scopes = list_scopes(&snap);
     println!("scopes={}", scopes.len());
     for s in scopes {
-        println!("scope package={} root={} watch={:?}", s.package, s.root, s.watch);
+        println!(
+            "scope package={} root={} watch={:?}",
+            s.package, s.root, s.watch
+        );
     }
 }

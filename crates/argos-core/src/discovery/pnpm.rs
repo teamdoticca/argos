@@ -16,7 +16,9 @@ pub fn discover(root: &Path) -> Result<Vec<WorkspaceNode>> {
 
     let mut out = Vec::new();
     for pkg in packages {
-        let Some(pattern) = pkg.as_str() else { continue };
+        let Some(pattern) = pkg.as_str() else {
+            continue;
+        };
         for dir in expand_workspace_globs(root, pattern) {
             let id = dir
                 .file_name()

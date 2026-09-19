@@ -5,10 +5,13 @@ English only. Architecture is frozen — implement against the contract; do not 
 ## Map
 
 | Document | Purpose |
-|----------|---------|
+| ---------- | --------- |
 | [architecture.md](architecture.md) | Frozen system contract |
 | [roadmap.md](roadmap.md) | Epics (current + deferred) |
 | [execution-plan.md](execution-plan.md) | Live execution status (update on every progress) |
+| [COMPATIBILITY.md](COMPATIBILITY.md) | Supported runtimes, lifecycle and troubleshooting |
+| [RELEASING.md](RELEASING.md) | Release process and GitHub launch gates |
+| [../CONTRIBUTING.md](../CONTRIBUTING.md) | Contributor setup and checks |
 | [epics/](epics/) | Active epic folders |
 | [done/](done/) | Completed epics |
 

@@ -1,12 +1,16 @@
 //! macOS backend using FSEvents (via the `notify` crate).
 
 use argos_backend::{PlatformCapabilities, WatchBackend};
-use argos_core::{
-    DomainEvent, FileEventKind, Result, WatchScope, Workspace, WorkspaceEventKind,
-};
-use notify::{Config, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
+#[cfg(target_os = "macos")]
+use argos_core::WorkspaceEventKind;
+use argos_core::{DomainEvent, FileEventKind, Result, WatchScope, Workspace};
+use notify::RecommendedWatcher;
+#[cfg(target_os = "macos")]
+use notify::{Config, EventKind, RecursiveMode, Watcher};
 use std::path::PathBuf;
-use std::sync::mpsc::{Receiver, TryRecvError};
+use std::sync::mpsc::Receiver;
+#[cfg(target_os = "macos")]
+use std::sync::mpsc::TryRecvError;
 
 pub struct MacosBackend {
     watcher: Option<RecommendedWatcher>,
@@ -50,9 +54,9 @@ impl WatchBackend for MacosBackend {
         #[cfg(not(target_os = "macos"))]
         {
             let _ = (workspace, scopes);
-            return Err(argos_core::ArgosError::UnsupportedPlatform(
+            Err(argos_core::ArgosError::UnsupportedPlatform(
                 "macos backend requires macOS host".into(),
-            ));
+            ))
         }
         #[cfg(target_os = "macos")]
         {
@@ -167,7 +171,8 @@ fn poll_inner(this: &mut MacosBackend) -> Result<Vec<DomainEvent>> {
             }
             Ok(Err(e)) => {
                 let msg = e.to_string().to_lowercase();
-                if msg.contains("overflow") || msg.contains("rescan") || msg.contains("invalidate") {
+                if msg.contains("overflow") || msg.contains("rescan") || msg.contains("invalidate")
+                {
                     events.push(DomainEvent::File {
                         kind: FileEventKind::ScopeRescan,
                         path: String::new(),

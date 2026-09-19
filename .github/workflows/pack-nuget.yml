@@ -14,6 +14,11 @@ on:
       - ".github/workflows/pack-nuget.yml"
       - "Cargo.toml"
       - "Cargo.lock"
+      - "LICENSE"
+      - "rust-toolchain.toml"
+      - ".github/workflows/verify.yml"
+      - "scripts/verify.ps1"
+      - "scripts/enter-msvc.ps1"
       - "fixtures/**"
   pull_request:
     paths:
@@ -23,13 +28,18 @@ on:
       - ".github/workflows/pack-nuget.yml"
       - "Cargo.toml"
       - "Cargo.lock"
+      - "LICENSE"
+      - "rust-toolchain.toml"
+      - ".github/workflows/verify.yml"
+      - "scripts/verify.ps1"
+      - "scripts/enter-msvc.ps1"
       - "fixtures/**"
   workflow_dispatch:
     inputs:
       publish:
         description: "Publish after pack + smoke"
         type: boolean
-        default: true
+        default: false
       registry:
         description: "Publish target (GitHub Packages dogfood vs public nuget.org)"
         type: choice
@@ -50,7 +60,11 @@ env:
   REQUIRED_RIDS: "win-x64,osx-arm64,linux-x64,osx-x64,linux-arm64"
 
 jobs:
+  verify:
+    uses: ./.github/workflows/verify.yml
+
   build-native:
+    timeout-minutes: 25
     name: native ${{ matrix.rid }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -79,17 +93,19 @@ jobs:
             native_name: libargos_ffi.dylib
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
 
       - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87
         with:
-          toolchain: stable
+          toolchain: '1.98.0'
           targets: ${{ matrix.rust_target }}
 
       - name: Build argos-ffi
         shell: bash
-        run: cargo build -p argos-ffi --release --target "${{ matrix.rust_target }}"
+        run: cargo build -p argos-ffi --locked --release --target "${{ matrix.rust_target }}"
 
       - name: Stage RID native
         shell: bash
@@ -107,7 +123,7 @@ jobs:
           ls -la "$dest"
 
       - name: Upload native artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           # Upload parent so artifact root is <rid>/native/<file> (merge-friendly).
           name: native-${{ matrix.rid }}
@@ -125,17 +141,19 @@ jobs:
       base_version: ${{ steps.packver.outputs.base }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
 
       - name: Download native RID artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           pattern: native-*
           path: artifacts/natives
           merge-multiple: true
 
       - name: Setup .NET 8
-        uses: actions/setup-dotnet@v6
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68
         with:
           dotnet-version: "8.0.x"
 
@@ -202,7 +220,7 @@ jobs:
           Write-Host "Resolved Argos $version ($($nupkg.Name))"
 
       - name: Upload nupkg artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: argos-nuget
           path: artifacts/nuget/*.nupkg
@@ -229,16 +247,18 @@ jobs:
           # Dedicated Intel Mac runners (macos-13) queue too long for PR smoke.
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
 
       - name: Download nupkg
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: argos-nuget
           path: artifacts/nuget
 
       - name: Setup .NET 8
-        uses: actions/setup-dotnet@v6
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68
         with:
           dotnet-version: "8.0.x"
 
@@ -265,27 +285,27 @@ jobs:
 
   publish-github-packages:
     name: Publish GitHub Packages
-    needs: [pack, smoke-rid]
+    needs: [pack, smoke-rid, verify]
     if: >
-      (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'))
-      || startsWith(github.ref, 'refs/tags/v')
-      || (github.event_name == 'workflow_dispatch'
-          && (inputs.publish == true || inputs.publish == 'true')
-          && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-          && (inputs.registry == 'github' || inputs.registry == 'both' || inputs.registry == ''))
+      github.repository == 'teamdoticca/argos'
+      && github.event_name == 'workflow_dispatch'
+      && inputs.publish
+      && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+      && (inputs.registry == 'github' || inputs.registry == 'both')
+    timeout-minutes: 15
     runs-on: windows-latest
     permissions:
       contents: read
       packages: write
     steps:
       - name: Download nupkg
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: argos-nuget
           path: artifacts/nuget
 
       - name: Setup .NET 8 (GitHub Packages auth)
-        uses: actions/setup-dotnet@v6
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68
         with:
           dotnet-version: "8.0.x"
           source-url: https://nuget.pkg.github.com/teamdoticca/index.json
@@ -329,36 +349,40 @@ jobs:
           - **Feed:** `https://nuget.pkg.github.com/teamdoticca/index.json`
           - **Org packages:** https://github.com/orgs/teamdoticca/packages
 
-          Main pushes publish as ``{csproj Version}.{GITHUB_RUN_NUMBER}``.
-          Tags ``v*`` and manual github/both dispatch publish the packed version.
+          Publication requires explicit dispatch from the default branch.
           "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8
 
   publish-nuget-org:
     name: Publish nuget.org
-    needs: [pack, smoke-rid]
+    needs: [pack, smoke-rid, verify]
     # Explicit only — never auto-publish CI 4-part versions to the public gallery.
     if: >
       github.event_name == 'workflow_dispatch'
       && (inputs.publish == true || inputs.publish == 'true')
       && (inputs.registry == 'nugetorg' || inputs.registry == 'both')
-      && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+      && github.repository == 'teamdoticca/argos'
+      && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     runs-on: windows-latest
+    environment: nugetorg
+    timeout-minutes: 15
     permissions:
       contents: read
       id-token: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
 
       - name: Download native RID artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           pattern: native-*
           path: artifacts/natives
           merge-multiple: true
 
       - name: Setup .NET 8
-        uses: actions/setup-dotnet@v6
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68
         with:
           dotnet-version: "8.0.x"
 
@@ -388,7 +412,7 @@ jobs:
 
       - name: Download packed nupkg
         if: steps.pubver.outputs.need_repack != 'true'
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: argos-nuget
           path: artifacts/nuget
@@ -407,7 +431,7 @@ jobs:
             -Version "${{ steps.pubver.outputs.version }}"
 
       - name: NuGet login (OIDC → temp API key)
-        uses: NuGet/login@v1
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841
         id: login
         with:
           user: ${{ secrets.NUGET_USER }}
