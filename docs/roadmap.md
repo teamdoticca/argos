@@ -16,13 +16,9 @@ English only. Update this file on every epic status change.
 
 ## Platform / integration (Product 2 + packaging)
 
-Public-readiness update 2026-09-18: licensing, contributor guidance, pinned CI, dependency/secret scans and explicit release safeguards implemented. Windows/Linux Rust gates, Windows Node 22/24, Linux Node 24 and Windows NuGet package smokes passed. Remote CI, security settings, registry trust and owner approval remain launch gates; see [release checklist](RELEASING.md).
+Public launch completed on 2026-09-19 with owner approval. [PR #2](https://github.com/teamdoticca/argos/pull/2) merged after final readiness head b4ed22c passed Windows/Linux/macOS verification, npm native targets and NuGet builds/consumer smokes. Licensing, community policies, pinned CI and dependency/history scans are in place. Intel Mac remains pack-verified only.
 
-2026-09-19: current Windows/Linux Rust gates, workflow lint and metadata/license checks passed again. The owner approved a readiness branch and PR for GitHub CI; merge, publication and visibility changes remain separate decisions.
-
-Hosted validation is now green for implementation commit 964b0c8 in [PR #2](https://github.com/teamdoticca/argos/pull/2): Windows/Linux/macOS verification, all npm targets, five NuGet native builds and four RID consumer smokes. Every publish job was skipped. Remaining launch gates are PR approval, ownership/contact confirmation and repository protections; registry trust is required before the next package release.
-
-The owner approved the policies, confirmed monitoring of <fotisgpap@doticca.com> and reported completion of the remaining owner-side checks, including distribution rights, on 2026-09-19. Master protection is now applied and verified: PRs, six strict CI checks, resolved conversations and admin enforcement, with no force pushes/deletion. Zero reviewer approvals are required because there is one maintainer. Final PR update and remote security verification remain; no merge, publication or visibility change is performed in this preparation step.
+Argos is public; anonymous clone and README access succeeded. Master requires PRs, six strict CI checks, resolved conversations and admin enforcement, with no force pushes/deletion and no second-reviewer requirement. Version tags are protected against updates/deletion. Secret scanning, push protection, Dependabot security updates and private vulnerability reporting are enabled. No packages, version tags or credentials changed. Protected publication environments and registry trust must be verified before the next package release; see the [release checklist](RELEASING.md).
 
 | Epic | Path | Status |
 | ------ | ------ | -------- |
@@ -42,7 +38,7 @@ The owner approved the policies, confirmed monitoring of <fotisgpap@doticca.com>
 | m20 NuGet multi-RID natives | [done/m20-nuget-multi-rid](done/m20-nuget-multi-rid/) | done |
 | m21 Planner root source watch | [done/m21-planner-root-source-watch](done/m21-planner-root-source-watch/) | done |
 | m22 Polyglot + ops discovery | [done/m22-polyglot-ops-discovery](done/m22-polyglot-ops-discovery/) | done |
-| m23 Public repository readiness | [epics/m23-public-readiness](epics/m23-public-readiness/) | in_progress |
+| m23 Public repository readiness | [done/m23-public-readiness](done/m23-public-readiness/) | done |
 
 ## Done
 
@@ -69,6 +65,7 @@ The owner approved the policies, confirmed monitoring of <fotisgpap@doticca.com>
 - [m20-nuget-multi-rid](done/m20-nuget-multi-rid/)
 - [m21-planner-root-source-watch](done/m21-planner-root-source-watch/)
 - [m22-polyglot-ops-discovery](done/m22-polyglot-ops-discovery/)
+- [m23-public-readiness](done/m23-public-readiness/)
 
 ## Deferred
 

@@ -10,10 +10,13 @@ Doticca maintains the release process. Repository preparation does not authorize
 - Protect master (or the current default branch): require PRs, passing checks and resolved conversations; restrict force pushes/deletion. Require review where maintainer staffing permits it. Protect release tags and review workflow changes separately.
 - Enable private vulnerability reporting, secret scanning, push protection and Dependabot security updates where the GitHub plan permits. Decide whether Discussions is needed; issues are the default support channel.
 - Confirm the conduct/security contact is monitored. Verify CODEOWNERS has write access before requiring owner review.
-- Create protected environments named npmjs and nugetorg, restricted to the default branch. Require a maintainer approval for production publication where the GitHub plan supports it.
+- After explicit owner approval, change visibility, confirm anonymous clone/docs access and set a useful repository description/topics. A package or GitHub release is not required for public visibility.
+
+## Before the Next Package Release
+
+- Create or verify protected environments named npmjs and nugetorg, restricted to the default branch. Require a maintainer approval for production publication where the GitHub plan supports it.
 - Configure npm Trusted Publishing for teamdoticca/argos, workflow pack-npm.yml, environment npmjs. After a successful OIDC release, revoke the old NPM_TOKEN and remove it from GitHub. Do not remove a needed credential before the replacement is verified.
 - Confirm the NuGet Trusted Publishing policy for pack-nuget.yml matches the nugetorg environment and default branch; retain only NUGET_USER as the account selector, not a long-lived API key.
-- After explicit owner approval, change visibility, confirm anonymous clone/docs access, set a useful repository description/topics and create a GitHub release tied to the verified version tag.
 
 ## Versioning
 
@@ -31,12 +34,12 @@ Package workflows no longer publish automatically on every default-branch push. 
 
 If one registry succeeds and the other fails, keep the successful immutable artifact and retry only the failed publication at the same commit/version. For a bad release, deprecate npm or unlist NuGet as appropriate, publish a new fixed version, and document the incident. Never silently replace artifacts or retarget a published tag.
 
-## Current Launch Gates
+## Completed Public Launch
 
-On 2026-09-19, the owner confirmed the policies, monitored reporting mailbox and remaining owner-side checks, including distribution rights. Cross-platform GitHub verification and npm/NuGet build matrices passed; all publication jobs were skipped.
+On 2026-09-19, the owner confirmed the policies, monitored reporting mailbox and remaining owner-side checks, including distribution rights, then authorized completion of the public launch. PR #2 merged at 095593e76f6c2260acb5a79e4142c48711311b30 after final readiness head b4ed22c passed cross-platform verification and npm/NuGet build matrices. All publication jobs were skipped.
 
 Master protection was applied with owner approval and read back successfully: PRs required; strict required checks Rust (windows-latest), Rust (ubuntu-latest), Rust (macos-latest), Package metadata, Workflow lint, and History and dependency scan, bound to GitHub Actions app 15368; resolved conversations; administrator enforcement; force pushes and branch deletion disabled. Required reviewer approvals are zero because there is one maintainer. Path-filtered package workflows are not required checks because they can be absent on docs-only changes; inspect them for package-relevant PRs.
 
-The repository remains private pending the separate merge/visibility step. The earlier inspection found secret scanning/push protection and Dependabot security updates disabled; verify those settings and release-tag protection before launch, subject to plan availability. Protected publication environments and registry trust policies must be verified before the next package release. A package release is not required to change repository visibility.
+The repository is public; anonymous HTTPS clone and raw README access were verified. Secret scanning, push protection, dependency vulnerability alerts, Dependabot security updates and private vulnerability reporting are enabled. Active ruleset 23691498 prevents updates/deletion of version tags matching `v*` or `[0-9]*`, with no bypass actors. Initial secret-scanning readback returned zero open alerts; this is point-in-time evidence, not a guarantee that future scans cannot find issues.
 
-Local evidence is recorded in the [readiness status](epics/m23-public-readiness/status.md). History and working-tree secret scans found no leaks in the locally available source; this does not certify unfetched refs, registry artifacts or distribution rights. No CODEOWNERS file is installed until a write-enabled owner is confirmed.
+Local and hosted evidence is recorded in the [readiness status](done/m23-public-readiness/status.md). History and working-tree secret scans found no leaks in the locally available source; this does not certify unfetched refs, registry artifacts or distribution rights. No CODEOWNERS approval is required for the sole-maintainer workflow. Protected publication environments and registry trust remain next-release checks. No package, version tag or credential was changed during launch.
