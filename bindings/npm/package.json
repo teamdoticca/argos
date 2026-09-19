@@ -1,6 +1,6 @@
 {
   "name": "@teamdoticca/argos",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Argos workspace intelligence for Node.js / TypeScript",
   "author": "Doticca",
   "main": "index.js",

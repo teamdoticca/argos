@@ -40,10 +40,15 @@ Argos is public; anonymous clone and README access succeeded. Master requires PR
 | m22 Polyglot + ops discovery | [done/m22-polyglot-ops-discovery](done/m22-polyglot-ops-discovery/) | done |
 | m23 Public repository readiness | [done/m23-public-readiness](done/m23-public-readiness/) | done |
 | m24 Dependency upgrade compatibility | [done/m24-dependency-upgrades](done/m24-dependency-upgrades/) | done |
+| m25 Package release 0.1.8 | [epics/m25-package-release](epics/m25-package-release/) | in_progress |
 
 Dependency maintenance completed 2026-09-19: [PR #10](https://github.com/teamdoticca/argos/pull/10) consolidates TOML document parsing, coordinated napi 3/CLI migration, uuid/napi-build patches and Cargo napi grouping. Implementation head a2cf551 passed all hosted verify/npm/NuGet workflows after repairing optional npm lock entries. Local Windows/Linux strict Rust gates and 38 tests each also passed. Evidence is archived with m24; final PR-head checks remain required before the approved merge and closure of superseded proposals #3 through #8. No publication or next epic was started.
 
 ## Done
+
+Release 0.1.8 authorized on 2026-09-19. m24 merged as f089f41 and passed post-merge verify/npm/NuGet; superseded proposals are closed. m25 now covers protected publication environments, OIDC verification, aligned versions, registry publication and release evidence. No package has been published during m25 yet.
+
+Release preparation: npmjs/nugetorg environments now require maintainer approval and restrict deployment to master. Manifests target 0.1.8; registry trust and release verification remain pending.
 
 - [m00-foundation](done/m00-foundation/)
 - [m01-topology-discovery](done/m01-topology-discovery/)
