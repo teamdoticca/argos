@@ -87,7 +87,6 @@ pub fn discover_topology(root: &Path) -> Result<TopologyResult> {
         push(n);
     }
     // document-root / guidance-path need the package topology for dedupe.
-    drop(push);
     for mut node in document::discover(root, &nodes)? {
         if node.path_identity.key.is_empty() {
             node.path_identity = PathIdentity::from_path(&node.root, case_sensitive);
@@ -109,7 +108,6 @@ pub fn discover_topology(root: &Path) -> Result<TopologyResult> {
     for n in os_artifacts::discover(root)? {
         push(n);
     }
-    drop(push);
 
     let has_topology = nodes
         .iter()
@@ -125,12 +123,11 @@ pub fn discover_topology(root: &Path) -> Result<TopologyResult> {
                 e.path()
                     .extension()
                     .and_then(|x| x.to_str())
-                    .is_some_and(|x| x.eq_ignore_ascii_case("csproj") || x.eq_ignore_ascii_case("sln"))
+                    .is_some_and(|x| {
+                        x.eq_ignore_ascii_case("csproj") || x.eq_ignore_ascii_case("sln")
+                    })
             });
-        if root.join("package.json").is_file()
-            || root.join("Cargo.toml").is_file()
-            || root_csproj
-        {
+        if root.join("package.json").is_file() || root.join("Cargo.toml").is_file() || root_csproj {
             let mut node = WorkspaceNode {
                 id: root
                     .file_name()

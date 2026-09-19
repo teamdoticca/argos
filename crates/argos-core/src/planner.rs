@@ -193,7 +193,7 @@ fn discover_watch_roots(node_root: &Path, ignore: &IgnoreEngine) -> Vec<String> 
 }
 
 fn is_manifest_watch_entry(name: &str) -> bool {
-    if CONFIG_FILES.iter().any(|c| *c == name) {
+    if CONFIG_FILES.contains(&name) {
         return true;
     }
     let lower = name.to_ascii_lowercase();
@@ -268,13 +268,7 @@ pub fn absolute_watch_paths(scope: &WatchScope) -> Vec<PathBuf> {
     scope
         .watch
         .iter()
-        .map(|w| {
-            if w == "." {
-                root.clone()
-            } else {
-                root.join(w)
-            }
-        })
+        .map(|w| if w == "." { root.clone() } else { root.join(w) })
         .filter(|p| p.exists())
         .collect()
 }
@@ -423,11 +417,7 @@ mod tests {
         let svc = dir.path().join("svc");
         fs::create_dir_all(svc.join("web")).unwrap();
         let compose = svc.join("docker-compose.yml");
-        fs::write(
-            &compose,
-            "services:\n  web:\n    build: ./web\n",
-        )
-        .unwrap();
+        fs::write(&compose, "services:\n  web:\n    build: ./web\n").unwrap();
         let ignore = IgnoreEngine::build(dir.path(), true).unwrap();
         let scopes = plan_scopes(
             &[package_node(

@@ -70,7 +70,11 @@ mod tests {
         fs::write(root.join("svc/pyproject.toml"), "[project]\nname='svc'\n").unwrap();
         fs::write(root.join("svc/main.py"), "print(1)\n").unwrap();
         fs::create_dir_all(root.join(".venv")).unwrap();
-        fs::write(root.join(".venv/pyproject.toml"), "[project]\nname='venv'\n").unwrap();
+        fs::write(
+            root.join(".venv/pyproject.toml"),
+            "[project]\nname='venv'\n",
+        )
+        .unwrap();
         let nodes = discover(root).unwrap();
         assert_eq!(nodes.len(), 1);
         assert_eq!(nodes[0].id, "svc");

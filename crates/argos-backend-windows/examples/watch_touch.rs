@@ -51,6 +51,9 @@ fn main() {
     }
     let _ = fs::write(&target, before);
     backend.stop().ok();
-    assert!(saw > 0, "expected at least one file event after touch of {rel}");
+    assert!(
+        saw > 0,
+        "expected at least one file event after touch of {rel}"
+    );
     println!("ok events={saw}");
 }

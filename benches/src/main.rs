@@ -30,7 +30,11 @@ fn main() {
     println!("scopes={}", snap.planning.scopes.len());
     println!(
         "active_watch_resources={}",
-        snap.planning.scopes.iter().map(|s| s.watch.len()).sum::<usize>()
+        snap.planning
+            .scopes
+            .iter()
+            .map(|s| s.watch.len())
+            .sum::<usize>()
     );
 
     let t2 = Instant::now();

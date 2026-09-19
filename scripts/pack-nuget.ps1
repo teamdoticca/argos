@@ -83,15 +83,15 @@ function Get-DefaultHostRid {
 function Resolve-CargoArtifact {
     param(
         [string] $RepoRoot,
-        [string] $Profile,
+        [string] $BuildProfile,
         [string] $Triple,
         [string] $FileName
     )
     $candidates = @(
-        (Join-Path $RepoRoot "target\$Triple\$Profile\$FileName"),
-        (Join-Path $RepoRoot "target/$Triple/$Profile/$FileName"),
-        (Join-Path $RepoRoot "target\$Profile\$FileName"),
-        (Join-Path $RepoRoot "target/$Profile/$FileName")
+        (Join-Path $RepoRoot "target\$Triple\$BuildProfile\$FileName"),
+        (Join-Path $RepoRoot "target/$Triple/$BuildProfile/$FileName"),
+        (Join-Path $RepoRoot "target\$BuildProfile\$FileName"),
+        (Join-Path $RepoRoot "target/$BuildProfile/$FileName")
     )
     foreach ($c in $candidates) {
         if (Test-Path $c) { return (Resolve-Path $c).Path }
@@ -102,27 +102,9 @@ function Resolve-CargoArtifact {
 function Invoke-CargoWithHostToolchain {
     param([string[]] $CargoArgs)
 
-    $isWin = $IsWindows -or ($env:OS -match "Windows")
-    if ($isWin) {
-        $vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
-        if (Test-Path $vswhere) {
-            $vsPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
-            if (-not [string]::IsNullOrWhiteSpace($vsPath)) {
-                $devCmd = Join-Path $vsPath "Common7\Tools\VsDevCmd.bat"
-                if (Test-Path $devCmd) {
-                    $quoted = ($CargoArgs | ForEach-Object {
-                            if ($_ -match '[\s"]') { '"' + ($_ -replace '"', '\"') + '"' } else { $_ }
-                        }) -join " "
-                    Write-Host ">> (VsDevCmd) cargo $quoted"
-                    cmd /c "`"$devCmd`" -arch=amd64 -host_arch=amd64 >nul && cargo $quoted"
-                    return $LASTEXITCODE
-                }
-            }
-        }
-    }
-
+    . (Join-Path $PSScriptRoot "enter-msvc.ps1")
     Write-Host ">> cargo $($CargoArgs -join ' ')"
-    & cargo @CargoArgs
+    & cargo @CargoArgs | Out-Host
     return $LASTEXITCODE
 }
 
@@ -204,7 +186,7 @@ foreach ($rid in $Rids) {
         # Cross RIDs: require rustup target + --target <triple>.
         $hostRid = $null
         try { $hostRid = Get-DefaultHostRid } catch { $hostRid = $null }
-        $cargoArgs = @("build", "-p", "argos-ffi")
+        $cargoArgs = @("build", "-p", "argos-ffi", "--locked")
         if ($rid -ne $hostRid) {
             $cargoArgs += @("--target", $triple)
         }
@@ -215,7 +197,7 @@ foreach ($rid in $Rids) {
         if ($cargoExit -ne 0) {
             throw "cargo build failed for $rid ($triple) with exit code $cargoExit"
         }
-        $cargoArtifact = Resolve-CargoArtifact -RepoRoot $repoRoot -Profile $cargoProfile -Triple $triple -FileName $fileName
+        $cargoArtifact = Resolve-CargoArtifact -RepoRoot $repoRoot -BuildProfile $cargoProfile -Triple $triple -FileName $fileName
         if (-not $cargoArtifact) {
             throw "Cargo artifact not found for $rid ($fileName under target/$triple/$cargoProfile or target/$cargoProfile)"
         }
@@ -266,11 +248,16 @@ if ($verifyRids.Count -eq 0) {
     $verifyRids = @($Rids)
 }
 
-$tmpZip = Join-Path $env:TEMP ("argos-nupkg-" + [guid]::NewGuid().ToString("n") + ".zip")
-$tmpExtract = Join-Path $env:TEMP ("argos-nupkg-" + [guid]::NewGuid().ToString("n"))
+$tmpZip = Join-Path ([IO.Path]::GetTempPath()) ("argos-nupkg-" + [guid]::NewGuid().ToString("n") + ".zip")
+$tmpExtract = Join-Path ([IO.Path]::GetTempPath()) ("argos-nupkg-" + [guid]::NewGuid().ToString("n"))
 try {
     Copy-Item $nupkg $tmpZip
     Expand-Archive -Path $tmpZip -DestinationPath $tmpExtract -Force
+    foreach ($requiredFile in @("LICENSE", "PackageReadme.md", "lib/net8.0/Argos.dll")) {
+        if (-not (Test-Path (Join-Path $tmpExtract $requiredFile))) {
+            throw "Package missing required file: $requiredFile"
+        }
+    }
     foreach ($rid in $verifyRids) {
         if (-not $RidCatalog.Contains($rid)) {
             throw "RequireRids contains unknown RID '$rid'"

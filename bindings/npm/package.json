@@ -2,6 +2,7 @@
   "name": "@teamdoticca/argos",
   "version": "0.1.7",
   "description": "Argos workspace intelligence for Node.js / TypeScript",
+  "author": "Doticca",
   "main": "index.js",
   "types": "index.d.ts",
   "homepage": "https://github.com/teamdoticca/argos#readme",
@@ -27,6 +28,8 @@
     "index.d.ts",
     "binding.js",
     "binding.d.ts",
+    "LICENSE",
+    "README.md",
     "*.node"
   ],
   "napi": {
@@ -44,9 +47,10 @@
     "node": ">= 18"
   },
   "scripts": {
+    "prepack": "node prepare-package.mjs",
     "artifacts": "napi artifacts",
-    "build": "napi build --platform --release --cargo-cwd ../../crates/argos-napi --js binding.js --dts binding.d.ts",
-    "build:debug": "napi build --platform --cargo-cwd ../../crates/argos-napi --js binding.js --dts binding.d.ts",
+    "build": "napi build --platform --release --cargo-flags=--locked --cargo-cwd ../../crates/argos-napi --js binding.js --dts binding.d.ts",
+    "build:debug": "napi build --platform --cargo-flags=--locked --cargo-cwd ../../crates/argos-napi --js binding.js --dts binding.d.ts",
     "check:natives": "node check-natives.mjs",
     "prepublishOnly": "node check-natives.mjs",
     "smoke": "node smoke.mjs",

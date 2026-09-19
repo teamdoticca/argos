@@ -1,12 +1,16 @@
 //! Linux backend using inotify (via the `notify` crate).
 
 use argos_backend::{PlatformCapabilities, WatchBackend};
-use argos_core::{
-    DomainEvent, FileEventKind, Result, WatchScope, Workspace, WorkspaceEventKind,
-};
-use notify::{Config, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
+#[cfg(target_os = "linux")]
+use argos_core::WorkspaceEventKind;
+use argos_core::{DomainEvent, FileEventKind, Result, WatchScope, Workspace};
+use notify::RecommendedWatcher;
+#[cfg(target_os = "linux")]
+use notify::{Config, EventKind, RecursiveMode, Watcher};
 use std::path::PathBuf;
-use std::sync::mpsc::{Receiver, TryRecvError};
+use std::sync::mpsc::Receiver;
+#[cfg(target_os = "linux")]
+use std::sync::mpsc::TryRecvError;
 
 pub struct LinuxBackend {
     watcher: Option<RecommendedWatcher>,
@@ -50,9 +54,9 @@ impl WatchBackend for LinuxBackend {
         #[cfg(not(target_os = "linux"))]
         {
             let _ = (workspace, scopes);
-            return Err(argos_core::ArgosError::UnsupportedPlatform(
+            Err(argos_core::ArgosError::UnsupportedPlatform(
                 "linux backend requires Linux host".into(),
-            ));
+            ))
         }
         #[cfg(target_os = "linux")]
         {

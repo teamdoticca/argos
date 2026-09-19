@@ -57,10 +57,7 @@ fn is_dockerfile_name(name: &str) -> bool {
 fn is_compose_name(name: &str) -> bool {
     matches!(
         name.to_ascii_lowercase().as_str(),
-        "docker-compose.yml"
-            | "docker-compose.yaml"
-            | "compose.yml"
-            | "compose.yaml"
+        "docker-compose.yml" | "docker-compose.yaml" | "compose.yml" | "compose.yaml"
     )
 }
 
@@ -79,7 +76,11 @@ pub fn compose_build_contexts(compose_file: &Path) -> Vec<String> {
         if pending_context {
             pending_context = false;
             if let Some(ctx) = line.strip_prefix("context:") {
-                push_context(dir, ctx.trim().trim_matches('"').trim_matches('\''), &mut out);
+                push_context(
+                    dir,
+                    ctx.trim().trim_matches('"').trim_matches('\''),
+                    &mut out,
+                );
             }
             continue;
         }
@@ -131,7 +132,10 @@ mod tests {
         assert!(nodes.iter().any(|n| n.source.provider == "compose"));
         assert!(nodes.iter().any(|n| n.source.provider == "bicep"));
         assert!(nodes.iter().any(|n| n.source.provider == "azure-yaml"));
-        let compose = nodes.iter().find(|n| n.source.provider == "compose").unwrap();
+        let compose = nodes
+            .iter()
+            .find(|n| n.source.provider == "compose")
+            .unwrap();
         assert!(compose.root.is_file());
         let ctx = compose_build_contexts(&compose.root);
         assert!(ctx.iter().any(|c| c == "web"));

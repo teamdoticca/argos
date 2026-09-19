@@ -1,5 +1,5 @@
-use walkdir::WalkDir;
 use std::path::{Path, PathBuf};
+use walkdir::WalkDir;
 
 /// Directories never entered during topology walks.
 pub const SKIP_DIR_NAMES: &[&str] = &[
@@ -26,9 +26,7 @@ pub const SKIP_DIR_NAMES: &[&str] = &[
 ];
 
 pub fn is_skip_dir_name(name: &str) -> bool {
-    SKIP_DIR_NAMES
-        .iter()
-        .any(|s| name.eq_ignore_ascii_case(s))
+    SKIP_DIR_NAMES.iter().any(|s| name.eq_ignore_ascii_case(s))
 }
 
 pub fn walk_entries(root: &Path) -> impl Iterator<Item = PathBuf> {

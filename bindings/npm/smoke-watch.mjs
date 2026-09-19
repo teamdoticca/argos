@@ -23,6 +23,7 @@ const ws = Workspace.open(fixture)
 const scopes = ws.listScopes()
 if (!Array.isArray(scopes) || scopes.length === 0) {
   console.error('WATCH SMOKE FAIL: empty scopes')
+  ws.close()
   process.exit(1)
 }
 
@@ -41,14 +42,24 @@ const loop = (async () => {
   }
 })()
 
-await new Promise((r) => setTimeout(r, 200))
-writeFileSync(target, `${before}\n// argos-smoke ${Date.now()}\n`)
-await Promise.race([
-  loop,
-  new Promise((r) => setTimeout(r, 5000)),
-])
-writeFileSync(target, before)
-ws.close()
+let timeout
+try {
+  await new Promise((resolve) => setTimeout(resolve, 200))
+  writeFileSync(target, `${before}\n// argos-smoke ${Date.now()}\n`)
+  await Promise.race([
+    loop,
+    new Promise((resolve) => { timeout = setTimeout(resolve, 5000) }),
+  ])
+} finally {
+  clearTimeout(timeout)
+  ac.abort()
+  try {
+    await loop
+  } finally {
+    writeFileSync(target, before)
+    ws.close()
+  }
+}
 
 if (saw < 1) {
   console.error('WATCH SMOKE FAIL: no events')

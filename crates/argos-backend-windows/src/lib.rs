@@ -1,12 +1,16 @@
 //! Windows backend using ReadDirectoryChangesW (via the `notify` crate).
 
 use argos_backend::{PlatformCapabilities, WatchBackend};
-use argos_core::{
-    DomainEvent, FileEventKind, Result, WatchScope, Workspace, WorkspaceEventKind,
-};
-use notify::{Config, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
+#[cfg(windows)]
+use argos_core::WorkspaceEventKind;
+use argos_core::{DomainEvent, FileEventKind, Result, WatchScope, Workspace};
+use notify::RecommendedWatcher;
+#[cfg(windows)]
+use notify::{Config, EventKind, RecursiveMode, Watcher};
 use std::path::PathBuf;
-use std::sync::mpsc::{Receiver, TryRecvError};
+use std::sync::mpsc::Receiver;
+#[cfg(windows)]
+use std::sync::mpsc::TryRecvError;
 
 pub struct WindowsBackend {
     watcher: Option<RecommendedWatcher>,
@@ -50,9 +54,9 @@ impl WatchBackend for WindowsBackend {
         #[cfg(not(windows))]
         {
             let _ = (workspace, scopes);
-            return Err(argos_core::ArgosError::UnsupportedPlatform(
+            Err(argos_core::ArgosError::UnsupportedPlatform(
                 "windows backend requires Windows host".into(),
-            ));
+            ))
         }
         #[cfg(windows)]
         {
@@ -119,9 +123,9 @@ impl WatchBackend for WindowsBackend {
     fn poll(&mut self) -> Result<Vec<DomainEvent>> {
         #[cfg(not(windows))]
         {
-            return Err(argos_core::ArgosError::UnsupportedPlatform(
+            Err(argos_core::ArgosError::UnsupportedPlatform(
                 "windows backend requires Windows host".into(),
-            ));
+            ))
         }
         #[cfg(windows)]
         {

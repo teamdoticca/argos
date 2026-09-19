@@ -18,6 +18,7 @@
     <RootNamespace>Argos</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="..\..\..\LICENSE" Pack="true" PackagePath="" />
     <None Include="PackageReadme.md" Pack="true" PackagePath="\" />
     <!-- Pack only RID native binaries; keep README out of the nupkg runtimes tree. -->
     <None Include="runtimes\**\native\*" Pack="true" PackagePath="runtimes\" />

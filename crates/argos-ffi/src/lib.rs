@@ -1,6 +1,15 @@
 //! Argos C ABI.
 //!
 //! Handles are opaque pointers owned by the consumer until free is called.
+//!
+//! # Pointer contract
+//! Non-null input strings must remain readable, NUL-terminated and unmodified
+//! for the call. Non-null output slots must be aligned, writable and must not
+//! alias inputs. Initialize output slots to null; read them only on success.
+//! Free successful string outputs exactly once with `argos_string_free`.
+//! Workspace handles must originate from this library and remain live for the
+//! call. Serialize all operations on a handle, including watch and disposal.
+//! Error text is thread-local; retrieve it on the thread that observed failure.
 
 use argos_backend::WatchBackend;
 use argos_core::{
@@ -56,6 +65,8 @@ unsafe fn write_string(out: *mut *mut c_char, value: &str) -> c_int {
 }
 
 #[no_mangle]
+/// # Safety
+/// `s` must be null or an unmodified string returned by this library, not yet freed.
 pub unsafe extern "C" fn argos_string_free(s: *mut c_char) {
     if !s.is_null() {
         drop(CString::from_raw(s));
@@ -63,12 +74,17 @@ pub unsafe extern "C" fn argos_string_free(s: *mut c_char) {
 }
 
 #[no_mangle]
+/// # Safety
+/// `out` must satisfy the output-slot contract in the module documentation.
 pub unsafe extern "C" fn argos_last_error(out: *mut *mut c_char) -> c_int {
     let msg = LAST_ERROR.with(|e| e.borrow().clone().unwrap_or_default());
     write_string(out, &msg)
 }
 
 #[no_mangle]
+/// # Safety
+/// Input strings and `out_workspace` must satisfy the module pointer contract.
+/// Release a successful handle exactly once with `argos_workspace_free`.
 pub unsafe extern "C" fn argos_workspace_open(
     root: *const c_char,
     options_json: *const c_char,
@@ -113,6 +129,9 @@ pub unsafe extern "C" fn argos_workspace_open(
 }
 
 #[no_mangle]
+/// # Safety
+/// `workspace` must be null or a live handle returned by this library.
+/// No operation may overlap this call or use the handle after it returns.
 pub unsafe extern "C" fn argos_workspace_free(workspace: *mut c_void) {
     if !workspace.is_null() {
         drop(Box::from_raw(workspace as *mut WorkspaceHandle));
@@ -127,6 +146,8 @@ unsafe fn as_handle<'a>(workspace: *mut c_void) -> Result<&'a mut WorkspaceHandl
 }
 
 #[no_mangle]
+/// # Safety
+/// The handle and output slot must satisfy the module pointer contract.
 pub unsafe extern "C" fn argos_workspace_current_snapshot(
     workspace: *mut c_void,
     out_json: *mut *mut c_char,
@@ -148,6 +169,8 @@ pub unsafe extern "C" fn argos_workspace_current_snapshot(
 }
 
 #[no_mangle]
+/// # Safety
+/// The handle and output slot must satisfy the module pointer contract.
 pub unsafe extern "C" fn argos_workspace_rebuild_snapshot(
     workspace: *mut c_void,
     out_json: *mut *mut c_char,
@@ -175,6 +198,8 @@ pub unsafe extern "C" fn argos_workspace_rebuild_snapshot(
 }
 
 #[no_mangle]
+/// # Safety
+/// The input string and output slot must satisfy the module pointer contract.
 pub unsafe extern "C" fn argos_snapshot_validate(
     snapshot_json: *const c_char,
     out_report: *mut *mut c_char,
@@ -202,6 +227,8 @@ pub unsafe extern "C" fn argos_snapshot_validate(
 }
 
 #[no_mangle]
+/// # Safety
+/// The handle, path string and output slot must satisfy the module pointer contract.
 pub unsafe extern "C" fn argos_explain_path(
     workspace: *mut c_void,
     path: *const c_char,
@@ -239,6 +266,8 @@ pub unsafe extern "C" fn argos_explain_path(
 }
 
 #[no_mangle]
+/// # Safety
+/// The handle, optional scope string and output slot must satisfy the module pointer contract.
 pub unsafe extern "C" fn argos_explain_scope(
     workspace: *mut c_void,
     scope: *const c_char,
@@ -268,6 +297,8 @@ pub unsafe extern "C" fn argos_explain_scope(
 }
 
 #[no_mangle]
+/// # Safety
+/// The handle, path string and output slot must satisfy the module pointer contract.
 pub unsafe extern "C" fn argos_find_owner(
     workspace: *mut c_void,
     path: *const c_char,
@@ -299,6 +330,8 @@ pub unsafe extern "C" fn argos_find_owner(
 }
 
 #[no_mangle]
+/// # Safety
+/// The handle and output slot must satisfy the module pointer contract.
 pub unsafe extern "C" fn argos_list_nodes(
     workspace: *mut c_void,
     out_json: *mut *mut c_char,
@@ -322,6 +355,8 @@ pub unsafe extern "C" fn argos_list_nodes(
 }
 
 #[no_mangle]
+/// # Safety
+/// The handle and output slot must satisfy the module pointer contract.
 pub unsafe extern "C" fn argos_list_scopes(
     workspace: *mut c_void,
     out_json: *mut *mut c_char,
@@ -344,6 +379,8 @@ pub unsafe extern "C" fn argos_list_scopes(
 }
 
 #[no_mangle]
+/// # Safety
+/// The handle and output slot must satisfy the module pointer contract.
 pub unsafe extern "C" fn argos_workspace_health(
     workspace: *mut c_void,
     out_json: *mut *mut c_char,
@@ -366,6 +403,8 @@ pub unsafe extern "C" fn argos_workspace_health(
 }
 
 #[no_mangle]
+/// # Safety
+/// The handle and output slot must satisfy the module pointer contract.
 pub unsafe extern "C" fn argos_platform_info(
     workspace: *mut c_void,
     out_json: *mut *mut c_char,
@@ -387,6 +426,8 @@ pub unsafe extern "C" fn argos_platform_info(
 }
 
 #[no_mangle]
+/// # Safety
+/// Both snapshot strings and the output slot must satisfy the module pointer contract.
 pub unsafe extern "C" fn argos_compute_delta(
     old_json: *const c_char,
     new_json: *const c_char,
@@ -464,11 +505,7 @@ impl WatchBackend for NullBackend {
             max_watch_resources: Some(0),
         }
     }
-    fn start(
-        &mut self,
-        _: &Workspace,
-        _: &[argos_core::WatchScope],
-    ) -> argos_core::Result<()> {
+    fn start(&mut self, _: &Workspace, _: &[argos_core::WatchScope]) -> argos_core::Result<()> {
         Err(argos_core::ArgosError::UnsupportedPlatform(
             "no backend".into(),
         ))
@@ -485,6 +522,8 @@ impl WatchBackend for NullBackend {
 }
 
 #[no_mangle]
+/// # Safety
+/// The handle must satisfy the module pointer contract; calls must not overlap.
 pub unsafe extern "C" fn argos_watch_start(workspace: *mut c_void) -> c_int {
     let handle = match as_handle(workspace) {
         Ok(h) => h,
@@ -504,6 +543,8 @@ pub unsafe extern "C" fn argos_watch_start(workspace: *mut c_void) -> c_int {
 }
 
 #[no_mangle]
+/// # Safety
+/// The handle must satisfy the module pointer contract; calls must not overlap.
 pub unsafe extern "C" fn argos_watch_stop(workspace: *mut c_void) -> c_int {
     let handle = match as_handle(workspace) {
         Ok(h) => h,
@@ -522,6 +563,8 @@ pub unsafe extern "C" fn argos_watch_stop(workspace: *mut c_void) -> c_int {
 }
 
 #[no_mangle]
+/// # Safety
+/// The handle and output slot must satisfy the module pointer contract.
 pub unsafe extern "C" fn argos_watch_poll(
     workspace: *mut c_void,
     out_json: *mut *mut c_char,
@@ -620,6 +663,8 @@ fn enrich_event(snapshot: &WorkspaceSnapshot, event: DomainEvent) -> DomainEvent
 }
 
 #[no_mangle]
+/// # Safety
+/// The handle, event string and output slot must satisfy the module pointer contract.
 pub unsafe extern "C" fn argos_get_affected_scopes(
     workspace: *mut c_void,
     event_json: *const c_char,

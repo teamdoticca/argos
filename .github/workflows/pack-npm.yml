@@ -9,6 +9,12 @@ on:
       - "bindings/npm/**"
       - ".github/workflows/pack-npm.yml"
       - "Cargo.toml"
+      - "Cargo.lock"
+      - ".github/workflows/verify.yml"
+      - "scripts/verify.ps1"
+      - "scripts/enter-msvc.ps1"
+      - "rust-toolchain.toml"
+      - "LICENSE"
       - "fixtures/**"
   pull_request:
     paths:
@@ -16,13 +22,19 @@ on:
       - "bindings/npm/**"
       - ".github/workflows/pack-npm.yml"
       - "Cargo.toml"
+      - "Cargo.lock"
+      - ".github/workflows/verify.yml"
+      - "scripts/verify.ps1"
+      - "scripts/enter-msvc.ps1"
+      - "rust-toolchain.toml"
+      - "LICENSE"
       - "fixtures/**"
   workflow_dispatch:
     inputs:
       publish:
         description: "Publish after build + smoke"
         type: boolean
-        default: true
+        default: false
       registry:
         description: "Publish target (github Packages dogfood vs public npmjs)"
         type: choice
@@ -40,7 +52,11 @@ permissions:
   contents: read
 
 jobs:
+  verify:
+    uses: ./.github/workflows/verify.yml
+
   build:
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
@@ -56,14 +72,17 @@ jobs:
             node_file: argos.darwin-arm64.node
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
 
       - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87
         with:
+          toolchain: '1.98.0'
           targets: ${{ matrix.target }}
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: "24"
 
@@ -79,6 +98,26 @@ jobs:
         working-directory: bindings/npm
         run: npm run smoke
 
+      - name: Smoke Watch on Node 24
+        working-directory: bindings/npm
+        run: npm run smoke:watch
+
+      - name: Verify npm archive contents
+        working-directory: bindings/npm
+        shell: bash
+        run: |
+          npm pack --dry-run --json --silent > "$RUNNER_TEMP/argos-pack.json"
+          node check-package.mjs "$RUNNER_TEMP/argos-pack.json"
+
+      - name: Switch to Node 22
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '22'
+
+      - name: Smoke Open on Node 22
+        working-directory: bindings/npm
+        run: npm run smoke
+
       - name: Watch smoke (Windows)
         if: runner.os == 'Windows'
         working-directory: bindings/npm
@@ -91,7 +130,7 @@ jobs:
         run: node smoke-watch.mjs
 
       - name: Upload native artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: argos-node-${{ matrix.target }}
           path: |
@@ -103,28 +142,31 @@ jobs:
 
   publish-github:
     name: Publish GitHub Packages
-    needs: build
+    needs: [build, verify]
     if: >
-      (
-        (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'))
-        || (github.event_name == 'workflow_dispatch' && (inputs.publish == true || inputs.publish == 'true')
-            && (inputs.registry == 'github' || inputs.registry == 'both' || inputs.registry == ''))
-      )
+      github.repository == 'teamdoticca/argos'
+      && github.event_name == 'workflow_dispatch'
+      && inputs.publish
+      && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+      && (inputs.registry == 'github' || inputs.registry == 'both')
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: "24"
           registry-url: https://npm.pkg.github.com
           scope: "@teamdoticca"
 
       - name: Download natives
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           path: artifacts/npm
           pattern: argos-node-*
@@ -167,26 +209,33 @@ jobs:
 
   publish-npmjs:
     name: Publish npmjs.org
-    needs: build
+    needs: [build, verify]
     # Explicit only — never auto-publish CI builds to the public registry.
     if: >
       github.event_name == 'workflow_dispatch'
       && (inputs.publish == true || inputs.publish == 'true')
       && (inputs.registry == 'npmjs' || inputs.registry == 'both')
+      && github.repository == 'teamdoticca/argos'
+      && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     runs-on: ubuntu-latest
+    environment: npmjs
+    timeout-minutes: 15
     permissions:
       contents: read
+      id-token: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: "24"
           registry-url: https://registry.npmjs.org
           scope: "@teamdoticca"
 
       - name: Download natives
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           path: artifacts/npm
           pattern: argos-node-*
@@ -214,13 +263,11 @@ jobs:
 
       - name: Publish (public, npmjs)
         working-directory: bindings/npm
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --access public --registry https://registry.npmjs.org/
+        run: npm publish --access public --provenance --registry https://registry.npmjs.org/
 
       - name: Summary
         run: |
           echo "## @teamdoticca/argos → npmjs.org" >> "$GITHUB_STEP_SUMMARY"
           echo "- Version: \`${NPM_VERSION}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- Install: \`npm install @teamdoticca/argos\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Prep doc: docs/epics/m17-typescript-napi/npmjs-prep.md" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Release guide: docs/RELEASING.md" >> "$GITHUB_STEP_SUMMARY"
