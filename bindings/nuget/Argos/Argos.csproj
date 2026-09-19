@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>Argos</PackageId>
-    <Version>0.1.7</Version>
+    <Version>0.1.8</Version>
     <Authors>Doticca</Authors>
     <Company>Doticca</Company>
     <Description>Argos workspace intelligence engine (.NET wrapper). Opens a repo root and answers what parts of the workspace matter right now via an immutable WorkspaceSnapshot.</Description>

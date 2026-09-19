@@ -20,7 +20,7 @@ Doticca maintains the release process. Repository preparation does not authorize
 
 ## Versioning
 
-Keep Cargo.toml/Cargo.lock, bindings/npm/package.json/package-lock.json and bindings/nuget/Argos/Argos.csproj aligned. Update CHANGELOG.md. Do not overwrite an existing public version. Readiness changes remain unreleased at source version 0.1.7; choose a new version before dispatching public publication because 0.1.7 already exists. During 0.x, breaking changes belong in a new minor version and require migration notes; patch releases should remain compatible.
+Keep Cargo.toml/Cargo.lock, bindings/npm/package.json/package-lock.json and bindings/nuget/Argos/Argos.csproj aligned. Update CHANGELOG.md. Do not overwrite an existing public version. The authorized readiness/dependency release is 0.1.8; 0.1.7 already exists and must not be republished. During 0.x, breaking changes belong in a new minor version and require migration notes; patch releases should remain compatible.
 
 ## Publication
 

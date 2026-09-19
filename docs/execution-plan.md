@@ -4,10 +4,10 @@ Live status. Update on every meaningful progress.
 
 ## Current
 
-- **Active epic:** None.
-- **Status:** m24 completed; all six initial Dependabot proposals consolidated and verified without changing public APIs or package versions.
+- **Active epic:** m25-package-release.
+- **Status:** in_progress; prepare and publish 0.1.8 through verified OIDC workflows.
 - **Owner approval (2026-09-19):** Policies, monitored mailbox and distribution rights confirmed; completion of public launch authorized after readiness checks passed.
-- **Last update:** 2026-09-19 - PR #10 implementation head a2cf551 passed all hosted verify/npm/NuGet workflows. m24 archived with evidence. Owner approved green-only merge and subsequent closure of superseded proposals; final documentation-head checks remain a merge gate. No publication or credential changes.
+- **Last update:** 2026-09-19 - PR #10 merged as f089f41 with green post-merge workflows; proposals #3 through #8 closed. Owner authorized release 0.1.8. Publication environments must be created and registry trust verified before publication.
 
 ## Completed
 
@@ -107,10 +107,10 @@ Path: [docs/done/m24-dependency-upgrades](done/m24-dependency-upgrades/)
 
 ## Next
 
-1. Merge PR #10 only after final-head checks pass and close superseded PRs #3 through #8. Continue maintaining public issues, vulnerability reports and dependency alerts.
-2. Before a separately authorized package release, verify protected environments and registry trust, choose a new version, and validate OIDC before revoking the old npm token. Follow the [release checklist](RELEASING.md).
-3. Later: Mnemon integration updates and an optional MCP wrapper epic, in separately scoped work. No epic beyond m24 is started.
+1. Complete m25: version PR, protected environments, OIDC, release validation, public packages, fresh consumers and immutable tag/GitHub release.
+2. Retire the old npm credential only after successful OIDC publication. Follow the [release checklist](RELEASING.md).
+3. Later: Mnemon integration updates and an optional MCP wrapper epic, in separately scoped work. No epic beyond m25 is started.
 
 ## Blockers
 
-No implementation blockers remain. All m24 hosted matrices and audits passed; final PR-head checks remain mandatory before merge. Registry trust and publication-environment verification remain prerequisites for the next package release, not unfinished repository launch work.
+Publication environments npmjs/nugetorg now require maintainer approval and allow only master. Release manifests target 0.1.8; registry trust remains unverified. Resolve registry prerequisites before m25 publication; no known product implementation blockers remain.

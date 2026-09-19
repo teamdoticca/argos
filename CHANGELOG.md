@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.1.8
+
 - Add MIT license text to source, npm and NuGet distribution.
 - Add contribution, security, support, compatibility and release guidance.
 - Add pinned toolchain verification, strict cross-platform Rust checks and publication safeguards.
