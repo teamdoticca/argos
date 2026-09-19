@@ -5,9 +5,9 @@ Live status. Update on every meaningful progress.
 ## Current
 
 - **Active epic:** none.
-- **Status:** m25-package-release done; 0.1.8 is public in npm, NuGet and GitHub Releases.
+- **Status:** m25-package-release done; 0.1.8 is public in npm, NuGet and GitHub Releases. The next package release, 0.1.9, is prepared locally and not yet published.
 - **Owner approval (2026-09-19):** Policies, monitored mailbox and distribution rights confirmed; completion of public launch authorized after readiness checks passed.
-- **Last update:** 2026-09-19 - Release PR #11 merged as 96bb168. Dry runs, protected OIDC publications and fresh public consumers passed. Immutable v0.1.8 and GitHub release verified; legacy npm token revoked and NPM_TOKEN secret removed.
+- **Last update:** 2026-09-19 - Release PR #11 merged as 96bb168. Dry runs, protected OIDC publications and fresh public consumers passed. Immutable v0.1.8 and GitHub release verified; legacy npm token revoked and NPM_TOKEN secret removed. Argos 0.1.9 manifests now include managed .NET 8/9/10 targets and public strong-name signing; publication is pending release gates.
 
 ## Completed
 

@@ -45,7 +45,9 @@ pwsh ./scripts/pack-nuget.ps1 -SkipBuild -StageFrom artifacts/natives `
   -RequireRids win-x64,osx-arm64,linux-x64,osx-x64,linux-arm64
 ```
 
-Produces `artifacts/nuget/Argos.<version>.nupkg` with `lib/net8.0/Argos.dll` plus RID natives below.
+Produces `artifacts/nuget/Argos.<version>.nupkg` with managed assemblies for `net8.0`, `net9.0`, and `net10.0`, plus RID natives below.
+
+The managed wrapper is public strong-name signed for C# consumers that require a strong-named dependency. This is assembly signing, not NuGet author signing.
 
 Managed wrapper uses `DllImport("argos_ffi")`. On Unix the CLR loads `libargos_ffi.so` / `libargos_ffi.dylib`. On Windows the packaged name must **not** be `argos.dll` (collides with managed `Argos.dll`).
 

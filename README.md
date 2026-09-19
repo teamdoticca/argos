@@ -11,7 +11,7 @@ Open → Snapshot → List nodes / scopes / explain / find owner
               ↘ optional WatchAsync → change events
 ```
 
-Typical consumers: IDE overlays, repo monitors, agent tooling (e.g. [Mnemon](https://github.com/teamdoticca/Mnemon)).
+Typical consumers: IDE overlays, repo monitors, agent tooling (e.g. [Mnemon](https://mnemon.doticca.com)).
 
 **Project status:** early-stage 0.x library maintained by Doticca. See [compatibility and lifecycle](docs/COMPATIBILITY.md) before integrating. API stability, older operating systems and every filesystem layout are not guaranteed.
 

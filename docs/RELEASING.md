@@ -17,10 +17,11 @@ Doticca maintains the release process. Repository preparation does not authorize
 - Create or verify protected environments named npmjs and nugetorg, restricted to the default branch. Require a maintainer approval for production publication where the GitHub plan supports it.
 - Configure npm Trusted Publishing for teamdoticca/argos, workflow pack-npm.yml, environment npmjs. After a successful OIDC release, revoke the old NPM_TOKEN and remove it from GitHub. Do not remove a needed credential before the replacement is verified.
 - Confirm the NuGet Trusted Publishing policy for pack-nuget.yml matches the nugetorg environment and default branch; retain only NUGET_USER as the account selector, not a long-lived API key.
+- Confirm the packed managed `Argos.dll` retains its public strong-name identity. This is separate from optional NuGet package author signing.
 
 ## Versioning
 
-Keep Cargo.toml/Cargo.lock, bindings/npm/package.json/package-lock.json and bindings/nuget/Argos/Argos.csproj aligned. Update CHANGELOG.md. Do not overwrite an existing public version. The authorized readiness/dependency release is 0.1.8; 0.1.7 already exists and must not be republished. During 0.x, breaking changes belong in a new minor version and require migration notes; patch releases should remain compatible.
+Keep Cargo.toml/Cargo.lock, bindings/npm/package.json/package-lock.json and bindings/nuget/Argos/Argos.csproj aligned. Update CHANGELOG.md. Do not overwrite an existing public version. The next release prepared by this change is 0.1.9; 0.1.8 and earlier versions must not be republished. During 0.x, breaking changes belong in a new minor version and require migration notes; patch releases should remain compatible.
 
 ## Publication
 

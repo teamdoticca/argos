@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.1.9
+
+- Add managed NuGet targets for .NET 8, .NET 9, and .NET 10.
+- Add a stable public strong-name identity to the managed Argos wrapper.
+- Expand RID consumer smoke coverage across all supported .NET target frameworks.
+
 ## 0.1.8
 
 - Add MIT license text to source, npm and NuGet distribution.
