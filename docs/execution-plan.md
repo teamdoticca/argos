@@ -4,10 +4,10 @@ Live status. Update on every meaningful progress.
 
 ## Current
 
-- **Active epic:** m25-package-release.
-- **Status:** in_progress; prepare and publish 0.1.8 through verified OIDC workflows.
+- **Active epic:** none.
+- **Status:** m25-package-release done; 0.1.8 is public in npm, NuGet and GitHub Releases.
 - **Owner approval (2026-09-19):** Policies, monitored mailbox and distribution rights confirmed; completion of public launch authorized after readiness checks passed.
-- **Last update:** 2026-09-19 - PR #10 merged as f089f41 with green post-merge workflows; proposals #3 through #8 closed. Owner authorized release 0.1.8. Publication environments must be created and registry trust verified before publication.
+- **Last update:** 2026-09-19 - Release PR #11 merged as 96bb168. Dry runs, protected OIDC publications and fresh public consumers passed. Immutable v0.1.8 and GitHub release verified; legacy npm token revoked and NPM_TOKEN secret removed.
 
 ## Completed
 
@@ -105,12 +105,21 @@ Path: [docs/done/m24-dependency-upgrades](done/m24-dependency-upgrades/)
 - [x] Clean npm lockfile, expanded Node API smokes and grouped Cargo napi updates.
 - [x] Implementation head a2cf551 passed verify 35421342658, npm 35421342774 and NuGet 35421342777; publication skipped.
 
+### m25-package-release (done)
+
+Path: [docs/done/m25-package-release](done/m25-package-release/)
+
+- [x] Aligned versions, protected master-only publication environments and verified registry OIDC trust.
+- [x] Green release PR #11, dry runs and public npm/NuGet publication from 96bb168.
+- [x] Fresh public consumers, archive contents and registry signatures/provenance verified.
+- [x] [v0.1.8 release](https://github.com/teamdoticca/argos/releases/tag/v0.1.8), protected immutable tag and registry artifacts with SHA256 evidence.
+- [x] Legacy npm token revoked after OIDC success; unused GitHub secret removed. Intel Mac remains pack-verified only.
+
 ## Next
 
-1. Complete m25: version PR, protected environments, OIDC, release validation, public packages, fresh consumers and immutable tag/GitHub release.
-2. Retire the old npm credential only after successful OIDC publication. Follow the [release checklist](RELEASING.md).
-3. Later: Mnemon integration updates and an optional MCP wrapper epic, in separately scoped work. No epic beyond m25 is started.
+1. Mnemon integration updates and an optional MCP wrapper epic require separately scoped work. No next epic is started.
+2. Follow the [release checklist](RELEASING.md) for future versions; never republish 0.1.8 or retarget its tag.
 
 ## Blockers
 
-Publication environments npmjs/nugetorg now require maintainer approval and allow only master. Release manifests target 0.1.8; registry trust remains unverified. Resolve registry prerequisites before m25 publication; no known product implementation blockers remain.
+None for the completed release. Intel Mac runtime verification remains a documented platform limitation, not a claim of tested execution.
