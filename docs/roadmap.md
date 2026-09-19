@@ -46,9 +46,9 @@ Dependency maintenance completed 2026-09-19: [PR #10](https://github.com/teamdot
 
 ## Done
 
-Release 0.1.8 authorized on 2026-09-19. m24 merged as f089f41 and passed post-merge verify/npm/NuGet; superseded proposals are closed. m25 now covers protected publication environments, OIDC verification, aligned versions, registry publication and release evidence. No package has been published during m25 yet.
+Release 0.1.8 authorized on 2026-09-19. PR #11 merged as 96bb168 after all checks passed. Both dry runs and protected OIDC publications succeeded from that SHA. npm's fresh consumer and signature/provenance validation passed. NuGet public indexing, consumer verification and the immutable tag/GitHub release remain pending.
 
-Release preparation: npmjs/nugetorg environments now require maintainer approval and restrict deployment to master. Manifests target 0.1.8; registry trust and release verification remain pending.
+The npmjs/nugetorg environments require maintainer approval and restrict deployment to master; registry trust is verified. The old npm token was revoked after OIDC succeeded and the unused NPM_TOKEN secret was removed.
 
 - [m00-foundation](done/m00-foundation/)
 - [m01-topology-discovery](done/m01-topology-discovery/)

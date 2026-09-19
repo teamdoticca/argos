@@ -5,9 +5,9 @@ Live status. Update on every meaningful progress.
 ## Current
 
 - **Active epic:** m25-package-release.
-- **Status:** in_progress; prepare and publish 0.1.8 through verified OIDC workflows.
+- **Status:** in_progress; both 0.1.8 OIDC publications succeeded; verify NuGet public availability and finalize release evidence.
 - **Owner approval (2026-09-19):** Policies, monitored mailbox and distribution rights confirmed; completion of public launch authorized after readiness checks passed.
-- **Last update:** 2026-09-19 - PR #10 merged as f089f41 with green post-merge workflows; proposals #3 through #8 closed. Owner authorized release 0.1.8. Publication environments must be created and registry trust verified before publication.
+- **Last update:** 2026-09-19 - Release PR #11 merged as 96bb168. Dry runs and protected npm/NuGet OIDC publications passed. Fresh npm consumer and signature/provenance validation passed; old npm token revoked and NPM_TOKEN secret removed.
 
 ## Completed
 
@@ -113,4 +113,4 @@ Path: [docs/done/m24-dependency-upgrades](done/m24-dependency-upgrades/)
 
 ## Blockers
 
-Publication environments npmjs/nugetorg now require maintainer approval and allow only master. Release manifests target 0.1.8; registry trust remains unverified. Resolve registry prerequisites before m25 publication; no known product implementation blockers remain.
+NuGet accepted 0.1.8 but public feed indexing and fresh consumer verification remain pending. Protected environments and registry trust are verified. Create the immutable tag/GitHub release after both consumers pass; no known product implementation blockers remain.
