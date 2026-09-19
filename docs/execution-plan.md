@@ -5,7 +5,8 @@ Live status. Update on every meaningful progress.
 ## Current
 
 - **Active epic:** m23-public-readiness
-- **Status:** in_progress; local and hosted implementation checks passed on PR #2; review and repository administration pending
+- **Status:** in_progress; hosted implementation checks passed on PR #2; master protection applied and verified; final PR update and public launch pending
+- **Owner approval (2026-09-19):** Policies and mailbox monitoring approved; remaining owner-side checks, including distribution rights, reported complete. Sole-maintainer master protection and PR completion authorized. No merge, publication or visibility change in this preparation step.
 - **Last update:** 2026-09-19 - Revalidated the current working tree: Windows/Linux format, strict lint and 38 tests per platform, workflow lint, metadata/license checks and diff whitespace checks passed. Previous Node/NuGet smoke evidence remains in the epic status. Owner approved branch/commit/push/PR for non-publishing CI, not merge or public launch. Package versions unchanged.
 
 ## Completed
@@ -90,10 +91,10 @@ Path: [docs/done/m22-polyglot-ops-discovery](done/m22-polyglot-ops-discovery/)
 ## Next
 
 1. Review [PR #2](https://github.com/teamdoticca/argos/pull/2). Hosted verify, npm and NuGet matrices passed for implementation commit 964b0c8 with all publication skipped; approve merge separately after final checks.
-2. Complete the [public launch checklist](RELEASING.md): ownership/contact review, branch/security protections, verified code owner, environments and registry trust.
+2. Complete the [public launch checklist](RELEASING.md): master protection and owner-side review are complete; verify remaining remote security/tag settings. Publication environments and registry trust are prerequisites for the next package release, not for repository visibility alone.
 3. Approve visibility separately; release a new version through OIDC, then revoke the old npm token after successful replacement validation.
 4. Later: Mnemon integration updates and an optional MCP wrapper epic, in separately scoped work.
 
 ## Blockers
 
-Public launch is blocked on owner approval and remote settings/CI verification. Local Docker cannot certify macOS or every native RID. No GitHub setting, public package or credential was changed.
+Master now requires PRs, six strict GitHub Actions checks and resolved conversations, enforced for administrators, with no force pushes/deletion and no second-reviewer requirement. Final PR checks, remaining remote security verification and the separate merge/visibility step are pending. No public package or credential was changed.

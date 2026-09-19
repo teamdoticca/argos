@@ -34,11 +34,16 @@ PR [#2](https://github.com/teamdoticca/argos/pull/2), implementation commit `964
 
 ## Remaining Launch Gates
 
+On 2026-09-19, the owner approved the MIT license, Code of Conduct, Security Policy and Support guidance, confirmed monitoring of <fotisgpap@doticca.com>, and reported completing the remaining owner-side checks, including distribution rights. This is an owner confirmation, not an independent legal audit. The owner identified themselves as the sole maintainer and authorized master protection and completion of the readiness PR. No merge, publication or visibility change is performed in this preparation step.
+
+Master protection was applied and read back successfully on 2026-09-19: PRs required, zero required reviewer approvals for the sole maintainer, strict up-to-date checks bound to GitHub Actions (app 15368), resolved conversations, administrator enforcement, and no force pushes or branch deletion. Required contexts are Rust (windows-latest), Rust (ubuntu-latest), Rust (macos-latest), Package metadata, Workflow lint, and History and dependency scan. Path-filtered package workflows are not required contexts because docs-only changes may skip them.
+
 On 2026-09-19, the current working tree passed Windows and Docker Linux format, strict lint and all 38 Rust tests per platform again. Workflow lint, package metadata/license checks and diff whitespace checks also passed. The owner authorized a dedicated branch, commit, push and pull request for non-publishing GitHub CI; merge, publication and visibility changes remain unauthorized.
 
 - Review and approve PR #2 before merge; require passing checks on the final reviewed revision. Hosted implementation checks are green; Intel Mac remains pack-verified, not runtime-certified.
-- Confirm distribution rights and that the security/conduct mailbox is monitored. Assign CODEOWNERS only to a verified write-enabled maintainer/team.
-- Protect the default branch/release tags, enable available GitHub security features, and configure protected environments and registry trust policies.
+- Owner-side policy, contact and distribution checks are confirmed complete. No second-reviewer or CODEOWNER approval is required for the sole maintainer.
+- Default-branch protection is verified. Release-tag protection and available GitHub security features still need remote verification; owner completion statements are not evidence of those settings.
+- Protected publication environments and registry trust policies must be verified before the next package release; no new package release is needed just to make the repository public.
 - Verify an OIDC release before revoking the old npm token; use a new release version because public 0.1.7 already exists.
 - Explicit owner approval is required for visibility changes, publication, tags and credential rotation. None of those operations was performed.
 
