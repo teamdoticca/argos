@@ -23,4 +23,6 @@ The public master is green. Dependabot PRs #4, #6, #7 and #8 fail because CLI op
 
 ## Remaining
 
+PR #10 first hosted run passed Rust on all three OSes, history/Cargo audit and all NuGet native/consumer jobs. npm installation exposed missing optional @emnapi lock entries produced by npm 11.6.2. Regenerating with CI's npm 11.19.0 added those entries; clean npm ci passed in an empty directory. Full hosted verification must rerun on the repaired lockfile.
+
 The owner approved one consolidated PR, merge only after every relevant hosted check passes, and closing PRs #3 through #8 as superseded. Verify all host OS checks, Node 22/24 native smokes and NuGet native/consumer matrices before merge. Keep branch protections and publication gates intact.

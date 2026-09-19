@@ -43,6 +43,8 @@ Argos is public; anonymous clone and README access succeeded. Master requires PR
 
 Dependency maintenance 2026-09-19: TOML document parsing and coordinated napi 3/CLI migration are implemented with uuid/napi-build patch updates and grouped Cargo napi proposals. Windows/Linux strict Rust gates and 38 tests per platform passed, as did Windows Node API/Watch, npm audit/archive and package metadata checks. Hosted verification remains required before the approved consolidated merge and closure of superseded Dependabot PRs.
 
+PR #10 first hosted pass verified Rust, audit and NuGet jobs. npm 11.19.0 exposed missing optional lock entries; the repaired lockfile passes a fresh-directory npm ci and awaits full hosted rerun.
+
 ## Done
 
 - [m00-foundation](done/m00-foundation/)

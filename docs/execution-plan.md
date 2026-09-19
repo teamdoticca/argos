@@ -105,4 +105,4 @@ Path: [docs/done/m23-public-readiness](done/m23-public-readiness/)
 
 ## Blockers
 
-No public-launch blockers remain. m24 awaits hosted cross-platform verification and audit. Registry trust and publication-environment verification remain prerequisites for the next package release, not unfinished repository launch work.
+No public-launch blockers remain. m24 PR #10 passed hosted Rust, audit and NuGet jobs; missing optional npm lock entries were repaired using npm 11.19.0 and clean-install verified. Full hosted matrices must rerun before merge. Registry trust and publication-environment verification remain prerequisites for the next package release, not unfinished repository launch work.
