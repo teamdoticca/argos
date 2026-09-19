@@ -10,6 +10,12 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    groups:
+      napi:
+        patterns:
+          - napi
+          - napi-derive
+          - napi-build
   - package-ecosystem: npm
     directory: /bindings/npm
     schedule:

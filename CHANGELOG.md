@@ -9,6 +9,8 @@
 - Normalize Rust formatting and conditional backend imports without changing snapshot semantics.
 - Upgrade notify to 8.2, removing the unmaintained instant dependency.
 - Use locked native builds and shared MSVC toolchain selection; make watch-smoke cleanup safe on timeout.
+- Migrate to toml 1.1 document parsing and coordinated napi 3 bindings/CLI, preserving the public Node API and locked native builds.
+- Update uuid and napi-build patches, group coupled Cargo napi upgrades, and expand Node API compatibility smoke checks.
 
 ## 0.1.7
 

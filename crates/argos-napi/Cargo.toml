@@ -11,8 +11,8 @@ crate-type = ["cdylib"]
 [dependencies]
 argos-core = { workspace = true }
 argos-backend = { workspace = true }
-napi = { version = "2", default-features = false, features = ["napi4", "serde-json"] }
-napi-derive = "2"
+napi = { version = "3.12.2", default-features = false, features = ["napi4", "serde-json"] }
+napi-derive = "3.6.6"
 serde = { workspace = true }
 serde_json = { workspace = true }
 parking_lot = { workspace = true }
@@ -27,7 +27,7 @@ argos-backend-linux = { path = "../argos-backend-linux" }
 argos-backend-macos = { path = "../argos-backend-macos" }
 
 [build-dependencies]
-napi-build = "2"
+napi-build = "2.4.2"
 
 [package.metadata.napi]
 name = "argos"

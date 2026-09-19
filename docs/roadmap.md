@@ -39,6 +39,9 @@ Argos is public; anonymous clone and README access succeeded. Master requires PR
 | m21 Planner root source watch | [done/m21-planner-root-source-watch](done/m21-planner-root-source-watch/) | done |
 | m22 Polyglot + ops discovery | [done/m22-polyglot-ops-discovery](done/m22-polyglot-ops-discovery/) | done |
 | m23 Public repository readiness | [done/m23-public-readiness](done/m23-public-readiness/) | done |
+| m24 Dependency upgrade compatibility | [done/m24-dependency-upgrades](done/m24-dependency-upgrades/) | done |
+
+Dependency maintenance completed 2026-09-19: [PR #10](https://github.com/teamdoticca/argos/pull/10) consolidates TOML document parsing, coordinated napi 3/CLI migration, uuid/napi-build patches and Cargo napi grouping. Implementation head a2cf551 passed all hosted verify/npm/NuGet workflows after repairing optional npm lock entries. Local Windows/Linux strict Rust gates and 38 tests each also passed. Evidence is archived with m24; final PR-head checks remain required before the approved merge and closure of superseded proposals #3 through #8. No publication or next epic was started.
 
 ## Done
 
@@ -66,6 +69,7 @@ Argos is public; anonymous clone and README access succeeded. Master requires PR
 - [m21-planner-root-source-watch](done/m21-planner-root-source-watch/)
 - [m22-polyglot-ops-discovery](done/m22-polyglot-ops-discovery/)
 - [m23-public-readiness](done/m23-public-readiness/)
+- [m24-dependency-upgrades](done/m24-dependency-upgrades/)
 
 ## Deferred
 

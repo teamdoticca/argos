@@ -8,9 +8,8 @@ pub fn discover(root: &Path) -> Result<Vec<WorkspaceNode>> {
         return Ok(vec![]);
     }
     let text = std::fs::read_to_string(&path)?;
-    let value: toml::Value = text
-        .parse()
-        .map_err(|e| crate::ArgosError::Parse(format!("Cargo.toml: {e}")))?;
+    let value: toml::Value =
+        toml::from_str(&text).map_err(|e| crate::ArgosError::Parse(format!("Cargo.toml: {e}")))?;
     let Some(members) = value
         .get("workspace")
         .and_then(|w| w.get("members"))
