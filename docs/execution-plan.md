@@ -4,10 +4,10 @@ Live status. Update on every meaningful progress.
 
 ## Current
 
-- **Active epic:** m23-public-readiness
-- **Status:** in_progress; hosted implementation checks passed on PR #2; master protection applied and verified; final PR update and public launch pending
-- **Owner approval (2026-09-19):** Policies and mailbox monitoring approved; remaining owner-side checks, including distribution rights, reported complete. Sole-maintainer master protection and PR completion authorized. No merge, publication or visibility change in this preparation step.
-- **Last update:** 2026-09-19 - Revalidated the current working tree: Windows/Linux format, strict lint and 38 tests per platform, workflow lint, metadata/license checks and diff whitespace checks passed. Previous Node/NuGet smoke evidence remains in the epic status. Owner approved branch/commit/push/PR for non-publishing CI, not merge or public launch. Package versions unchanged.
+- **Active epic:** none
+- **Status:** m23-public-readiness done; Argos is public and PR #2 is merged.
+- **Owner approval (2026-09-19):** Policies, monitored mailbox and distribution rights confirmed; completion of public launch authorized after readiness checks passed.
+- **Last update:** 2026-09-19 - Anonymous clone/docs access verified. Master and version-tag protections, secret scanning, push protection, Dependabot security updates and private vulnerability reporting enabled and verified. No packages, version tags or credentials changed.
 
 ## Completed
 
@@ -88,13 +88,21 @@ Path: [docs/done/m22-polyglot-ops-discovery](done/m22-polyglot-ops-discovery/)
 - [x] Fixture `mixed-polyglot-ops`; `cargo test -p argos-core` green
 - [x] Public **Argos 0.1.7** — nuget.org + GitHub Packages; npm `0.1.7`
 
+### m23-public-readiness (done)
+
+Path: [docs/done/m23-public-readiness](done/m23-public-readiness/)
+
+- [x] Licensing, community policies, cross-platform CI, package checks and dependency/history scans.
+- [x] [PR #2](https://github.com/teamdoticca/argos/pull/2) merged after verify/npm/NuGet passed on final readiness head b4ed22c.
+- [x] Public visibility and anonymous access verified; master/version-tag protections and public security controls enabled.
+- [x] Package publication and credential rotation left to a separately authorized release.
+
 ## Next
 
-1. Review [PR #2](https://github.com/teamdoticca/argos/pull/2). Hosted verify, npm and NuGet matrices passed for implementation commit 964b0c8 with all publication skipped; approve merge separately after final checks.
-2. Complete the [public launch checklist](RELEASING.md): master protection and owner-side review are complete; verify remaining remote security/tag settings. Publication environments and registry trust are prerequisites for the next package release, not for repository visibility alone.
-3. Approve visibility separately; release a new version through OIDC, then revoke the old npm token after successful replacement validation.
-4. Later: Mnemon integration updates and an optional MCP wrapper epic, in separately scoped work.
+1. Maintain public issues, vulnerability reports and dependency alerts.
+2. Before a separately authorized package release, verify protected environments and registry trust, choose a new version, and validate OIDC before revoking the old npm token. Follow the [release checklist](RELEASING.md).
+3. Later: Mnemon integration updates and an optional MCP wrapper epic, in separately scoped work. No next epic is started.
 
 ## Blockers
 
-Master now requires PRs, six strict GitHub Actions checks and resolved conversations, enforced for administrators, with no force pushes/deletion and no second-reviewer requirement. Final PR checks, remaining remote security verification and the separate merge/visibility step are pending. No public package or credential was changed.
+No public-launch blockers remain. Registry trust and publication-environment verification remain prerequisites for the next package release, not unfinished repository launch work.
