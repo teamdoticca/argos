@@ -39,11 +39,9 @@ Argos is public; anonymous clone and README access succeeded. Master requires PR
 | m21 Planner root source watch | [done/m21-planner-root-source-watch](done/m21-planner-root-source-watch/) | done |
 | m22 Polyglot + ops discovery | [done/m22-polyglot-ops-discovery](done/m22-polyglot-ops-discovery/) | done |
 | m23 Public repository readiness | [done/m23-public-readiness](done/m23-public-readiness/) | done |
-| m24 Dependency upgrade compatibility | [epics/m24-dependency-upgrades](epics/m24-dependency-upgrades/) | in_progress |
+| m24 Dependency upgrade compatibility | [done/m24-dependency-upgrades](done/m24-dependency-upgrades/) | done |
 
-Dependency maintenance 2026-09-19: TOML document parsing and coordinated napi 3/CLI migration are implemented with uuid/napi-build patch updates and grouped Cargo napi proposals. Windows/Linux strict Rust gates and 38 tests per platform passed, as did Windows Node API/Watch, npm audit/archive and package metadata checks. Hosted verification remains required before the approved consolidated merge and closure of superseded Dependabot PRs.
-
-PR #10 first hosted pass verified Rust, audit and NuGet jobs. npm 11.19.0 exposed missing optional lock entries; the repaired lockfile passes a fresh-directory npm ci and awaits full hosted rerun.
+Dependency maintenance completed 2026-09-19: [PR #10](https://github.com/teamdoticca/argos/pull/10) consolidates TOML document parsing, coordinated napi 3/CLI migration, uuid/napi-build patches and Cargo napi grouping. Implementation head a2cf551 passed all hosted verify/npm/NuGet workflows after repairing optional npm lock entries. Local Windows/Linux strict Rust gates and 38 tests each also passed. Evidence is archived with m24; final PR-head checks remain required before the approved merge and closure of superseded proposals #3 through #8. No publication or next epic was started.
 
 ## Done
 
@@ -71,6 +69,7 @@ PR #10 first hosted pass verified Rust, audit and NuGet jobs. npm 11.19.0 expose
 - [m21-planner-root-source-watch](done/m21-planner-root-source-watch/)
 - [m22-polyglot-ops-discovery](done/m22-polyglot-ops-discovery/)
 - [m23-public-readiness](done/m23-public-readiness/)
+- [m24-dependency-upgrades](done/m24-dependency-upgrades/)
 
 ## Deferred
 

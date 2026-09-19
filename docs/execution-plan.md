@@ -4,10 +4,10 @@ Live status. Update on every meaningful progress.
 
 ## Current
 
-- **Active epic:** m24-dependency-upgrades
-- **Status:** in_progress; repair all six initial Dependabot proposals while preserving public APIs and package versions.
+- **Active epic:** None.
+- **Status:** m24 completed; all six initial Dependabot proposals consolidated and verified without changing public APIs or package versions.
 - **Owner approval (2026-09-19):** Policies, monitored mailbox and distribution rights confirmed; completion of public launch authorized after readiness checks passed.
-- **Last update:** 2026-09-19 - TOML parsing and coordinated napi 3/CLI migration implemented with uuid/napi-build updates. Windows/Linux strict Rust checks and 38 tests each passed; Windows Node API/Watch, npm audit/archive and package metadata checks passed. Owner approved consolidated PR, gated merge and closure of superseded Dependabot PRs. Hosted matrices are pending; no publication or credential changes.
+- **Last update:** 2026-09-19 - PR #10 implementation head a2cf551 passed all hosted verify/npm/NuGet workflows. m24 archived with evidence. Owner approved green-only merge and subsequent closure of superseded proposals; final documentation-head checks remain a merge gate. No publication or credential changes.
 
 ## Completed
 
@@ -97,12 +97,20 @@ Path: [docs/done/m23-public-readiness](done/m23-public-readiness/)
 - [x] Public visibility and anonymous access verified; master/version-tag protections and public security controls enabled.
 - [x] Package publication and credential rotation left to a separately authorized release.
 
+### m24-dependency-upgrades (done)
+
+Path: [docs/done/m24-dependency-upgrades](done/m24-dependency-upgrades/)
+
+- [x] TOML 1.1 document parsing, coordinated napi 3/CLI migration and uuid/napi-build patches.
+- [x] Clean npm lockfile, expanded Node API smokes and grouped Cargo napi updates.
+- [x] Implementation head a2cf551 passed verify 35421342658, npm 35421342774 and NuGet 35421342777; publication skipped.
+
 ## Next
 
-1. Complete m24 hosted verification, merge the consolidated dependency repair only when green and close superseded PRs #3 through #8. Continue maintaining public issues, vulnerability reports and dependency alerts.
+1. Merge PR #10 only after final-head checks pass and close superseded PRs #3 through #8. Continue maintaining public issues, vulnerability reports and dependency alerts.
 2. Before a separately authorized package release, verify protected environments and registry trust, choose a new version, and validate OIDC before revoking the old npm token. Follow the [release checklist](RELEASING.md).
 3. Later: Mnemon integration updates and an optional MCP wrapper epic, in separately scoped work. No epic beyond m24 is started.
 
 ## Blockers
 
-No public-launch blockers remain. m24 PR #10 passed hosted Rust, audit and NuGet jobs; missing optional npm lock entries were repaired using npm 11.19.0 and clean-install verified. Full hosted matrices must rerun before merge. Registry trust and publication-environment verification remain prerequisites for the next package release, not unfinished repository launch work.
+No implementation blockers remain. All m24 hosted matrices and audits passed; final PR-head checks remain mandatory before merge. Registry trust and publication-environment verification remain prerequisites for the next package release, not unfinished repository launch work.
