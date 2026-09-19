@@ -44,6 +44,10 @@ Argos is public; anonymous clone and README access succeeded. Master requires PR
 
 Dependency maintenance completed 2026-09-19: [PR #10](https://github.com/teamdoticca/argos/pull/10) consolidated TOML document parsing, coordinated napi 3/CLI migration, uuid/napi-build patches and Cargo napi grouping. Final PR-head and merged-master workflows passed; superseded proposals #3 through #8 are closed. Local Windows/Linux strict Rust gates and 38 tests each also passed. Evidence is archived with m24; the changes shipped in the separately authorized m25 release.
 
+Packaging maintenance: the managed Argos NuGet wrapper now has a stable public strong-name identity and targets .NET 8, .NET 9, and .NET 10 for C# consumers. This does not change the WorkspaceSnapshot contract, native artifacts, or NuGet publication policy.
+
+The next package release is being prepared as 0.1.9; publication remains pending the standard release gates and owner-authorized tag workflow.
+
 ## Done
 
 Release 0.1.8 completed on 2026-09-19 with owner authorization. PR #11 merged as 96bb168 after all checks passed. Both dry runs, protected OIDC publications, fresh public consumers and registry signature/provenance checks passed. The protected v0.1.8 tag and [GitHub release](https://github.com/teamdoticca/argos/releases/tag/v0.1.8) identify the same published SHA. Actual registry artifacts and hashes are attached; Intel Mac remains pack-verified only. No epic is active.
@@ -90,4 +94,4 @@ The npmjs/nugetorg environments require maintainer approval and restrict deploym
 - Snapshot persistence (`argos snapshot save` / `load`)
 - linux-musl NuGet RIDs
 - linux-arm64 / darwin-x64 / musl napi triples
-- Author NuGet package signing (code-signing certificates)
+-

@@ -152,10 +152,10 @@ jobs:
           path: artifacts/natives
           merge-multiple: true
 
-      - name: Setup .NET 8
+      - name: Setup .NET 10
         uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68
         with:
-          dotnet-version: "8.0.x"
+          dotnet-version: "10.0.x"
 
       - name: Resolve pack version
         id: packver
@@ -228,12 +228,13 @@ jobs:
           retention-days: 14
 
   smoke-rid:
-    name: smoke ${{ matrix.rid }}
+    name: smoke ${{ matrix.tfm }} ${{ matrix.rid }}
     needs: pack
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        tfm: [net8.0, net9.0, net10.0]
         include:
           - rid: win-x64
             os: windows-latest
@@ -257,10 +258,10 @@ jobs:
           name: argos-nuget
           path: artifacts/nuget
 
-      - name: Setup .NET 8
+      - name: Setup selected .NET SDK
         uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68
         with:
-          dotnet-version: "8.0.x"
+          dotnet-version: ${{ matrix.tfm == 'net8.0' && '8.0.x' || matrix.tfm == 'net9.0' && '9.0.x' || '10.0.x' }}
 
       - name: Smoke PackageReference + watch
         shell: pwsh
@@ -268,15 +269,16 @@ jobs:
           $ErrorActionPreference = "Stop"
           $version = "${{ needs.pack.outputs.package_version }}"
           $rid = "${{ matrix.rid }}"
+          $tfm = "${{ matrix.tfm }}"
           if ([string]::IsNullOrWhiteSpace($version)) { throw "package version output missing" }
           Push-Location bindings/nuget/smoke
           try {
-            dotnet restore Argos.Smoke.csproj -p:ArgosPackageVersion=$version -p:RuntimeIdentifier=$rid
+            dotnet restore Argos.Smoke.csproj -p:ArgosPackageVersion=$version -p:RuntimeIdentifier=$rid -p:TargetFramework=$tfm
             if ($LASTEXITCODE -ne 0) { throw "restore failed" }
             $fixture = (Resolve-Path "..\..\..\fixtures\small-pnpm").Path
-            dotnet run -c Release --no-restore -p:ArgosPackageVersion=$version -p:RuntimeIdentifier=$rid -- $fixture
+            dotnet run --framework $tfm -c Release --no-restore -p:ArgosPackageVersion=$version -p:RuntimeIdentifier=$rid -- $fixture
             if ($LASTEXITCODE -ne 0) { throw "open smoke failed" }
-            dotnet run -c Release --no-restore -p:ArgosPackageVersion=$version -p:RuntimeIdentifier=$rid -- --watch
+            dotnet run --framework $tfm -c Release --no-restore -p:ArgosPackageVersion=$version -p:RuntimeIdentifier=$rid -- --watch
             if ($LASTEXITCODE -ne 0) { throw "watch smoke failed" }
           }
           finally {

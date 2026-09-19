@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>Argos</PackageId>
-    <Version>0.1.8</Version>
+    <Version>0.1.9</Version>
     <Authors>Doticca</Authors>
     <Company>Doticca</Company>
     <Description>Argos workspace intelligence engine (.NET wrapper). Opens a repo root and answers what parts of the workspace matter right now via an immutable WorkspaceSnapshot.</Description>
@@ -16,6 +16,9 @@
     <PackageTags>argos;workspace;monorepo;watch;dotnet;intelligence</PackageTags>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>Argos</RootNamespace>
+    <SignAssembly>true</SignAssembly>
+    <PublicSign>true</PublicSign>
+    <AssemblyOriginatorKeyFile>Argos.public.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\..\LICENSE" Pack="true" PackagePath="" />
