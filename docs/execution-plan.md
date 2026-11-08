@@ -5,9 +5,9 @@ Live status. Update on every meaningful progress.
 ## Current
 
 - **Active epic:** [m26-filesystem-library-mode](epics/m26-filesystem-library-mode/) (`in_progress`).
-- **Status:** Implementing opt-in filesystem-only discovery/watch for registered roots; workspace mode preserved. Branch `feature/filesystem-library-mode`.
+- **Status:** Implementation complete; manifests bumped to **0.1.10** for release PR. Workspace mode preserved.
 - **Owner approval (2026-09-19):** Policies, monitored mailbox and distribution rights confirmed; completion of public launch authorized after readiness checks passed.
-- **Last update:** 2026-11-08 - m26 implementation complete on `feature/filesystem-library-mode`: filesystem open/filters/coverage/backends/bindings/tests; Bookworm Node 24 packaged-addon validation passed for a Bookworm-built `.node`.
+- **Last update:** 2026-11-08 - Version 0.1.10 prepared on `feature/filesystem-library-mode`. Next: merge to master, dry-run pack-npm/pack-nuget, then owner-authorized publish.
 
 ## Completed
 

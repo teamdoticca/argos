@@ -47,9 +47,9 @@ Dependency maintenance completed 2026-09-19: [PR #10](https://github.com/teamdot
 
 Packaging maintenance: the managed Argos NuGet wrapper now has a stable public strong-name identity and targets .NET 8, .NET 9, and .NET 10 for C# consumers. This does not change the WorkspaceSnapshot contract, native artifacts, or NuGet publication policy.
 
-The next package release is being prepared as 0.1.9; publication remains pending the standard release gates and owner-authorized tag workflow.
+Package line **0.1.9** is public. The next package release is prepared as **0.1.10** (filesystem library mode); publication remains pending PR merge, dry-run packs and owner-authorized publish/tag workflow.
 
-Active work: **m26 Filesystem library mode** — implementation complete on `feature/filesystem-library-mode` (awaiting PR); Bookworm-built Node 24 addon validated.
+Active work: **m26 Filesystem library mode** — implementation complete on `feature/filesystem-library-mode`; version bump 0.1.10 for release.
 
 ## Done
 
