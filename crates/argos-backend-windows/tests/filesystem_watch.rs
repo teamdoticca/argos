@@ -1,5 +1,7 @@
 //! Windows filesystem-mode watch integration tests (bounded waits).
 
+#![cfg(windows)]
+
 use argos_backend::WatchBackend;
 use argos_backend_windows::WindowsBackend;
 use argos_core::{list_scopes, DomainEvent, FileEventKind, OpenOptions, Workspace};
