@@ -66,7 +66,9 @@ pub fn discover_filesystem_root(
         }
     })?;
     if !meta.is_dir() {
-        return Err(crate::ArgosError::RootNotDirectory(root.display().to_string()));
+        return Err(crate::ArgosError::RootNotDirectory(
+            root.display().to_string(),
+        ));
     }
     // Prove we can list the root; do not pretend an unreadable root is empty.
     let _ = std::fs::read_dir(root).map_err(|e| {
@@ -153,7 +155,9 @@ fn walk_coverage(
         Ok(rd) => rd,
         Err(e) => {
             coverage.complete = false;
-            coverage.unreadable.push(format!("{} ({e})", display_rel(root, dir)));
+            coverage
+                .unreadable
+                .push(format!("{} ({e})", display_rel(root, dir)));
             return Ok(());
         }
     };
@@ -251,7 +255,11 @@ fn handle_symlink(
         }
         SymlinkPolicy::Follow => {
             // Explicit unconfined follow: traverse if target is a directory; diagnose limitation.
-            if !coverage.notes.iter().any(|n| n == "symlink-follow-unconfined") {
+            if !coverage
+                .notes
+                .iter()
+                .any(|n| n == "symlink-follow-unconfined")
+            {
                 coverage.notes.push("symlink-follow-unconfined".into());
             }
             let target = match std::fs::canonicalize(link_path) {

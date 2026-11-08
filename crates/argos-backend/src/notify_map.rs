@@ -1,6 +1,6 @@
 //! Shared notify → DomainEvent mapping and bounded receive queue.
 
-use argos_core::{DomainEvent, DiscoveryMode, FileEventKind, WorkspaceEventKind};
+use argos_core::{DiscoveryMode, DomainEvent, FileEventKind, WorkspaceEventKind};
 use notify::event::{ModifyKind, RenameMode};
 use notify::{Config, Event, EventHandler, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use std::path::{Path, PathBuf};
@@ -176,10 +176,7 @@ pub fn map_notify_event(
                 }
                 out.push(DomainEvent::file_with_reason(
                     FileEventKind::ScopeRescan,
-                    ev.paths
-                        .first()
-                        .map(|p| path_string(p))
-                        .unwrap_or_default(),
+                    ev.paths.first().map(|p| path_string(p)).unwrap_or_default(),
                     "uncertain-rename",
                 ));
                 return out;
@@ -327,14 +324,17 @@ mod tests {
             attrs: Default::default(),
         };
         let mapped = map_notify_event(ev, DiscoveryMode::Filesystem, None);
-        assert!(mapped.iter().all(|e| !matches!(e, DomainEvent::Workspace { .. })));
+        assert!(mapped
+            .iter()
+            .all(|e| !matches!(e, DomainEvent::Workspace { .. })));
     }
 
     #[test]
     fn overflow_flag_drains_as_scope_rescan() {
         let dir = tempfile::tempdir().unwrap();
-        let (_watcher, queue) = start_bounded_watcher(8, &[(dir.path().to_path_buf(), RecursiveMode::Recursive)])
-            .unwrap();
+        let (_watcher, queue) =
+            start_bounded_watcher(8, &[(dir.path().to_path_buf(), RecursiveMode::Recursive)])
+                .unwrap();
         queue.force_overflow();
         let events = queue
             .drain(DiscoveryMode::Filesystem, dir.path(), None)

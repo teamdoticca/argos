@@ -1,7 +1,5 @@
 use crate::diagnostics::{platform_info, PlatformInfo};
-use crate::discovery::{
-    discover_filesystem_root, discover_topology, SymlinkPolicy,
-};
+use crate::discovery::{discover_filesystem_root, discover_topology, SymlinkPolicy};
 use crate::ignore_engine::IgnoreEngine;
 use crate::path_filter::{PathFilter, PathFilterSpec};
 use crate::path_identity::{detect_case_sensitivity, PathSemantics};
@@ -83,9 +81,8 @@ impl Workspace {
         let case_sensitive = detect_case_sensitivity(&root);
         let mode = DiscoveryMode::parse(options.mode.as_deref())?;
         let symlink_mode = resolve_symlink_mode(mode, options.symlink_mode.as_deref())?;
-        let symlink_policy = SymlinkPolicy::parse(&symlink_mode).ok_or_else(|| {
-            ArgosError::Parse(format!("unknown symlinkMode '{symlink_mode}'"))
-        })?;
+        let symlink_policy = SymlinkPolicy::parse(&symlink_mode)
+            .ok_or_else(|| ArgosError::Parse(format!("unknown symlinkMode '{symlink_mode}'")))?;
         let workspace_id = Uuid::new_v4();
         let filter_spec = PathFilterSpec {
             include: options.include.unwrap_or_default(),
@@ -226,13 +223,7 @@ impl Workspace {
         snap.identity.snapshot_version = prev + 1;
         snap.identity.state = SnapshotState::Recovering;
         snap.planning.coverage.requires_reconciliation = true;
-        if !snap
-            .planning
-            .coverage
-            .notes
-            .iter()
-            .any(|n| n == "recovery")
-        {
+        if !snap.planning.coverage.notes.iter().any(|n| n == "recovery") {
             snap.planning.coverage.notes.push("recovery".into());
         }
         *self.snapshot_version.write() = snap.identity.snapshot_version;
@@ -344,13 +335,10 @@ fn build_snapshot(
             break;
         }
     }
-    let state = if (warnings_degraded || !coverage.complete)
-        && matches!(state, SnapshotState::Ready)
-        && mode == DiscoveryMode::Filesystem
-        && (!coverage.unreadable.is_empty())
+    let state = if matches!(state, SnapshotState::Ready)
+        && (warnings_degraded
+            || (mode == DiscoveryMode::Filesystem && !coverage.unreadable.is_empty()))
     {
-        SnapshotState::Degraded
-    } else if warnings_degraded && matches!(state, SnapshotState::Ready) {
         SnapshotState::Degraded
     } else {
         state

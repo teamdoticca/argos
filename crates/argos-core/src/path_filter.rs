@@ -54,7 +54,10 @@ impl PathFilter {
 
     /// Relative path from the registered root, using `/` separators.
     pub fn normalize_rel(path: &Path) -> String {
-        path.to_string_lossy().replace('\\', "/").trim_start_matches('/').to_string()
+        path.to_string_lossy()
+            .replace('\\', "/")
+            .trim_start_matches('/')
+            .to_string()
     }
 
     fn candidate(&self, rel: &str) -> String {

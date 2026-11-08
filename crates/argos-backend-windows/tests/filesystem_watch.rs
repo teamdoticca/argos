@@ -14,7 +14,11 @@ fn fs_opts() -> OpenOptions {
     }
 }
 
-fn wait_for_events<F>(backend: &mut WindowsBackend, timeout: Duration, mut pred: F) -> Vec<DomainEvent>
+fn wait_for_events<F>(
+    backend: &mut WindowsBackend,
+    timeout: Duration,
+    mut pred: F,
+) -> Vec<DomainEvent>
 where
     F: FnMut(&[DomainEvent]) -> bool,
 {
