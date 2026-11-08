@@ -9,3 +9,7 @@ description = "Argos watch backend abstraction and PlatformCapabilities"
 argos-core = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
+notify = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3"

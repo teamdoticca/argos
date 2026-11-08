@@ -15,7 +15,7 @@ pub fn discover(root: &Path) -> Result<Vec<WorkspaceNode>> {
         return Ok(vec![]);
     }
     let text = std::fs::read_to_string(&path)?;
-    let file: WorkspaceFile = serde_yaml::from_str(&text)
+    let file: WorkspaceFile = serde_norway::from_str(&text)
         .map_err(|e| crate::ArgosError::Parse(format!(".workspace: {e}")))?;
     let Some(imports) = file.imports else {
         return Ok(vec![]);

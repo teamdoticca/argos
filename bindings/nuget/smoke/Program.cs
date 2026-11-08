@@ -147,10 +147,68 @@ static async Task<int> RunWatchSmokeAsync()
     }
 }
 
+static async Task<int> RunFilesystemSmokeAsync()
+{
+    var tmp = Path.Combine(Path.GetTempPath(), "argos-nuget-fs-" + Guid.NewGuid().ToString("n"));
+    Directory.CreateDirectory(Path.Combine(tmp, "Artist"));
+    await File.WriteAllTextAsync(Path.Combine(tmp, "Artist", "a.flac"), "x");
+    Console.WriteLine($"SMOKE filesystem OpenAsync({tmp})");
+    try
+    {
+        await using var workspace = await ArgosWorkspace.OpenAsync(
+            tmp,
+            OpenOptions.Filesystem(exclude: new[] { "**/*.partial" }));
+        using var doc = JsonDocument.Parse(workspace.CurrentSnapshot);
+        if (doc.RootElement.GetProperty("identity").GetProperty("mode").GetString() != "filesystem")
+        {
+            return Fail("identity.mode != filesystem");
+        }
+        if (!doc.RootElement.GetProperty("planning").GetProperty("coverage").GetProperty("requiresReconciliation").GetBoolean())
+        {
+            return Fail("filesystem open must require reconciliation (startup-gap)");
+        }
+        using var scopes = JsonDocument.Parse(workspace.ListScopes());
+        if (scopes.RootElement.GetArrayLength() != 1)
+        {
+            return Fail("expected single filesystem-root scope");
+        }
+
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var saw = false;
+        var watchTask = Task.Run(async () =>
+        {
+            await foreach (var _ in workspace.WatchAsync(cts.Token))
+            {
+                saw = true;
+                cts.Cancel();
+                break;
+            }
+        });
+        await Task.Delay(300);
+        await File.WriteAllTextAsync(Path.Combine(tmp, "Artist", "a.flac"), "y");
+        try { await watchTask; } catch (OperationCanceledException) { }
+        if (!saw)
+        {
+            return Fail("filesystem WatchAsync produced no event");
+        }
+        Console.WriteLine("SMOKE FILESYSTEM OK");
+        return 0;
+    }
+    finally
+    {
+        try { Directory.Delete(tmp, recursive: true); } catch { }
+    }
+}
+
 var watch = args.Any(a => string.Equals(a, "--watch", StringComparison.OrdinalIgnoreCase));
+var filesystem = args.Any(a => string.Equals(a, "--filesystem", StringComparison.OrdinalIgnoreCase));
 if (watch)
 {
     return await RunWatchSmokeAsync();
+}
+if (filesystem)
+{
+    return await RunFilesystemSmokeAsync();
 }
 
 var pathArgs = args.Where(a => !a.StartsWith("--", StringComparison.Ordinal)).ToArray();

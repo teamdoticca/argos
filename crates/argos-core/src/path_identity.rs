@@ -6,6 +6,13 @@ use std::path::{Component, Path, PathBuf};
 pub struct PathSemantics {
     pub case_sensitive: bool,
     pub follows_symlinks: bool,
+    /// Mirrors open `symlinkMode` (`follow` | `nofollow` | `followConfined`). Additive.
+    #[serde(default = "default_symlink_policy")]
+    pub symlink_policy: String,
+}
+
+fn default_symlink_policy() -> String {
+    "follow".into()
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -92,6 +99,18 @@ pub fn classify_symlink(path: &Path) -> Option<String> {
     } else {
         None
     }
+}
+
+/// True when `candidate` is the registered root or a strict descendant, using
+/// canonical path identities and a path-component boundary (not a bare string prefix).
+pub fn is_path_within_root(candidate: &Path, root: &Path, case_sensitive: bool) -> bool {
+    let cand = PathIdentity::from_path(candidate, case_sensitive);
+    let root_id = PathIdentity::from_path(root, case_sensitive);
+    if cand.key == root_id.key {
+        return true;
+    }
+    let root_key = root_id.key.trim_end_matches('/');
+    cand.key.starts_with(&format!("{root_key}/"))
 }
 
 #[cfg(windows)]

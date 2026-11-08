@@ -106,8 +106,28 @@ pub unsafe extern "C" fn argos_workspace_open(
         let raw = CStr::from_ptr(options_json).to_string_lossy();
         if !raw.is_empty() {
             if let Ok(v) = serde_json::from_str::<serde_json::Value>(&raw) {
+                if let Some(m) = v.get("mode").and_then(|x| x.as_str()) {
+                    options.mode = Some(m.to_string());
+                }
                 if let Some(m) = v.get("symlinkMode").and_then(|x| x.as_str()) {
                     options.symlink_mode = Some(m.to_string());
+                }
+                if let Some(arr) = v.get("include").and_then(|x| x.as_array()) {
+                    options.include = Some(
+                        arr.iter()
+                            .filter_map(|x| x.as_str().map(|s| s.to_string()))
+                            .collect(),
+                    );
+                }
+                if let Some(arr) = v.get("exclude").and_then(|x| x.as_array()) {
+                    options.exclude = Some(
+                        arr.iter()
+                            .filter_map(|x| x.as_str().map(|s| s.to_string()))
+                            .collect(),
+                    );
+                }
+                if let Some(n) = v.get("eventBufferCapacity").and_then(|x| x.as_u64()) {
+                    options.event_buffer_capacity = Some(n as usize);
                 }
             }
         }
@@ -611,7 +631,11 @@ pub unsafe extern "C" fn argos_watch_poll(
 
     if needs_recovery {
         let _ = handle.workspace.mark_recovering();
-        let _ = handle.workspace.mark_ready_from_rebuild();
+        if let Err(e) = handle.workspace.mark_ready_from_rebuild() {
+            let _ = handle
+                .workspace
+                .mark_degraded_root_unavailable(&format!("root-unavailable:{e}"));
+        }
     } else if topology_changed {
         let _ = handle.workspace.rebuild_snapshot();
     }
@@ -619,6 +643,7 @@ pub unsafe extern "C" fn argos_watch_poll(
     let snap = handle.workspace.current_snapshot();
     let enriched: Vec<DomainEvent> = events
         .into_iter()
+        .filter(|ev| event_passes_filter(&handle.workspace, ev))
         .map(|ev| enrich_event(&snap, ev))
         .collect();
 
@@ -631,6 +656,39 @@ pub unsafe extern "C" fn argos_watch_poll(
     }
 }
 
+fn event_passes_filter(ws: &Workspace, event: &DomainEvent) -> bool {
+    match event {
+        DomainEvent::File {
+            kind,
+            path,
+            from_path,
+            to_path,
+            ..
+        } => {
+            if matches!(kind, argos_core::FileEventKind::ScopeRescan) {
+                return true;
+            }
+            if matches!(kind, argos_core::FileEventKind::FileRenamed) {
+                let from_ok = from_path
+                    .as_ref()
+                    .map(|p| ws.file_event_eligible(PathBuf::from(p).as_path()))
+                    .unwrap_or(false);
+                let to_ok = to_path
+                    .as_ref()
+                    .map(|p| ws.file_event_eligible(PathBuf::from(p).as_path()))
+                    .unwrap_or_else(|| ws.file_event_eligible(PathBuf::from(path).as_path()));
+                return from_ok || to_ok;
+            }
+            let p = PathBuf::from(path);
+            if p.is_dir() {
+                return true;
+            }
+            ws.file_event_eligible(&p)
+        }
+        DomainEvent::Workspace { .. } => true,
+    }
+}
+
 fn enrich_event(snapshot: &WorkspaceSnapshot, event: DomainEvent) -> DomainEvent {
     match event {
         DomainEvent::File {
@@ -638,6 +696,9 @@ fn enrich_event(snapshot: &WorkspaceSnapshot, event: DomainEvent) -> DomainEvent
             path,
             node,
             scope,
+            from_path,
+            to_path,
+            reason,
         } => {
             let owner = find_owner(snapshot, PathBuf::from(&path).as_path());
             let node = node.or_else(|| owner.as_ref().map(|o| o.node_id.clone()));
@@ -656,6 +717,9 @@ fn enrich_event(snapshot: &WorkspaceSnapshot, event: DomainEvent) -> DomainEvent
                 path,
                 node,
                 scope,
+                from_path,
+                to_path,
+                reason,
             }
         }
         other => other,

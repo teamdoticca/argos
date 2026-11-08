@@ -41,6 +41,13 @@ pub fn plan_scopes(nodes: &[WorkspaceNode], ignore: &IgnoreEngine) -> Vec<WatchS
             NodeKind::GitSubmodule | NodeKind::ImportedFolder | NodeKind::Package
         ) {
             let watch = match node.source.provider.as_str() {
+                "filesystem-root" => {
+                    if node.root.is_dir() {
+                        vec![".".into()]
+                    } else {
+                        Vec::new()
+                    }
+                }
                 "document-root" | "guidance-path" | "dockerfile" | "bicep" | "azure-yaml" => {
                     plan_document_or_guidance_watch(node, ignore)
                 }

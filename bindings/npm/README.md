@@ -21,7 +21,27 @@ try {
 }
 ```
 
-Run the example as an ES module. Stop the watcher before closing the workspace. Use one iterator per workspace and serialize operations.
+Filesystem-only mode for an explicit media directory (CommonJS and ESM examples under `examples/`):
+
+```js
+const ws = Workspace.open(mediaRoot, JSON.stringify({
+  mode: 'filesystem',
+  symlinkMode: 'nofollow',
+  include: ['**/*.flac'],
+  exclude: ['**/*.partial'],
+}))
+console.log(ws.currentSnapshot.planning.coverage)
+const ac = new AbortController()
+try {
+  for await (const event of watch(ws, ac.signal)) {
+    if (event.reason) console.log('rescan', event)
+  }
+} finally {
+  ws.close()
+}
+```
+
+Run the workspace example as an ES module. Stop the watcher before closing the workspace. Use one iterator per workspace and serialize operations.
 
 Shipped addons: Windows x64, Linux x64 glibc, macOS ARM64. Use maintained Node.js 22 or 24. Older versions allowed by the manifest are not maintained support targets. Alpine/musl and other architectures are not included.
 

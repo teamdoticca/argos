@@ -3,7 +3,7 @@
 use argos_backend::WatchBackend;
 use argos_core::{
     compute_delta as compute_delta_core, explain_path, find_owner, list_nodes, list_scopes,
-    workspace_health, DomainEvent, OpenOptions, Workspace as CoreWorkspace,
+    workspace_health, DomainEvent, FileEventKind, OpenOptions, Workspace as CoreWorkspace,
 };
 use napi::bindgen_prelude::*;
 use napi_derive::napi;
@@ -69,7 +69,16 @@ impl Workspace {
     pub fn explain_path(&self, path: String) -> Result<serde_json::Value> {
         let snap = self.inner.current_snapshot();
         let p = PathBuf::from(&path);
-        let ignored = self.inner.ignore().is_ignored(&p);
+        let ignored = if self.inner.mode() == argos_core::DiscoveryMode::Filesystem {
+            let Ok(rel) = p.strip_prefix(self.inner.root()) else {
+                return serde_json::to_value(explain_path(&snap, &p, false, None))
+                    .map_err(to_napi_err);
+            };
+            let rel = argos_core::PathFilter::normalize_rel(rel);
+            !self.inner.path_filter().file_matches(&rel) && !p.is_dir()
+        } else {
+            self.inner.ignore().is_ignored(&p)
+        };
         let explained = explain_path(&snap, &p, ignored, None);
         serde_json::to_value(explained).map_err(to_napi_err)
     }
@@ -108,7 +117,7 @@ impl Workspace {
             matches!(
                 e,
                 DomainEvent::File {
-                    kind: argos_core::FileEventKind::ScopeRescan,
+                    kind: FileEventKind::ScopeRescan,
                     ..
                 }
             )
@@ -126,7 +135,11 @@ impl Workspace {
 
         if needs_recovery {
             let _ = self.inner.mark_recovering();
-            let _ = self.inner.mark_ready_from_rebuild();
+            if let Err(e) = self.inner.mark_ready_from_rebuild() {
+                let _ = self
+                    .inner
+                    .mark_degraded_root_unavailable(&format!("root-unavailable:{e}"));
+            }
         } else if topology_changed {
             let _ = self.inner.rebuild_snapshot();
         }
@@ -134,6 +147,7 @@ impl Workspace {
         let snap = self.inner.current_snapshot();
         let enriched: Vec<DomainEvent> = events
             .into_iter()
+            .filter(|ev| event_passes_filter(&self.inner, ev))
             .map(|ev| enrich_event(&snap, ev))
             .collect();
         serde_json::to_value(enriched).map_err(to_napi_err)
@@ -193,12 +207,53 @@ fn parse_open_options(options_json: Option<&str>) -> Result<OpenOptions> {
     #[derive(serde::Deserialize)]
     #[serde(rename_all = "camelCase")]
     struct Opts {
+        mode: Option<String>,
         symlink_mode: Option<String>,
+        include: Option<Vec<String>>,
+        exclude: Option<Vec<String>>,
+        event_buffer_capacity: Option<u32>,
     }
     let opts: Opts = serde_json::from_str(raw).map_err(to_napi_err)?;
     Ok(OpenOptions {
+        mode: opts.mode,
         symlink_mode: opts.symlink_mode,
+        include: opts.include,
+        exclude: opts.exclude,
+        event_buffer_capacity: opts.event_buffer_capacity.map(|n| n as usize),
     })
+}
+
+fn event_passes_filter(ws: &CoreWorkspace, event: &DomainEvent) -> bool {
+    match event {
+        DomainEvent::File {
+            kind,
+            path,
+            from_path,
+            to_path,
+            ..
+        } => {
+            if matches!(kind, FileEventKind::ScopeRescan) {
+                return true;
+            }
+            if matches!(kind, FileEventKind::FileRenamed) {
+                let from_ok = from_path
+                    .as_ref()
+                    .map(|p| ws.file_event_eligible(PathBuf::from(p).as_path()))
+                    .unwrap_or(false);
+                let to_ok = to_path
+                    .as_ref()
+                    .map(|p| ws.file_event_eligible(PathBuf::from(p).as_path()))
+                    .unwrap_or_else(|| ws.file_event_eligible(PathBuf::from(path).as_path()));
+                return from_ok || to_ok;
+            }
+            let p = PathBuf::from(path);
+            if p.is_dir() {
+                return true;
+            }
+            ws.file_event_eligible(&p)
+        }
+        DomainEvent::Workspace { .. } => true,
+    }
 }
 
 fn to_napi_err(e: impl ToString) -> Error {
@@ -265,6 +320,9 @@ fn enrich_event(snapshot: &argos_core::WorkspaceSnapshot, event: DomainEvent) ->
             path,
             node,
             scope,
+            from_path,
+            to_path,
+            reason,
         } => {
             let owner = find_owner(snapshot, PathBuf::from(&path).as_path());
             let node = node.or_else(|| owner.as_ref().map(|o| o.node_id.clone()));
@@ -283,6 +341,9 @@ fn enrich_event(snapshot: &argos_core::WorkspaceSnapshot, event: DomainEvent) ->
                 path,
                 node,
                 scope,
+                from_path,
+                to_path,
+                reason,
             }
         }
         other => other,

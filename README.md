@@ -4,7 +4,7 @@
 
 Use it when your tool opens a real repo (monorepo or not) and needs to know **which packages exist**, **what is safe to ignore**, **where to watch for changes**, and **who owns a path** — without recursively watching the entire git root or treating `node_modules` / `.next` / `bin` / `obj` as signal.
 
-Argos is a **workspace intelligence** library (not a file-watcher product). You open a root; it builds an immutable **`WorkspaceSnapshot`**. Watching is optional and driven by that snapshot’s scopes.
+Argos is a **workspace intelligence** library (not a file-watcher product). You open a root; it builds an immutable **`WorkspaceSnapshot`**. Watching is optional and driven by that snapshot’s scopes. An opt-in **filesystem mode** observes an explicitly registered directory tree (for example a media library) without software-package discovery; see [compatibility](docs/COMPATIBILITY.md#filesystem-mode).
 
 ```text
 Open → Snapshot → List nodes / scopes / explain / find owner

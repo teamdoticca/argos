@@ -21,7 +21,7 @@ Doticca maintains the release process. Repository preparation does not authorize
 
 ## Versioning
 
-Keep Cargo.toml/Cargo.lock, bindings/npm/package.json/package-lock.json and bindings/nuget/Argos/Argos.csproj aligned. Update CHANGELOG.md. Do not overwrite an existing public version. The next release prepared by this change is 0.1.9; 0.1.8 and earlier versions must not be republished. During 0.x, breaking changes belong in a new minor version and require migration notes; patch releases should remain compatible.
+Keep Cargo.toml/Cargo.lock, bindings/npm/package.json/package-lock.json and bindings/nuget/Argos/Argos.csproj aligned. Update CHANGELOG.md. Do not overwrite an existing public version. The next release prepared by this change is 0.1.10; 0.1.9 and earlier versions must not be republished. During 0.x, breaking changes belong in a new minor version and require migration notes; patch releases should remain compatible.
 
 ## Publication
 
