@@ -16,7 +16,9 @@ name = "argos-backend"
 version = "0.1.9"
 dependencies = [
  "argos-core",
+ "notify",
  "serde",
+ "tempfile",
  "thiserror",
 ]
 
@@ -45,6 +47,7 @@ dependencies = [
  "argos-backend",
  "argos-core",
  "notify",
+ "tempfile",
 ]
 
 [[package]]

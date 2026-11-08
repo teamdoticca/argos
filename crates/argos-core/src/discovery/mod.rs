@@ -1,6 +1,7 @@
 mod cargo_ws;
 mod document;
 mod dotnet;
+pub mod filesystem;
 mod git_submodules;
 mod golang;
 mod gradle;
@@ -14,6 +15,8 @@ mod pnpm;
 mod python;
 mod walk;
 mod workspace_file;
+
+pub use filesystem::{discover_filesystem_root, FilesystemDiscovery, SymlinkPolicy};
 
 use crate::model::{TopologyResult, WorkspaceNode};
 use crate::path_identity::{detect_case_sensitivity, PathIdentity};

@@ -4,10 +4,10 @@ Live status. Update on every meaningful progress.
 
 ## Current
 
-- **Active epic:** none.
-- **Status:** m25-package-release done; 0.1.8 is public in npm, NuGet and GitHub Releases. The next package release, 0.1.9, is prepared locally and not yet published.
+- **Active epic:** [m26-filesystem-library-mode](epics/m26-filesystem-library-mode/) (`in_progress`).
+- **Status:** Implementing opt-in filesystem-only discovery/watch for registered roots; workspace mode preserved. Branch `feature/filesystem-library-mode`.
 - **Owner approval (2026-09-19):** Policies, monitored mailbox and distribution rights confirmed; completion of public launch authorized after readiness checks passed.
-- **Last update:** 2026-09-19 - Release PR #11 merged as 96bb168. Dry runs, protected OIDC publications and fresh public consumers passed. Immutable v0.1.8 and GitHub release verified; legacy npm token revoked and NPM_TOKEN secret removed. Argos 0.1.9 manifests now include managed .NET 8/9/10 targets and public strong-name signing; publication is pending release gates.
+- **Last update:** 2026-11-08 - m26 implementation complete on `feature/filesystem-library-mode`: filesystem open/filters/coverage/backends/bindings/tests; Bookworm Node 24 packaged-addon validation passed for a Bookworm-built `.node`.
 
 ## Completed
 
@@ -117,8 +117,9 @@ Path: [docs/done/m25-package-release](done/m25-package-release/)
 
 ## Next
 
-1. Mnemon integration updates and an optional MCP wrapper epic require separately scoped work. No next epic is started.
-2. Follow the [release checklist](RELEASING.md) for future versions; never republish 0.1.8 or retarget its tag.
+1. Complete m26 acceptance criteria (core, backends, bindings, tests, Bookworm packaged-addon evidence).
+2. After m26 closes: Mnemon integration updates and an optional MCP wrapper epic remain separately scoped.
+3. Follow the [release checklist](RELEASING.md) for future versions; never republish 0.1.8 or retarget its tag.
 
 ## Blockers
 

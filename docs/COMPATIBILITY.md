@@ -27,6 +27,18 @@ In Node, pass an AbortSignal to watch, await termination, then call close in a f
 
 Topology events can rebuild the snapshot. Events are filesystem notifications, not a durable, ordered audit log or a guaranteed one-event-per-edit stream. Reconcile against CurrentSnapshot after topology/recovery changes. Consumers must handle missed/coalesced events and periodic reconciliation where correctness requires it.
 
+### Filesystem mode
+
+Pass `"mode":"filesystem"` in open options JSON to observe an explicitly registered directory without software topology discovery. Defaults: `symlinkMode` is `nofollow`; include/exclude are empty (all files eligible, no consumer excludes). Workspace mode defaults and behavior are unchanged when mode is omitted or `"workspace"`.
+
+Additive snapshot fields (`identity.mode`, `planning.filters`, `planning.coverage`, optional file-event `fromPath`/`toPath`/`reason`) keep `schemaVersion` at 1; consumers must tolerate additional JSON fields. Filesystem open sets `planning.coverage.requiresReconciliation` because enumerate-then-watch cannot guarantee a gap-free startup. Overflow, root disappearance and uncertain renames emit `scopeRescan` (with `reason` when available) rather than claiming silent completeness.
+
+Symlink confinement in Argos is observation policy only — consumers must independently validate identity/confinement before opening files. Network shares, bind mounts and Linux ARM64 npm natives are not claimed by this mode without separate evidence.
+
+Linux npm natives built on Ubuntu CI may require a newer glibc than Debian Bookworm; validate the packaged `.node` artifact on the target distro or rebuild locally.
+
+**Bookworm evidence (2026-11-08):** `scripts/validate-filesystem-bookworm.sh` built `argos.linux-x64-gnu.node` inside `debian:bookworm-slim` (glibc 2.36) with Node 24.22.2, opened a filesystem-mode root on Docker named volume `argos-fs-bookworm-media`, and observed watch events (`BOOKWORM_OPEN_OK` / `BOOKWORM_WATCH_OK`). That verifies a **Bookworm-built** packaged addon, not an Ubuntu-CI artifact loaded on Bookworm. Network-share / Windows bind-mount notification delivery is still unclaimed.
+
 ## Troubleshooting
 
 - DllNotFoundException: select the matching NuGet RID, ensure argos_ffi is present with its OS dependencies, and check process bitness. Do not rename the native DLL to Argos.dll.

@@ -79,10 +79,11 @@ Four formal sections plus identity metadata:
 
 ```text
 Open Workspace
-  → Topology Discovery
+  → Topology Discovery          (workspace mode)
+  → or Filesystem Root          (filesystem mode; explicit root only)
   → Filesystem Semantics
   → Workspace Model
-  → Ignore Engine
+  → Ignore Engine               (workspace) / Path Filters (filesystem)
   → Scope Planner
   → WorkspaceSnapshot
   → Diagnostics Ready
@@ -95,6 +96,13 @@ Open Workspace
 Invariant: **Open → Build Snapshot → Explain → Optional Watching**
 
 Watchers synchronize an existing snapshot; they do not discover the workspace after the fact.
+
+### Workspace mode vs filesystem mode
+
+- **Workspace mode (default):** polyglot topology discovery, software ignore hard-defaults, package-oriented scopes.
+- **Filesystem mode (opt-in):** single registered directory root, consumer include/exclude filters only, recursive root scope. No package/Git/Cargo/.NET discovery. Intended for ordinary trees (for example media libraries) that still need observation, coverage diagnostics and reconciliation signals through `WorkspaceSnapshot`.
+
+Events are filesystem hints, not a durable audit log. Consumers own durable queues, stable-file checks, periodic reconciliation and independent confinement when opening files.
 
 ## Product formula
 

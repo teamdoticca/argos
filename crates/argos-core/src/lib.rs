@@ -9,6 +9,7 @@ mod error;
 mod events;
 mod ignore_engine;
 mod model;
+mod path_filter;
 mod path_identity;
 mod planner;
 mod snapshot;
@@ -20,15 +21,20 @@ pub use diagnostics::{
     snapshot_validate, workspace_health, ExplainPathResult, ExplainScopeResult, HealthReport,
     OwnerHit, PlatformInfo, SnapshotValidation, Stats, ValidationIssue,
 };
-pub use discovery::discover_topology;
+pub use discovery::{
+    discover_filesystem_root, discover_topology, FilesystemDiscovery, SymlinkPolicy,
+};
 pub use error::{ArgosError, Result};
 pub use events::{DomainEvent, FileEventKind, WorkspaceEventKind};
 pub use ignore_engine::{hard_default_names, IgnoreEngine};
 pub use model::{Confidence, DiscoverySource, NodeKind, TopologyResult, WorkspaceNode};
-pub use path_identity::{detect_case_sensitivity, PathIdentity, PathSemantics};
+pub use path_filter::{PathFilter, PathFilterSpec};
+pub use path_identity::{
+    detect_case_sensitivity, is_path_within_root, PathIdentity, PathSemantics,
+};
 pub use planner::{absolute_watch_paths, apply_planner, plan_scopes, WatchScope};
 pub use snapshot::{
-    FilesystemSection, IdentitySection, ModelSection, PlanningSection, SnapshotState,
-    WorkspaceSnapshot, SCHEMA_VERSION,
+    CoverageReport, FilesystemSection, IdentitySection, ModelSection, PlanningSection,
+    SnapshotState, WorkspaceSnapshot, SCHEMA_VERSION,
 };
-pub use workspace::{OpenOptions, Workspace};
+pub use workspace::{DiscoveryMode, OpenOptions, Workspace, DEFAULT_FILESYSTEM_EVENT_BUFFER};

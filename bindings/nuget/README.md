@@ -13,6 +13,19 @@ await foreach (var change in workspace.WatchAsync())
 }
 ```
 
+Filesystem-only mode (explicit media/library roots; no software topology discovery):
+
+```csharp
+await using var library = await ArgosWorkspace.OpenAsync(
+    mediaRoot,
+    OpenOptions.Filesystem(
+        symlinkMode: "nofollow",
+        include: new[] { "**/*.flac", "**/*.mp3" },
+        exclude: new[] { "**/*.partial", "staging/**" }));
+// Inspect CurrentSnapshot → identity.mode, planning.coverage, planning.filters
+// Cancel WatchAsync with a CancellationToken, await completion, then dispose.
+```
+
 ## Install (public)
 
 ```bash

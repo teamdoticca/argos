@@ -1,5 +1,11 @@
 //! Argos watch backend abstraction and PlatformCapabilities.
 
+mod notify_map;
+
+pub use notify_map::{
+    collect_watch_roots, map_notify_event, start_bounded_watcher, BoundedWatchQueue,
+};
+
 use argos_core::{DomainEvent, Result, WatchScope, Workspace};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -22,6 +28,9 @@ pub trait WatchBackend: Send {
     fn stop(&mut self) -> Result<()>;
     fn poll(&mut self) -> Result<Vec<DomainEvent>>;
     fn watched_roots(&self) -> Vec<PathBuf>;
+
+    /// Test hook: mark the bounded queue as overflowed when supported.
+    fn inject_overflow_for_test(&mut self) {}
 }
 
 pub fn select_backend_name() -> &'static str {
@@ -54,7 +63,17 @@ pub mod recovery {
         affected_scopes: &[WatchScope],
     ) -> argos_core::Result<Vec<DomainEvent>> {
         let _ = workspace.mark_recovering()?;
-        let _ = workspace.mark_ready_from_rebuild()?;
+        match workspace.mark_ready_from_rebuild() {
+            Ok(_) => {}
+            Err(e) => {
+                let _ = workspace.mark_degraded_root_unavailable("root-unavailable");
+                return Ok(vec![DomainEvent::file_with_reason(
+                    FileEventKind::ScopeRescan,
+                    workspace.root().to_string_lossy().replace('\\', "/"),
+                    format!("root-unavailable:{e}"),
+                )]);
+            }
+        }
         let events = affected_scopes
             .iter()
             .map(|s| DomainEvent::File {
@@ -62,6 +81,9 @@ pub mod recovery {
                 path: s.root.clone(),
                 node: Some(s.package.clone()),
                 scope: Some(s.root.clone()),
+                from_path: None,
+                to_path: None,
+                reason: Some("overflow".into()),
             })
             .collect();
         Ok(events)

@@ -37,6 +37,18 @@ pub struct IgnoreEngine {
 }
 
 impl IgnoreEngine {
+    /// Empty ignore engine for filesystem mode (no software hard-defaults or gitignore).
+    pub fn empty(case_sensitive: bool) -> crate::Result<Self> {
+        let set = GlobSetBuilder::new()
+            .build()
+            .map_err(|e| crate::ArgosError::Parse(format!("globset: {e}")))?;
+        Ok(Self {
+            rules: Vec::new(),
+            set,
+            case_sensitive,
+        })
+    }
+
     pub fn build(root: &Path, case_sensitive: bool) -> crate::Result<Self> {
         let mut rules = Vec::new();
         for d in HARD_DEFAULTS {

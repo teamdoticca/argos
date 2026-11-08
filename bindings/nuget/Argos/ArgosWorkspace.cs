@@ -17,6 +17,16 @@ public sealed class ArgosWorkspace : IAsyncDisposable, IDisposable
         return Task.FromResult(Open(root, optionsJson));
     }
 
+    /// <summary>
+    /// Open with typed options. Filesystem mode uses <see cref="OpenOptions.Filesystem"/>.
+    /// Pass null for default workspace mode.
+    /// </summary>
+    public static Task<ArgosWorkspace> OpenAsync(string root, OpenOptions? options, CancellationToken ct = default)
+    {
+        ct.ThrowIfCancellationRequested();
+        return Task.FromResult(Open(root, options));
+    }
+
     public static ArgosWorkspace Open(string root, string? optionsJson = null)
     {
         var opts = string.IsNullOrEmpty(optionsJson) ? "{}" : optionsJson;
@@ -25,6 +35,9 @@ public sealed class ArgosWorkspace : IAsyncDisposable, IDisposable
             throw new ArgosException(Native.LastError());
         return new ArgosWorkspace(handle);
     }
+
+    public static ArgosWorkspace Open(string root, OpenOptions? options) =>
+        Open(root, options?.ToJson());
 
     /// <summary>Pointer to the latest immutable WorkspaceSnapshot JSON.</summary>
     public string CurrentSnapshot
@@ -102,6 +115,11 @@ public sealed class ArgosWorkspace : IAsyncDisposable, IDisposable
         return JsonSerializer.Deserialize<List<string>>(json) ?? new List<string>();
     }
 
+    /// <summary>
+    /// Watch filesystem/workspace changes. Cancel via <paramref name="ct"/>, then dispose the workspace.
+    /// Events are hints (not a durable audit log). After scopeRescan or recovery, reconcile from
+    /// <see cref="CurrentSnapshot"/>. Await enumerator completion before <see cref="Dispose"/>.
+    /// </summary>
     public async IAsyncEnumerable<string> WatchAsync([System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken ct = default)
     {
         EnsureAlive();

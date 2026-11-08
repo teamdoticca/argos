@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Add opt-in filesystem-only open mode (`mode: "filesystem"`) for explicitly registered directory roots.
+- Add consumer include/exclude path filters, coverage diagnostics and symlink policies (`nofollow`, `followConfined`, `follow`).
+- Surface rename hints (`fromPath`/`toPath`) and recovery reasons on file events; bound watch event buffering with overflow → `scopeRescan`.
+- Preserve workspace-mode defaults and topology discovery when filesystem mode is not selected.
+- Document Debian Bookworm + Node 24 packaged-addon validation via `scripts/validate-filesystem-bookworm.sh` (Bookworm-built native).
+
 ## 0.1.9
 
 - Add managed NuGet targets for .NET 8, .NET 9, and .NET 10.

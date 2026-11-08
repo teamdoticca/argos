@@ -176,6 +176,16 @@ pub fn workspace_health(snapshot: &WorkspaceSnapshot) -> HealthReport {
             warnings.push(format!("missing node root: {}", node.id));
         }
     }
+    let cov = &snapshot.planning.coverage;
+    if cov.requires_reconciliation {
+        warnings.push("reconciliation required".into());
+    }
+    for path in &cov.unreadable {
+        warnings.push(format!("unreadable: {path}"));
+    }
+    for path in &cov.skipped_outside_root {
+        warnings.push(format!("skipped outside-root link: {path}"));
+    }
     let status = match snapshot.identity.state {
         SnapshotState::Ready if warnings.is_empty() => "healthy",
         SnapshotState::Ready => "degraded",
