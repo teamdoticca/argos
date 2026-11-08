@@ -1,13 +1,13 @@
 //! Windows backend using ReadDirectoryChangesW (via the `notify` crate).
 
-use argos_backend::{
-    collect_watch_roots, start_bounded_watcher, BoundedWatchQueue, PlatformCapabilities,
-    WatchBackend,
-};
+use argos_backend::{BoundedWatchQueue, PlatformCapabilities, WatchBackend};
+#[cfg(windows)]
+use argos_backend::{collect_watch_roots, start_bounded_watcher};
 use argos_core::{DomainEvent, FileEventKind, Result, WatchScope, Workspace};
 use notify::RecommendedWatcher;
 use std::path::PathBuf;
 
+#[cfg_attr(not(windows), allow(dead_code))]
 pub struct WindowsBackend {
     watcher: Option<RecommendedWatcher>,
     queue: Option<BoundedWatchQueue>,
