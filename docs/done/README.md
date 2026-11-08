@@ -27,3 +27,7 @@ Completed Argos epics. Each folder retains README / design / status for historic
 | m20-nuget-multi-rid | Multi-RID nupkg |
 | m21-planner-root-source-watch | Package-root `"."` watch |
 | m22-polyglot-ops-discovery | PHP/Python/Go/Gradle/Maven + ops |
+| m23-public-readiness | Public repo launch readiness |
+| m24-dependency-upgrades | TOML/napi/uuid compatibility |
+| m25-package-release | Public 0.1.8 release |
+| m26-filesystem-library-mode | Filesystem library mode; public 0.1.10 |
