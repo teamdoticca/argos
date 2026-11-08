@@ -1,6 +1,6 @@
 # m26 — Filesystem library mode
 
-**Status:** in_progress
+**Status:** done
 
 ## Goal
 

@@ -4,10 +4,10 @@ Live status. Update on every meaningful progress.
 
 ## Current
 
-- **Active epic:** [m26-filesystem-library-mode](epics/m26-filesystem-library-mode/) (`in_progress`).
-- **Status:** Implementation complete; manifests bumped to **0.1.10** for release PR. Workspace mode preserved.
+- **Active epic:** none.
+- **Status:** m26 closed; public **0.1.10** published from `1fe1aa74db5711281475d5363231d996dd056757`.
 - **Owner approval (2026-09-19):** Policies, monitored mailbox and distribution rights confirmed; completion of public launch authorized after readiness checks passed.
-- **Last update:** 2026-11-08 - Version 0.1.10 prepared on `feature/filesystem-library-mode`. Next: merge to master, dry-run pack-npm/pack-nuget, then owner-authorized publish.
+- **Last update:** 2026-11-08 - Closed m26 after 0.1.10 npm/NuGet publish and tag `v0.1.10`. No next epic started.
 
 ## Completed
 
@@ -115,12 +115,19 @@ Path: [docs/done/m25-package-release](done/m25-package-release/)
 - [x] [v0.1.8 release](https://github.com/teamdoticca/argos/releases/tag/v0.1.8), protected immutable tag and registry artifacts with SHA256 evidence.
 - [x] Legacy npm token revoked after OIDC success; unused GitHub secret removed. Intel Mac remains pack-verified only.
 
+### m26-filesystem-library-mode (done)
+
+Path: [docs/done/m26-filesystem-library-mode](done/m26-filesystem-library-mode/)
+
+- [x] Opt-in filesystem-only open mode, filters, coverage, symlink policies, bounded watch/recovery.
+- [x] Node/.NET parity; Bookworm packaged-addon validation script; workspace mode preserved.
+- [x] [PR #29](https://github.com/teamdoticca/argos/pull/29) merged; public **0.1.10** on npmjs + nuget.org; tag [v0.1.10](https://github.com/teamdoticca/argos/releases/tag/v0.1.10).
+
 ## Next
 
-1. Complete m26 acceptance criteria (core, backends, bindings, tests, Bookworm packaged-addon evidence).
-2. After m26 closes: Mnemon integration updates and an optional MCP wrapper epic remain separately scoped.
-3. Follow the [release checklist](RELEASING.md) for future versions; never republish 0.1.8 or retarget its tag.
+1. Mnemon integration updates and an optional MCP wrapper epic remain separately scoped (not started).
+2. Follow the [release checklist](RELEASING.md) for future versions; never republish 0.1.10 or retarget its tag.
 
 ## Blockers
 
-None for the completed release. Intel Mac runtime verification remains a documented platform limitation, not a claim of tested execution.
+None. Intel Mac runtime verification remains a documented platform limitation, not a claim of tested execution.

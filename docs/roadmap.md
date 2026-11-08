@@ -41,15 +41,13 @@ Argos is public; anonymous clone and README access succeeded. Master requires PR
 | m23 Public repository readiness | [done/m23-public-readiness](done/m23-public-readiness/) | done |
 | m24 Dependency upgrade compatibility | [done/m24-dependency-upgrades](done/m24-dependency-upgrades/) | done |
 | m25 Package release 0.1.8 | [done/m25-package-release](done/m25-package-release/) | done |
-| m26 Filesystem library mode | [epics/m26-filesystem-library-mode](epics/m26-filesystem-library-mode/) | in_progress |
+| m26 Filesystem library mode | [done/m26-filesystem-library-mode](done/m26-filesystem-library-mode/) | done |
 
 Dependency maintenance completed 2026-09-19: [PR #10](https://github.com/teamdoticca/argos/pull/10) consolidated TOML document parsing, coordinated napi 3/CLI migration, uuid/napi-build patches and Cargo napi grouping. Final PR-head and merged-master workflows passed; superseded proposals #3 through #8 are closed. Local Windows/Linux strict Rust gates and 38 tests each also passed. Evidence is archived with m24; the changes shipped in the separately authorized m25 release.
 
 Packaging maintenance: the managed Argos NuGet wrapper now has a stable public strong-name identity and targets .NET 8, .NET 9, and .NET 10 for C# consumers. This does not change the WorkspaceSnapshot contract, native artifacts, or NuGet publication policy.
 
-Package line **0.1.9** is public. The next package release is prepared as **0.1.10** (filesystem library mode); publication remains pending PR merge, dry-run packs and owner-authorized publish/tag workflow.
-
-Active work: **m26 Filesystem library mode** — implementation complete on `feature/filesystem-library-mode`; version bump 0.1.10 for release.
+Package line **0.1.10** is public ([npm](https://www.npmjs.com/package/@teamdoticca/argos/v/0.1.10), [NuGet](https://www.nuget.org/packages/Argos/0.1.10), [v0.1.10](https://github.com/teamdoticca/argos/releases/tag/v0.1.10)). No epic is currently `in_progress`.
 
 ## Done
 
@@ -83,6 +81,7 @@ The npmjs/nugetorg environments require maintainer approval and restrict deploym
 - [m23-public-readiness](done/m23-public-readiness/)
 - [m24-dependency-upgrades](done/m24-dependency-upgrades/)
 - [m25-package-release](done/m25-package-release/)
+- [m26-filesystem-library-mode](done/m26-filesystem-library-mode/)
 
 ## Deferred
 
