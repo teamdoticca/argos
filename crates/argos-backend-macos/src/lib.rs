@@ -1,8 +1,8 @@
 //! macOS backend using FSEvents (via the `notify` crate).
 
-use argos_backend::{BoundedWatchQueue, PlatformCapabilities, WatchBackend};
 #[cfg(target_os = "macos")]
 use argos_backend::{collect_watch_roots, start_bounded_watcher};
+use argos_backend::{BoundedWatchQueue, PlatformCapabilities, WatchBackend};
 use argos_core::{DomainEvent, FileEventKind, Result, WatchScope, Workspace};
 use notify::RecommendedWatcher;
 use std::path::PathBuf;
