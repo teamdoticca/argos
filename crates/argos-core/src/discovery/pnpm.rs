@@ -8,7 +8,7 @@ pub fn discover(root: &Path) -> Result<Vec<WorkspaceNode>> {
         return Ok(vec![]);
     }
     let text = std::fs::read_to_string(&path)?;
-    let value: serde_yaml::Value = serde_yaml::from_str(&text)
+    let value: serde_norway::Value = serde_norway::from_str(&text)
         .map_err(|e| crate::ArgosError::Parse(format!("pnpm-workspace.yaml: {e}")))?;
     let Some(packages) = value.get("packages").and_then(|v| v.as_sequence()) else {
         return Ok(vec![]);

@@ -9,6 +9,7 @@
 - Surface rename hints (`fromPath`/`toPath`) and recovery reasons on file events; bound watch event buffering with overflow → `scopeRescan`.
 - Preserve workspace-mode defaults and topology discovery when filesystem mode is not selected.
 - Document Debian Bookworm + Node 24 packaged-addon validation via `scripts/validate-filesystem-bookworm.sh` (Bookworm-built native).
+- Replace deprecated `serde_yaml` with maintained `serde_norway` to clear `RUSTSEC-2024-0449` (`unsafe-libyaml` unmaintained).
 
 ## 0.1.9
 
