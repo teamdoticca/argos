@@ -123,12 +123,19 @@ Path: [docs/done/m26-filesystem-library-mode](done/m26-filesystem-library-mode/)
 - [x] Node/.NET parity; Bookworm packaged-addon validation script; workspace mode preserved.
 - [x] [PR #29](https://github.com/teamdoticca/argos/pull/29) merged; public **0.1.10** on npmjs + nuget.org; tag [v0.1.10](https://github.com/teamdoticca/argos/releases/tag/v0.1.10).
 
+### m27-ignore-access-watch-noise (done)
+
+Path: [docs/done/m27-ignore-access-watch-noise](done/m27-ignore-access-watch-noise/)
+
+- [x] Pre-queue drop of non-mutating access; close-after-write preserved; overflow recovery intact.
+- [x] Unit + Linux integration + Bookworm Node `followConfined` idle-scan evidence.
+- [x] [PR #31](https://github.com/teamdoticca/argos/pull/31) merged; public **0.1.11** on npmjs + nuget.org; tag [v0.1.11](https://github.com/teamdoticca/argos/releases/tag/v0.1.11).
+
 ## Next
 
-1. Complete m27 acceptance criteria (pre-queue access drop, close-after-write preserved, Linux + Node tests, 0.1.11 prep).
-2. After m27 closes and owner-authorized publish: Bassode pins `@teamdoticca/argos@0.1.11`.
-3. Mnemon integration updates and an optional MCP wrapper epic remain separately scoped (not started).
-4. Follow the [release checklist](RELEASING.md) for future versions; never republish 0.1.10 or retarget its tag.
+1. Bassode pins `@teamdoticca/argos@0.1.11`.
+2. Mnemon integration updates and an optional MCP wrapper epic remain separately scoped (not started).
+3. Follow the [release checklist](RELEASING.md) for future versions; never republish 0.1.11 or retarget its tag.
 
 ## Blockers
 
