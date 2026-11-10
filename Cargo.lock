@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "argos-backend"
-version = "0.1.10"
+version = "0.1.11"
 dependencies = [
  "argos-core",
  "notify",
@@ -24,16 +24,17 @@ dependencies = [
 
 [[package]]
 name = "argos-backend-linux"
-version = "0.1.10"
+version = "0.1.11"
 dependencies = [
  "argos-backend",
  "argos-core",
  "notify",
+ "tempfile",
 ]
 
 [[package]]
 name = "argos-backend-macos"
-version = "0.1.10"
+version = "0.1.11"
 dependencies = [
  "argos-backend",
  "argos-core",
@@ -42,7 +43,7 @@ dependencies = [
 
 [[package]]
 name = "argos-backend-windows"
-version = "0.1.10"
+version = "0.1.11"
 dependencies = [
  "argos-backend",
  "argos-core",
@@ -52,7 +53,7 @@ dependencies = [
 
 [[package]]
 name = "argos-benches"
-version = "0.1.10"
+version = "0.1.11"
 dependencies = [
  "argos-core",
  "serde_json",
@@ -60,7 +61,7 @@ dependencies = [
 
 [[package]]
 name = "argos-core"
-version = "0.1.10"
+version = "0.1.11"
 dependencies = [
  "globset",
  "ignore",
@@ -77,7 +78,7 @@ dependencies = [
 
 [[package]]
 name = "argos-ffi"
-version = "0.1.10"
+version = "0.1.11"
 dependencies = [
  "argos-backend",
  "argos-backend-linux",
@@ -90,7 +91,7 @@ dependencies = [
 
 [[package]]
 name = "argos-napi"
-version = "0.1.10"
+version = "0.1.11"
 dependencies = [
  "argos-backend",
  "argos-backend-linux",

@@ -102,7 +102,7 @@ Watchers synchronize an existing snapshot; they do not discover the workspace af
 - **Workspace mode (default):** polyglot topology discovery, software ignore hard-defaults, package-oriented scopes.
 - **Filesystem mode (opt-in):** single registered directory root, consumer include/exclude filters only, recursive root scope. No package/Git/Cargo/.NET discovery. Intended for ordinary trees (for example media libraries) that still need observation, coverage diagnostics and reconciliation signals through `WorkspaceSnapshot`.
 
-Events are filesystem hints, not a durable audit log. Consumers own durable queues, stable-file checks, periodic reconciliation and independent confinement when opening files.
+Events are filesystem hints, not a durable audit log. Consumers own durable queues, stable-file checks, periodic reconciliation and independent confinement when opening files. Non-mutating access (open/read/close-read) is not a change signal; close-after-write and data/metadata modifies are.
 
 ## Product formula
 

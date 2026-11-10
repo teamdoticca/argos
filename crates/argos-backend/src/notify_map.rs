@@ -1,7 +1,7 @@
 //! Shared notify → DomainEvent mapping and bounded receive queue.
 
 use argos_core::{DiscoveryMode, DomainEvent, FileEventKind, WorkspaceEventKind};
-use notify::event::{ModifyKind, RenameMode};
+use notify::event::{AccessKind, AccessMode, ModifyKind, RenameMode};
 use notify::{Config, Event, EventHandler, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -30,6 +30,12 @@ struct OverflowHandler {
 
 impl EventHandler for OverflowHandler {
     fn handle_event(&mut self, event: notify::Result<Event>) {
+        // Drop non-mutating access before try_send so read storms cannot overflow.
+        if let Ok(ref ev) = event {
+            if is_non_mutating_access(ev) {
+                return;
+            }
+        }
         match self.tx.try_send(event) {
             Ok(()) => {}
             Err(TrySendError::Full(_)) | Err(TrySendError::Disconnected(_)) => {
@@ -37,6 +43,29 @@ impl EventHandler for OverflowHandler {
             }
         }
     }
+}
+
+/// Open / read / close-after-read (and other non-mutating access) must not become mutations
+/// or consume bounded-queue capacity. Close-after-write is kept.
+pub fn is_non_mutating_access(ev: &Event) -> bool {
+    match ev.kind {
+        EventKind::Access(AccessKind::Read)
+        | EventKind::Access(AccessKind::Open(_))
+        | EventKind::Access(AccessKind::Any)
+        | EventKind::Access(AccessKind::Other) => true,
+        EventKind::Access(AccessKind::Close(mode)) => match mode {
+            AccessMode::Write | AccessMode::Any => false,
+            AccessMode::Read | AccessMode::Execute | AccessMode::Other => true,
+        },
+        _ => false,
+    }
+}
+
+fn access_maps_to_modified(ev: &Event) -> bool {
+    matches!(
+        ev.kind,
+        EventKind::Access(AccessKind::Close(AccessMode::Write | AccessMode::Any))
+    )
 }
 
 pub fn start_bounded_watcher(
@@ -159,6 +188,17 @@ pub fn map_notify_event(
         return out;
     }
 
+    // Defense in depth: access noise must never become mutations even if enqueued.
+    if matches!(ev.kind, EventKind::Access(_)) {
+        if !access_maps_to_modified(&ev) {
+            return out;
+        }
+        for path in &ev.paths {
+            maybe_push_path(&mut out, path, FileEventKind::FileModified, mode, filter);
+        }
+        return out;
+    }
+
     // Reliable rename: Modify(Name(Both)) with two paths.
     if let EventKind::Modify(ModifyKind::Name(rename_mode)) = ev.kind {
         match rename_mode {
@@ -199,8 +239,9 @@ pub fn map_notify_event(
     let kind = match ev.kind {
         EventKind::Create(_) => FileEventKind::FileCreated,
         EventKind::Remove(_) => FileEventKind::FileDeleted,
-        EventKind::Modify(_) => FileEventKind::FileModified,
-        EventKind::Access(_) | EventKind::Any | EventKind::Other => FileEventKind::FileModified,
+        EventKind::Modify(_) | EventKind::Any => FileEventKind::FileModified,
+        // Access/Other handled above; keep match exhaustive for future kinds.
+        EventKind::Access(_) | EventKind::Other => return out,
     };
 
     for path in &ev.paths {
@@ -274,6 +315,146 @@ pub fn collect_watch_roots(scopes: &[argos_core::WatchScope]) -> Vec<(PathBuf, R
 mod tests {
     use super::*;
     use notify::event::CreateKind;
+
+    fn access_event(kind: EventKind) -> Event {
+        Event {
+            kind,
+            paths: vec![PathBuf::from("/lib/track.flac")],
+            attrs: Default::default(),
+        }
+    }
+
+    #[test]
+    fn classifies_non_mutating_access() {
+        let cases: &[(EventKind, bool)] = &[
+            (EventKind::Access(AccessKind::Read), true),
+            (EventKind::Access(AccessKind::Open(AccessMode::Read)), true),
+            (EventKind::Access(AccessKind::Open(AccessMode::Write)), true),
+            (EventKind::Access(AccessKind::Open(AccessMode::Any)), true),
+            (EventKind::Access(AccessKind::Close(AccessMode::Read)), true),
+            (
+                EventKind::Access(AccessKind::Close(AccessMode::Execute)),
+                true,
+            ),
+            (
+                EventKind::Access(AccessKind::Close(AccessMode::Other)),
+                true,
+            ),
+            (EventKind::Access(AccessKind::Any), true),
+            (EventKind::Access(AccessKind::Other), true),
+            (
+                EventKind::Access(AccessKind::Close(AccessMode::Write)),
+                false,
+            ),
+            (EventKind::Access(AccessKind::Close(AccessMode::Any)), false),
+            (EventKind::Create(CreateKind::File), false),
+            (
+                EventKind::Modify(ModifyKind::Data(notify::event::DataChange::Any)),
+                false,
+            ),
+        ];
+        for (kind, expect_drop) in cases {
+            let ev = access_event(*kind);
+            assert_eq!(is_non_mutating_access(&ev), *expect_drop, "kind={kind:?}");
+        }
+    }
+
+    #[test]
+    fn map_drops_access_noise_keeps_close_write() {
+        let open = map_notify_event(
+            access_event(EventKind::Access(AccessKind::Open(AccessMode::Any))),
+            DiscoveryMode::Filesystem,
+            None,
+        );
+        assert!(open.is_empty());
+
+        let close_read = map_notify_event(
+            access_event(EventKind::Access(AccessKind::Close(AccessMode::Read))),
+            DiscoveryMode::Filesystem,
+            None,
+        );
+        assert!(close_read.is_empty());
+
+        let close_write = map_notify_event(
+            access_event(EventKind::Access(AccessKind::Close(AccessMode::Write))),
+            DiscoveryMode::Filesystem,
+            None,
+        );
+        assert_eq!(close_write.len(), 1);
+        assert!(matches!(
+            &close_write[0],
+            DomainEvent::File {
+                kind: FileEventKind::FileModified,
+                ..
+            }
+        ));
+
+        let close_any = map_notify_event(
+            access_event(EventKind::Access(AccessKind::Close(AccessMode::Any))),
+            DiscoveryMode::Filesystem,
+            None,
+        );
+        assert!(matches!(
+            &close_any[0],
+            DomainEvent::File {
+                kind: FileEventKind::FileModified,
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn access_noise_does_not_overflow_tiny_queue_mutations_do() {
+        let (tx, rx) = sync_channel(2);
+        let overflow = Arc::new(AtomicBool::new(false));
+        let mut handler = OverflowHandler {
+            tx,
+            overflow: overflow.clone(),
+        };
+
+        for _ in 0..200 {
+            handler.handle_event(Ok(access_event(EventKind::Access(AccessKind::Open(
+                AccessMode::Any,
+            )))));
+        }
+        assert!(
+            !overflow.load(Ordering::SeqCst),
+            "open/read access must not fill the queue"
+        );
+        assert!(rx.try_recv().is_err(), "access noise must not be enqueued");
+
+        for i in 0..10 {
+            handler.handle_event(Ok(Event {
+                kind: EventKind::Create(CreateKind::File),
+                paths: vec![PathBuf::from(format!("/lib/f{i}.flac"))],
+                attrs: Default::default(),
+            }));
+        }
+        assert!(
+            overflow.load(Ordering::SeqCst),
+            "mutation flood must still overflow"
+        );
+    }
+
+    #[test]
+    fn close_write_is_enqueued() {
+        let (tx, rx) = sync_channel(4);
+        let overflow = Arc::new(AtomicBool::new(false));
+        let mut handler = OverflowHandler {
+            tx,
+            overflow: overflow.clone(),
+        };
+        handler.handle_event(Ok(access_event(EventKind::Access(AccessKind::Close(
+            AccessMode::Write,
+        )))));
+        assert!(!overflow.load(Ordering::SeqCst));
+        let got = rx.try_recv().expect("close-write must enqueue");
+        let ev = got.expect("ok event");
+        assert!(matches!(
+            ev.kind,
+            EventKind::Access(AccessKind::Close(AccessMode::Write))
+        ));
+    }
 
     #[test]
     fn maps_reliable_rename_both_paths() {
