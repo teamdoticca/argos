@@ -3,7 +3,8 @@
 mod notify_map;
 
 pub use notify_map::{
-    collect_watch_roots, map_notify_event, start_bounded_watcher, BoundedWatchQueue,
+    collect_watch_roots, is_non_mutating_access, map_notify_event, start_bounded_watcher,
+    BoundedWatchQueue,
 };
 
 use argos_core::{DomainEvent, Result, WatchScope, Workspace};

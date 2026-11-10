@@ -4,10 +4,10 @@ Live status. Update on every meaningful progress.
 
 ## Current
 
-- **Active epic:** none.
-- **Status:** m26 closed; public **0.1.10** published from `1fe1aa74db5711281475d5363231d996dd056757`.
+- **Active epic:** [m27-ignore-access-watch-noise](epics/m27-ignore-access-watch-noise/) (`in_progress`).
+- **Status:** Fix Linux access→`FileModified` feedback loop; prepare **0.1.11** (no publish without approval).
 - **Owner approval (2026-09-19):** Policies, monitored mailbox and distribution rights confirmed; completion of public launch authorized after readiness checks passed.
-- **Last update:** 2026-11-08 - Closed m26 after 0.1.10 npm/NuGet publish and tag `v0.1.10`. No next epic started.
+- **Last update:** 2026-11-10 - m27 implementation validated (unit + Linux Docker integration + Bookworm Node `ACCESS_NOISE_*`); **0.1.11** prepared, not published.
 
 ## Completed
 
@@ -125,8 +125,10 @@ Path: [docs/done/m26-filesystem-library-mode](done/m26-filesystem-library-mode/)
 
 ## Next
 
-1. Mnemon integration updates and an optional MCP wrapper epic remain separately scoped (not started).
-2. Follow the [release checklist](RELEASING.md) for future versions; never republish 0.1.10 or retarget its tag.
+1. Complete m27 acceptance criteria (pre-queue access drop, close-after-write preserved, Linux + Node tests, 0.1.11 prep).
+2. After m27 closes and owner-authorized publish: Bassode pins `@teamdoticca/argos@0.1.11`.
+3. Mnemon integration updates and an optional MCP wrapper epic remain separately scoped (not started).
+4. Follow the [release checklist](RELEASING.md) for future versions; never republish 0.1.10 or retarget its tag.
 
 ## Blockers
 

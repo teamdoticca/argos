@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.1.11
+
+- Ignore non-mutating filesystem access notifications (open, read, close-after-read) before the bounded watch queue so read-only scans cannot fake `fileModified` or overflow into `scopeRescan`.
+- Preserve close-after-write (`Access(Close(Write))` / ambiguous `Close(Any)`) as `fileModified`; keep create/modify/delete/rename/topology and genuine overflow recovery.
+- Add Linux access-noise integration tests and Bookworm Node `followConfined` idle-scan validation via `scripts/validate-access-noise-bookworm.sh`.
+
 ## 0.1.10
 
 - Add opt-in filesystem-only open mode (`mode: "filesystem"`) for explicitly registered directory roots.

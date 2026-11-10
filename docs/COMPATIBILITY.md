@@ -27,6 +27,8 @@ In Node, pass an AbortSignal to watch, await termination, then call close in a f
 
 Topology events can rebuild the snapshot. Events are filesystem notifications, not a durable, ordered audit log or a guaranteed one-event-per-edit stream. Reconcile against CurrentSnapshot after topology/recovery changes. Consumers must handle missed/coalesced events and periodic reconciliation where correctness requires it.
 
+Non-mutating access notifications (open, read, close-after-read) are dropped before the bounded watch queue and do not become `fileModified`. Close-after-write remains a modification hint. Overflow protection still applies to retained mutation events.
+
 ### Filesystem mode
 
 Pass `"mode":"filesystem"` in open options JSON to observe an explicitly registered directory without software topology discovery. Defaults: `symlinkMode` is `nofollow`; include/exclude are empty (all files eligible, no consumer excludes). Workspace mode defaults and behavior are unchanged when mode is omitted or `"workspace"`.
@@ -38,6 +40,8 @@ Symlink confinement in Argos is observation policy only — consumers must indep
 Linux npm natives built on Ubuntu CI may require a newer glibc than Debian Bookworm; validate the packaged `.node` artifact on the target distro or rebuild locally.
 
 **Bookworm evidence (2026-11-08):** `scripts/validate-filesystem-bookworm.sh` built `argos.linux-x64-gnu.node` inside `debian:bookworm-slim` (glibc 2.36) with Node 24.22.2, opened a filesystem-mode root on Docker named volume `argos-fs-bookworm-media`, and observed watch events (`BOOKWORM_OPEN_OK` / `BOOKWORM_WATCH_OK`). That verifies a **Bookworm-built** packaged addon, not an Ubuntu-CI artifact loaded on Bookworm. Network-share / Windows bind-mount notification delivery is still unclaimed.
+
+**Access-noise evidence (m27):** `scripts/validate-access-noise-bookworm.sh` opens filesystem mode with `symlinkMode:"followConfined"` and a small `eventBufferCapacity`, runs repeated read-only tree scans expecting idle watch polls (`ACCESS_NOISE_IDLE_OK`), then writes a file and expects a mutation event (`ACCESS_NOISE_WRITE_OK`).
 
 ## Troubleshooting
 
