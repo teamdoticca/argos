@@ -4,10 +4,10 @@ Live status. Update on every meaningful progress.
 
 ## Current
 
-- **Active epic:** [m27-ignore-access-watch-noise](epics/m27-ignore-access-watch-noise/) (`in_progress`).
-- **Status:** Fix Linux access→`FileModified` feedback loop; prepare **0.1.11** (no publish without approval).
+- **Active epic:** none.
+- **Status:** m27 closed; public **0.1.11** published from `b8e608ccba4ea43295848f2d83bfd04f67fdd46c`.
 - **Owner approval (2026-09-19):** Policies, monitored mailbox and distribution rights confirmed; completion of public launch authorized after readiness checks passed.
-- **Last update:** 2026-11-10 - m27 implementation validated (unit + Linux Docker integration + Bookworm Node `ACCESS_NOISE_*`); **0.1.11** prepared, not published.
+- **Last update:** 2026-11-10 - Closed m27 after 0.1.11 npm/NuGet publish and tag `v0.1.11`. No next epic started.
 
 ## Completed
 

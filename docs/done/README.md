@@ -31,3 +31,4 @@ Completed Argos epics. Each folder retains README / design / status for historic
 | m24-dependency-upgrades | TOML/napi/uuid compatibility |
 | m25-package-release | Public 0.1.8 release |
 | m26-filesystem-library-mode | Filesystem library mode; public 0.1.10 |
+| m27-ignore-access-watch-noise | Ignore access watch noise; public 0.1.11 |
