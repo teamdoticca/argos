@@ -1,6 +1,6 @@
 # m27 — Ignore access watch noise
 
-**Status:** in_progress
+**Status:** done
 
 ## Goal
 
@@ -16,7 +16,7 @@ Stop non-mutating filesystem access notifications (open, read, close-after-read)
 - [x] Linux integration: repeated readdir/readFile produce no mutation/topology/rescan (including tiny queue); real writes still detected; mutation overflow still rescans
 - [x] Node filesystem-mode + `followConfined` read-only scan settles idle, then detects a real write
 - [x] Version prepared as **0.1.11**; changelog and compatibility notes updated in English
-- [ ] No publish / tag without owner approval
+- [x] Owner-authorized publish and tag `v0.1.11`
 
 ## Non-goals
 
