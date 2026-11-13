@@ -123,7 +123,7 @@ jobs:
           ls -la "$dest"
 
       - name: Upload native artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           # Upload parent so artifact root is <rid>/native/<file> (merge-friendly).
           name: native-${{ matrix.rid }}
@@ -220,7 +220,7 @@ jobs:
           Write-Host "Resolved Argos $version ($($nupkg.Name))"
 
       - name: Upload nupkg artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: argos-nuget
           path: artifacts/nuget/*.nupkg
